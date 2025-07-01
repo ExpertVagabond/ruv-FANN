@@ -440,4 +440,4 @@ const NeuralNetworkTemplates = {
     }
 };
 
-module.exports = { NeuralNetworkManager, NeuralNetworkTemplates };
+export { NeuralNetworkManager, NeuralNetworkTemplates };

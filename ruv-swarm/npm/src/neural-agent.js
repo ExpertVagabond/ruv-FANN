@@ -3,7 +3,7 @@
  * into agent processing for cognitive diversity and learning
  */
 
-const EventEmitter = require('events');
+import { EventEmitter } from 'events';
 
 // Import these after class definitions to avoid circular dependency
 let MemoryOptimizer, PATTERN_MEMORY_CONFIG;
@@ -808,12 +808,13 @@ class NeuralAgentFactory {
 
 // Lazy load to avoid circular dependency
 setImmediate(() => {
-  const neural = require('./neural');
-  MemoryOptimizer = neural.MemoryOptimizer;
-  PATTERN_MEMORY_CONFIG = neural.PATTERN_MEMORY_CONFIG;
+  import('./neural.js').then(neural => {
+    MemoryOptimizer = neural.MemoryOptimizer;
+    PATTERN_MEMORY_CONFIG = neural.PATTERN_MEMORY_CONFIG;
+  });
 });
 
-module.exports = {
+export {
   NeuralAgent,
   NeuralAgentFactory,
   NeuralNetwork,

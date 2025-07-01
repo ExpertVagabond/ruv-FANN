@@ -3,9 +3,9 @@
  * Generates claude.md and .claude/commands/ documentation
  */
 
-const fs = require('fs').promises;
-const path = require('path');
-const { AdvancedCommandsGenerator } = require('./advanced-commands');
+import fs from 'fs/promises';
+import path from 'path';
+import { AdvancedCommandsGenerator } from './advanced-commands.js';
 
 class ClaudeDocsGenerator {
     constructor(options = {}) {
@@ -1095,4 +1095,4 @@ ${config.details}
     }
 }
 
-module.exports = { ClaudeDocsGenerator };
+export { ClaudeDocsGenerator };

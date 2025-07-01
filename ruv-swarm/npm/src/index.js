@@ -4,11 +4,11 @@
  */
 
 // Re-export the enhanced implementation
-module.exports = require('./index-enhanced');
+export * from './index-enhanced.js';
 
 /* Legacy exports for backward compatibility */
-const path = require('path');
-const fs = require('fs').promises;
+import path from 'path';
+import { promises as fs } from 'fs';
 
 // Lazy-loaded WASM module
 let wasmModule = null;
@@ -20,7 +20,7 @@ let wasmInstance = null;
 class WASMLoader {
   constructor(options = {}) {
     this.useSIMD = options.useSIMD && this.detectSIMDSupport();
-    this.wasmPath = options.wasmPath || path.join(__dirname, '..', 'wasm');
+    this.wasmPath = options.wasmPath || path.join(new URL('.', import.meta.url).pathname, '..', 'wasm');
     this.debug = options.debug || false;
   }
 
@@ -367,16 +367,17 @@ const formatJsError = (error) => {
 };
 
 // Import neural agent capabilities
-const {
+import {
   NeuralAgent,
   NeuralAgentFactory,
   NeuralNetwork,
   COGNITIVE_PATTERNS,
   AGENT_COGNITIVE_PROFILES
-} = require('./neural-agent');
+} from './neural-agent.js';
 
 // Legacy exports - these are now provided by index-enhanced.js
-const legacyExports = {
+// Export all the legacy functions and classes directly
+export {
   RuvSwarm,
   consoleLog,
   consoleError,
@@ -389,8 +390,3 @@ const legacyExports = {
   COGNITIVE_PATTERNS,
   AGENT_COGNITIVE_PROFILES
 };
-
-// Override module.exports if it hasn't been set by index-enhanced
-if (!module.exports.RuvSwarm) {
-  module.exports = legacyExports;
-}

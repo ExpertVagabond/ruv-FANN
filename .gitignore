@@ -16,4 +16,4 @@ node_modules
 *.rej
 *.swp
 *.swo
-*.swn
+*.swn.venv/

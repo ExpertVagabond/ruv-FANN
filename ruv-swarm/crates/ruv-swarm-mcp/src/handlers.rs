@@ -119,6 +119,7 @@ impl RequestHandler {
             "ruv-swarm.task.create" => self.handle_task_create(request.id, tool_params).await,
             "ruv-swarm.workflow.execute" => self.handle_workflow_execute(request.id, tool_params).await,
             "ruv-swarm.agent.list" => self.handle_agent_list(request.id, tool_params).await,
+            "ruv-swarm.agent.metrics" => self.handle_agent_metrics(request.id, tool_params).await,
             _ => Ok(McpResponse::error(
                 request.id,
                 -32602,
@@ -131,7 +132,7 @@ impl RequestHandler {
     async fn handle_spawn(&self, id: Option<Value>, params: &Value) -> anyhow::Result<McpResponse> {
         let agent_type_str = params.get("agent_type")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| anyhow::anyhow!("Missing agent_type"))?;
+            .ok_or_else(|| anyhow::anyhow!("Missing required parameter: agent_type"))?;
         
         let agent_type = match agent_type_str {
             "researcher" => AgentType::Researcher,
@@ -174,7 +175,7 @@ impl RequestHandler {
     async fn handle_orchestrate(&self, id: Option<Value>, params: &Value) -> anyhow::Result<McpResponse> {
         let objective = params.get("objective")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| anyhow::anyhow!("Missing objective"))?;
+            .ok_or_else(|| anyhow::anyhow!("Missing required parameter: objective"))?;
         
         let strategy_str = params.get("strategy")
             .and_then(|v| v.as_str())
@@ -360,16 +361,28 @@ impl RequestHandler {
     async fn handle_memory_store(&self, id: Option<Value>, params: &Value) -> anyhow::Result<McpResponse> {
         let key = params.get("key")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| anyhow::anyhow!("Missing key"))?;
+            .ok_or_else(|| anyhow::anyhow!("Missing required parameter: key"))?;
         
         let value = params.get("value")
-            .ok_or_else(|| anyhow::anyhow!("Missing value"))?;
+            .ok_or_else(|| anyhow::anyhow!("Missing required parameter: value"))?;
         
         let ttl_secs = params.get("ttl_secs")
             .and_then(|v| v.as_u64());
         
-        // Store in session metadata for now
+        // Store in session metadata with TTL support
         self.session.metadata.insert(key.to_string(), value.clone());
+        
+        // If TTL is specified, schedule cleanup
+        if let Some(ttl) = ttl_secs {
+            let _session_id = self.session.id;
+            let key_copy = key.to_string();
+            let session_meta = self.session.metadata.clone();
+            
+            tokio::spawn(async move {
+                tokio::time::sleep(tokio::time::Duration::from_secs(ttl)).await;
+                session_meta.remove(&key_copy);
+            });
+        }
         
         let result = json!({
             "key": key,
@@ -385,7 +398,7 @@ impl RequestHandler {
     async fn handle_memory_get(&self, id: Option<Value>, params: &Value) -> anyhow::Result<McpResponse> {
         let key = params.get("key")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| anyhow::anyhow!("Missing key"))?;
+            .ok_or_else(|| anyhow::anyhow!("Missing required parameter: key"))?;
         
         let value = self.session.metadata.get(key).map(|v| v.clone());
         
@@ -402,11 +415,11 @@ impl RequestHandler {
     async fn handle_task_create(&self, id: Option<Value>, params: &Value) -> anyhow::Result<McpResponse> {
         let task_type = params.get("task_type")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| anyhow::anyhow!("Missing task_type"))?;
+            .ok_or_else(|| anyhow::anyhow!("Missing required parameter: task_type"))?;
         
         let description = params.get("description")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| anyhow::anyhow!("Missing description"))?;
+            .ok_or_else(|| anyhow::anyhow!("Missing required parameter: description"))?;
         
         let priority_str = params.get("priority")
             .and_then(|v| v.as_str())
@@ -448,7 +461,7 @@ impl RequestHandler {
     async fn handle_workflow_execute(&self, id: Option<Value>, params: &Value) -> anyhow::Result<McpResponse> {
         let workflow_path = params.get("workflow_path")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| anyhow::anyhow!("Missing workflow_path"))?;
+            .ok_or_else(|| anyhow::anyhow!("Missing required parameter: workflow_path"))?;
         
         let parameters = params.get("parameters").cloned().unwrap_or(json!({}));
         
@@ -510,6 +523,57 @@ impl RequestHandler {
             "count": agents.len(),
             "include_inactive": include_inactive,
             "sorted_by": sort_by,
+        });
+        
+        Ok(McpResponse::success(id, result))
+    }
+    
+    /// Handle agent metrics
+    async fn handle_agent_metrics(&self, id: Option<Value>, params: &Value) -> anyhow::Result<McpResponse> {
+        let agent_id = params.get("agent_id")
+            .and_then(|v| v.as_str())
+            .and_then(|s| Uuid::parse_str(s).ok());
+        
+        let metric_type = params.get("metric")
+            .and_then(|v| v.as_str())
+            .unwrap_or("all");
+        
+        let metrics = if let Some(agent_id) = agent_id {
+            // Get metrics for specific agent
+            self.orchestrator.get_agent_metrics(&agent_id).await?
+        } else {
+            // Get metrics for all agents
+            self.orchestrator.get_all_agent_metrics().await?
+        };
+        
+        let filtered_metrics = match metric_type {
+            "cpu" => json!({
+                "cpu_usage": metrics.get("cpu_usage").unwrap_or(&json!({})),
+                "cpu_utilization": metrics.get("cpu_utilization").unwrap_or(&json!({})),
+            }),
+            "memory" => json!({
+                "memory_usage": metrics.get("memory_usage").unwrap_or(&json!({})),
+                "memory_peak": metrics.get("memory_peak").unwrap_or(&json!({})),
+            }),
+            "tasks" => json!({
+                "tasks_completed": metrics.get("tasks_completed").unwrap_or(&json!(0)),
+                "tasks_failed": metrics.get("tasks_failed").unwrap_or(&json!(0)),
+                "tasks_in_progress": metrics.get("tasks_in_progress").unwrap_or(&json!(0)),
+                "average_task_duration": metrics.get("average_task_duration").unwrap_or(&json!(0)),
+            }),
+            "performance" => json!({
+                "throughput": metrics.get("throughput").unwrap_or(&json!({})),
+                "response_time": metrics.get("response_time").unwrap_or(&json!({})),
+                "error_rate": metrics.get("error_rate").unwrap_or(&json!({})),
+            }),
+            "all" | _ => metrics,
+        };
+        
+        let result = json!({
+            "agent_id": agent_id.map(|id| id.to_string()),
+            "metric_type": metric_type,
+            "metrics": filtered_metrics,
+            "timestamp": chrono::Utc::now(),
         });
         
         Ok(McpResponse::success(id, result))

@@ -4,9 +4,9 @@
  * Uses modular architecture for better maintainability and remote execution
  */
 
-const { setupClaudeIntegration, invokeClaudeWithSwarm } = require('../src/claude-integration');
-const { RuvSwarm } = require('../src/index-enhanced');
-const { EnhancedMCPTools } = require('../src/mcp-tools-enhanced');
+import { setupClaudeIntegration, invokeClaudeWithSwarm } from '../src/claude-integration/index.js';
+import { RuvSwarm } from '../src/index-enhanced.js';
+import { EnhancedMCPTools } from '../src/mcp-tools-enhanced.js';
 
 // Input validation constants and functions
 const VALID_TOPOLOGIES = ['mesh', 'hierarchical', 'ring', 'star'];
@@ -715,7 +715,15 @@ async function handleMcpRequest(request, mcpTools) {
                 
                 // Call the appropriate mcpTools method
                 if (mcpTools[toolName]) {
-                    response.result = await mcpTools[toolName](toolArgs);
+                    const result = await mcpTools[toolName](toolArgs);
+                    // Format response with content array as required by Claude Code
+                    // Each content item must have a type (text, image, audio, resource)
+                    response.result = {
+                        content: [{
+                            type: 'text',
+                            text: typeof result === 'string' ? result : JSON.stringify(result, null, 2)
+                        }]
+                    };
                 } else {
                     response.error = {
                         code: -32601,
@@ -974,8 +982,7 @@ process.on('unhandledRejection', (reason, promise) => {
     process.exit(1);
 });
 
-if (require.main === module) {
-    main();
-}
+// In ES modules, this file is always the main module when run directly
+main();
 
-module.exports = { main, initializeSystem };
+export { main, initializeSystem };

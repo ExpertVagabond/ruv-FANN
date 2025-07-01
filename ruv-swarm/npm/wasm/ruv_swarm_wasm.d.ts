@@ -229,13 +229,13 @@ export interface InitOutput {
   readonly simdmatrixops_new: () => number;
   readonly wasmswarmorchestrator_new: (a: number, b: number) => number;
   readonly wasmforecastingmodel_new: (a: number, b: number) => number;
-  readonly __wbg_simdmatrixops_free: (a: number, b: number) => void;
   readonly __wbg_simdvectorops_free: (a: number, b: number) => void;
+  readonly __wbg_simdmatrixops_free: (a: number, b: number) => void;
   readonly __wbindgen_export_0: (a: number) => void;
-  readonly __wbindgen_export_1: (a: number, b: number) => number;
-  readonly __wbindgen_export_2: (a: number, b: number, c: number, d: number) => number;
+  readonly __wbindgen_export_1: (a: number, b: number, c: number) => void;
+  readonly __wbindgen_export_2: (a: number, b: number) => number;
+  readonly __wbindgen_export_3: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
-  readonly __wbindgen_export_3: (a: number, b: number, c: number) => void;
   readonly __wbindgen_start: () => void;
 }
 

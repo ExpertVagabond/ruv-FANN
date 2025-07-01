@@ -3,8 +3,8 @@
  * Creates cross-platform wrapper scripts for remote execution
  */
 
-const fs = require('fs').promises;
-const path = require('path');
+import { promises as fs } from 'fs';
+import path from 'path';
 
 class RemoteWrapperGenerator {
     constructor(options = {}) {
@@ -405,4 +405,4 @@ if "%1"=="research" (
     }
 }
 
-module.exports = { RemoteWrapperGenerator };
+export { RemoteWrapperGenerator };

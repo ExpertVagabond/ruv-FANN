@@ -59,20 +59,38 @@ impl RuntimeFeatures {
 
 #[cfg(target_arch = "wasm32")]
 fn detect_simd_support() -> bool {
-    // Compile-time SIMD detection for WebAssembly
-    #[cfg(target_feature = "simd128")]
+    // Primary check: if we compiled with simd feature, SIMD is available
+    #[cfg(feature = "simd")]
     {
-        true
+        // Additional runtime verification
+        test_simd_functionality()
     }
-    #[cfg(all(feature = "simd", not(target_feature = "simd128")))]
+    #[cfg(not(feature = "simd"))]
     {
-        // Try runtime detection via JavaScript if compiled with SIMD support
+        // Try JavaScript-based detection as fallback
         detect_wasm_simd_runtime()
     }
-    #[cfg(not(any(target_feature = "simd128", feature = "simd")))]
-    {
-        false
-    }
+}
+
+/// Test basic SIMD functionality to ensure it's working
+fn test_simd_functionality() -> bool {
+    // Test with wide crate which should be available with simd feature
+    use wide::f32x4;
+    
+    let result = std::panic::catch_unwind(|| {
+        let a = f32x4::new([1.0, 2.0, 3.0, 4.0]);
+        let b = f32x4::new([2.0, 3.0, 4.0, 5.0]);
+        let sum = a + b;
+        let expected = f32x4::new([3.0, 5.0, 7.0, 9.0]);
+        
+        // Check if SIMD addition works correctly
+        let diff = sum - expected;
+        let abs_diff = diff.abs();
+        let max_diff = abs_diff.as_array_ref().iter().fold(0.0f32, |a, &b| a.max(b));
+        max_diff < 0.001
+    });
+    
+    result.unwrap_or(false)
 }
 
 #[cfg(not(target_arch = "wasm32"))]

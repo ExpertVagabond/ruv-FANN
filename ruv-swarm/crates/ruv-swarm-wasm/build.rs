@@ -3,25 +3,36 @@ use std::env;
 fn main() {
     // Enable SIMD target features for WebAssembly builds
     if env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default() == "wasm32" {
-        println!("cargo:rustc-env=RUSTFLAGS=-C target-feature=+simd128");
+        // Don't override RUSTFLAGS if already set by user
+        if env::var("RUSTFLAGS").is_err() {
+            println!("cargo:rustc-env=RUSTFLAGS=-C target-feature=+simd128");
+        }
         
         // Tell cargo to rerun if environment changes
         println!("cargo:rerun-if-env-changed=RUSTFLAGS");
         println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_ARCH");
         
-        // Feature detection
+        // Feature detection and warnings
         if env::var("CARGO_FEATURE_SIMD").is_ok() {
-            println!("cargo:rustc-cfg=feature=\"simd\"");
-            println!("cargo:warning=SIMD feature enabled for WebAssembly build");
+            println!("cargo:warning=✅ SIMD feature enabled for WebAssembly build");
+            
+            // Set a config flag to help with detection
+            println!("cargo:rustc-cfg=ruv_simd_enabled");
+        } else {
+            println!("cargo:warning=⚠️ SIMD feature not enabled - compile with --features simd for best performance");
         }
         
-        // Check for target features
-        if env::var("CARGO_CFG_TARGET_FEATURE").unwrap_or_default().contains("simd128") {
-            println!("cargo:warning=SIMD128 target feature detected");
+        // Check current RUSTFLAGS for SIMD
+        let rustflags = env::var("RUSTFLAGS").unwrap_or_default();
+        if rustflags.contains("simd128") {
+            println!("cargo:warning=✅ SIMD128 target feature detected in RUSTFLAGS");
+            println!("cargo:rustc-cfg=ruv_simd128_enabled");
+        } else {
+            println!("cargo:warning=⚠️ SIMD128 not found in RUSTFLAGS - set RUSTFLAGS=\"-C target-feature=+simd128\" for SIMD support");
         }
         
         // Output build information
-        println!("cargo:warning=Building ruv-swarm-wasm with SIMD optimizations");
+        println!("cargo:warning=🚀 Building ruv-swarm-wasm with enhanced SIMD detection");
         
         // Enable wasm-bindgen features for SIMD
         println!("cargo:rustc-env=WASM_BINDGEN_FEATURES=simd");

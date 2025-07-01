@@ -72,6 +72,5 @@ panic = "abort"
 # Disable overflow checks in release mode
 overflow-checks = false
 
-# Enable SIMD target features
-[build]
-rustflags = ["-C", "target-feature=+simd128"]
+# SIMD configuration is handled via RUSTFLAGS environment variable
+# and build.rs script for better cross-platform compatibility

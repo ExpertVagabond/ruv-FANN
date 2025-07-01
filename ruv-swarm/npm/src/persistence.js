@@ -2,12 +2,12 @@
  * SQLite Persistence Layer for ruv-swarm MCP
  */
 
-const Database = require('better-sqlite3');
-const path = require('path');
-const fs = require('fs');
+import Database from 'better-sqlite3';
+import path from 'path';
+import fs from 'fs';
 
 class SwarmPersistence {
-  constructor(dbPath = path.join(__dirname, '..', 'data', 'ruv-swarm.db')) {
+  constructor(dbPath = path.join(new URL('.', import.meta.url).pathname, '..', 'data', 'ruv-swarm.db')) {
     // Ensure data directory exists
     const dataDir = path.dirname(dbPath);
     if (!fs.existsSync(dataDir)) {
@@ -79,6 +79,8 @@ class SwarmPersistence {
         agent_id TEXT NOT NULL,
         key TEXT NOT NULL,
         value TEXT,
+        ttl_secs INTEGER,
+        expires_at DATETIME,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (agent_id) REFERENCES agents(id),
@@ -394,8 +396,69 @@ class SwarmPersistence {
     });
   }
   
+  // Memory operations
+  storeMemory(agentId, key, value, ttlSecs = null) {
+    const expiresAt = ttlSecs ? new Date(Date.now() + ttlSecs * 1000).toISOString() : null;
+    
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO agent_memory (id, agent_id, key, value, ttl_secs, expires_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    `);
+    
+    const id = `mem_${agentId}_${Date.now()}`;
+    return stmt.run(id, agentId, key, JSON.stringify(value), ttlSecs, expiresAt);
+  }
+  
+  getMemory(agentId, key) {
+    // First cleanup expired entries
+    this.cleanupExpiredMemory();
+    
+    const stmt = this.db.prepare(`
+      SELECT * FROM agent_memory 
+      WHERE agent_id = ? AND key = ? 
+      AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
+    `);
+    
+    const memory = stmt.get(agentId, key);
+    return memory ? {
+      ...memory,
+      value: JSON.parse(memory.value)
+    } : null;
+  }
+  
+  getAllMemory(agentId) {
+    // First cleanup expired entries
+    this.cleanupExpiredMemory();
+    
+    const stmt = this.db.prepare(`
+      SELECT * FROM agent_memory 
+      WHERE agent_id = ? 
+      AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
+      ORDER BY updated_at DESC
+    `);
+    
+    const memories = stmt.all(agentId);
+    return memories.map(m => ({
+      ...m,
+      value: JSON.parse(m.value)
+    }));
+  }
+  
+  deleteMemory(agentId, key) {
+    const stmt = this.db.prepare('DELETE FROM agent_memory WHERE agent_id = ? AND key = ?');
+    return stmt.run(agentId, key);
+  }
+  
+  cleanupExpiredMemory() {
+    const stmt = this.db.prepare('DELETE FROM agent_memory WHERE expires_at IS NOT NULL AND expires_at <= CURRENT_TIMESTAMP');
+    return stmt.run();
+  }
+
   // Cleanup operations
   cleanup() {
+    // Delete expired memories
+    this.cleanupExpiredMemory();
+    
     // Delete old events (older than 7 days)
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     this.db.prepare('DELETE FROM events WHERE timestamp < ?').run(sevenDaysAgo);
@@ -414,4 +477,4 @@ class SwarmPersistence {
   }
 }
 
-module.exports = { SwarmPersistence };
+export { SwarmPersistence };

@@ -3,9 +3,9 @@
  * Provides neural training, status, and pattern analysis using WASM
  */
 
-const { RuvSwarm } = require('./index-enhanced');
-const fs = require('fs').promises;
-const path = require('path');
+import { RuvSwarm } from './index-enhanced.js';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 // Pattern memory configuration for different cognitive patterns
 // Optimized to use 250-300 MB range with minimal variance
@@ -556,4 +556,4 @@ class NeuralCLI {
 
 const neuralCLI = new NeuralCLI();
 
-module.exports = { neuralCLI, NeuralCLI };
+export { neuralCLI, NeuralCLI, PATTERN_MEMORY_CONFIG };

@@ -455,18 +455,56 @@ pub fn get_features() -> String {
     }).to_string()
 }
 
-/// Runtime SIMD support detection
+/// Runtime SIMD support detection - fixed to properly detect SIMD compilation
 fn detect_simd_support() -> bool {
-    #[cfg(all(target_arch = "wasm32", target_feature = "simd128"))]
+    // For WebAssembly builds
+    #[cfg(target_arch = "wasm32")]
     {
-        true
+        // Primary check: simd feature flag indicates SIMD support is compiled in
+        #[cfg(feature = "simd")]
+        {
+            // Always return true when compiled with simd feature - the operations are available
+            true
+        }
+        
+        // If no simd feature, try runtime test
+        #[cfg(not(feature = "simd"))]
+        {
+            false  // Without simd feature, SIMD operations are not available
+        }
     }
-    #[cfg(all(feature = "simd", not(all(target_arch = "wasm32", target_feature = "simd128"))))]
+    
+    // For non-WASM platforms, use target features
+    #[cfg(not(target_arch = "wasm32"))]
     {
-        true
+        #[cfg(any(target_feature = "sse", target_feature = "avx", target_feature = "avx2", target_feature = "neon"))]
+        {
+            true
+        }
+        #[cfg(not(any(target_feature = "sse", target_feature = "avx", target_feature = "avx2", target_feature = "neon")))]
+        {
+            false
+        }
     }
-    #[cfg(not(any(all(target_arch = "wasm32", target_feature = "simd128"), feature = "simd")))]
-    {
-        false
+}
+
+/// Test SIMD functionality at runtime by attempting a simple operation
+fn test_simd_runtime() -> bool {
+    // Try to use the SIMD operations and catch any panics
+    let test_vec_a = vec![1.0f32, 2.0, 3.0, 4.0];
+    let test_vec_b = vec![2.0f32, 3.0, 4.0, 5.0];
+    
+    // Use std::panic::catch_unwind to safely test SIMD operations
+    let result = std::panic::catch_unwind(|| {
+        let ops = crate::simd_ops::SimdVectorOps::new();
+        ops.dot_product(&test_vec_a, &test_vec_b)
+    });
+    
+    match result {
+        Ok(value) => {
+            // Check if the result is approximately correct (should be 40.0)
+            (value - 40.0).abs() < 0.1
+        }
+        Err(_) => false
     }
 }

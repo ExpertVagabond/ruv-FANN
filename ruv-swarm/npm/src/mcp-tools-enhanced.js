@@ -3,9 +3,9 @@
  * Provides complete WASM capabilities exposure through MCP interface
  */
 
-const { RuvSwarm } = require('./index-enhanced');
-const { NeuralNetworkManager } = require('./neural-network-manager');
-const { SwarmPersistence } = require('./persistence');
+import { RuvSwarm } from './index-enhanced.js';
+import { NeuralNetworkManager } from './neural-network-manager.js';
+import { SwarmPersistence } from './persistence.js';
 
 // Custom error class for MCP validation errors
 class MCPValidationError extends Error {
@@ -1677,4 +1677,4 @@ class EnhancedMCPTools {
     }
 }
 
-module.exports = { EnhancedMCPTools };
+export { EnhancedMCPTools };

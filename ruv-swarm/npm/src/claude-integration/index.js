@@ -3,9 +3,9 @@
  * Coordinates all integration modules for modular, remote-capable setup
  */
 
-const { ClaudeIntegrationCore } = require('./core');
-const { ClaudeDocsGenerator } = require('./docs');
-const { RemoteWrapperGenerator } = require('./remote');
+import { ClaudeIntegrationCore } from './core.js';
+import { ClaudeDocsGenerator } from './docs.js';
+import { RemoteWrapperGenerator } from './remote.js';
 
 class ClaudeIntegrationOrchestrator {
     constructor(options = {}) {
@@ -186,7 +186,7 @@ async function invokeClaudeWithSwarm(prompt, options = {}) {
     return await orchestrator.invokeClaudeWithPrompt(prompt);
 }
 
-module.exports = {
+export {
     ClaudeIntegrationOrchestrator,
     setupClaudeIntegration,
     invokeClaudeWithSwarm,

@@ -2,8 +2,8 @@
  * Advanced command documentation for enhanced swarm optimization
  */
 
-const fs = require('fs').promises;
-const path = require('path');
+import fs from 'fs/promises';
+import path from 'path';
 
 class AdvancedCommandsGenerator {
     constructor(options = {}) {
@@ -558,4 +558,4 @@ ${config.benefits || '- Improved performance\n- Automated workflows\n- Intellige
     }
 }
 
-module.exports = { AdvancedCommandsGenerator };
+export { AdvancedCommandsGenerator };

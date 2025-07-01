@@ -4,11 +4,11 @@
  * neural networks, forecasting, and swarm orchestration
  */
 
-const { WasmModuleLoader } = require('./wasm-loader');
-const { SwarmPersistence } = require('./persistence');
-const { NeuralAgentFactory } = require('./neural-agent');
-const path = require('path');
-const fs = require('fs');
+import { WasmModuleLoader } from './wasm-loader.js';
+import { SwarmPersistence } from './persistence.js';
+import { NeuralAgentFactory } from './neural-agent.js';
+import path from 'path';
+import fs from 'fs';
 
 class RuvSwarm {
     constructor() {
@@ -274,10 +274,17 @@ class RuvSwarm {
     // Feature detection helpers
     static detectSIMDSupport() {
         try {
-            // Check for WebAssembly SIMD support
-            return WebAssembly.validate(new Uint8Array([
-                0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 7, 8, 1, 4, 116, 101, 115, 116, 0, 0, 10, 15, 1, 13, 0, 65, 0, 253, 15, 253, 98, 11
-            ]));
+            // Check for WebAssembly SIMD support using v128 type validation
+            // This is more compatible across Node.js versions
+            const simdTestModule = new Uint8Array([
+                0x00, 0x61, 0x73, 0x6d, // WASM magic
+                0x01, 0x00, 0x00, 0x00, // Version 1
+                0x01, 0x05, 0x01,       // Type section: 1 type
+                0x60, 0x00, 0x01, 0x7b  // Function type: () -> v128 (SIMD type)
+            ]);
+            
+            // If v128 type is supported, SIMD is available
+            return WebAssembly.validate(simdTestModule);
         } catch {
             return false;
         }
@@ -673,4 +680,4 @@ class Task {
     }
 }
 
-module.exports = { RuvSwarm, Swarm, Agent, Task };
+export { RuvSwarm, Swarm, Agent, Task };

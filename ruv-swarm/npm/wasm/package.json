@@ -9,9 +9,11 @@
   "license": "MIT OR Apache-2.0",
   "files": [
     "ruv_swarm_wasm_bg.wasm",
-    "ruv_swarm_wasm.js"
+    "ruv_swarm_wasm.js",
+    "ruv_swarm_wasm.d.ts"
   ],
-  "module": "ruv_swarm_wasm.js",
+  "main": "ruv_swarm_wasm.js",
+  "types": "ruv_swarm_wasm.d.ts",
   "sideEffects": [
     "./snippets/*"
   ]

@@ -442,4 +442,35 @@ pub fn register_tools(registry: &ToolRegistry) {
         ],
         handler: None,
     });
+    
+    // Agent metrics tool
+    registry.register(Tool {
+        name: "ruv-swarm.agent.metrics".to_string(),
+        description: "Get performance metrics for agents".to_string(),
+        parameters: vec![
+            ToolParameter {
+                name: "agent_id".to_string(),
+                description: "Specific agent ID (optional)".to_string(),
+                param_type: "string".to_string(),
+                required: false,
+                default: None,
+                enum_values: None,
+            },
+            ToolParameter {
+                name: "metric".to_string(),
+                description: "Metric type to retrieve".to_string(),
+                param_type: "string".to_string(),
+                required: false,
+                default: Some(json!("all")),
+                enum_values: Some(vec![
+                    "all".to_string(),
+                    "cpu".to_string(),
+                    "memory".to_string(),
+                    "tasks".to_string(),
+                    "performance".to_string(),
+                ]),
+            },
+        ],
+        handler: None,
+    });
 }
