@@ -147,6 +147,7 @@ class RuvSwarm {
 
     async createSwarm(config) {
         const {
+            id = null, // Allow existing ID for persistence loading
             name = 'default-swarm',
             topology = 'mesh',
             strategy = 'balanced',
@@ -171,15 +172,15 @@ class RuvSwarm {
         if (coreModule.exports && coreModule.exports.RuvSwarm) {
             try {
                 wasmSwarm = new coreModule.exports.RuvSwarm();
-                // Store swarm config
-                wasmSwarm.id = `swarm-${Date.now()}`;
+                // Store swarm config - use existing ID if provided
+                wasmSwarm.id = id || `swarm-${Date.now()}`;
                 wasmSwarm.name = name;
                 wasmSwarm.config = swarmConfig;
             } catch (error) {
                 console.warn('Failed to create WASM swarm:', error.message);
                 // Fallback to JavaScript implementation
                 wasmSwarm = {
-                    id: `swarm-${Date.now()}`,
+                    id: id || `swarm-${Date.now()}`,
                     name,
                     config: swarmConfig,
                     agents: new Map(),
@@ -189,7 +190,7 @@ class RuvSwarm {
         } else {
             // Fallback for placeholder or different module structure
             wasmSwarm = {
-                id: `swarm-${Date.now()}`,
+                id: id || `swarm-${Date.now()}`,
                 name,
                 config: swarmConfig,
                 agents: new Map(),
@@ -200,16 +201,22 @@ class RuvSwarm {
         // Create JavaScript wrapper
         const swarm = new Swarm(wasmSwarm.id || wasmSwarm.name, wasmSwarm, this);
         
-        // Persist swarm if persistence is enabled
-        if (this.persistence) {
-            await this.persistence.createSwarm({
-                id: swarm.id,
-                name,
-                topology,
-                strategy,
-                maxAgents,
-                created: new Date().toISOString()
-            });
+        // Persist swarm if persistence is enabled and this is a new swarm
+        if (this.persistence && !id) {
+            try {
+                this.persistence.createSwarm({
+                    id: swarm.id,
+                    name,
+                    topology,
+                    strategy,
+                    maxAgents,
+                    created: new Date().toISOString()
+                });
+            } catch (error) {
+                if (!error.message.includes('UNIQUE constraint failed')) {
+                    console.warn('Failed to persist swarm:', error.message);
+                }
+            }
         }
 
         this.activeSwarms.set(swarm.id, swarm);
@@ -314,6 +321,7 @@ class Swarm {
 
     async spawn(config) {
         const {
+            id = null, // Allow existing ID for persistence loading
             type = 'researcher',
             name = null,
             capabilities = null,
@@ -336,9 +344,9 @@ class Swarm {
         if (this.wasmSwarm.spawn) {
             result = this.wasmSwarm.spawn(agentConfig);
         } else {
-            // Fallback for placeholder
+            // Fallback for placeholder - use existing ID if provided
             result = {
-                agent_id: `agent-${Date.now()}`,
+                agent_id: id || `agent-${Date.now()}`,
                 name: agentConfig.name,
                 type: agentConfig.agent_type,
                 capabilities: agentConfig.capabilities,
@@ -347,23 +355,29 @@ class Swarm {
             };
         }
 
-        const agentId = result.agent_id || result.id;
+        const agentId = id || result.agent_id || result.id;
 
         // Create JavaScript wrapper
         const agent = new Agent(agentId, result, this);
         this.agents.set(agentId, agent);
 
-        // Persist agent if persistence is enabled
-        if (this.ruvSwarm.persistence) {
-            await this.ruvSwarm.persistence.createAgent({
-                id: agentId,
-                swarmId: this.id,
-                name: result.name,
-                type,
-                capabilities: result.capabilities,
-                cognitive_pattern: result.cognitive_pattern,
-                created: new Date().toISOString()
-            });
+        // Persist agent if persistence is enabled and this is a new agent
+        if (this.ruvSwarm.persistence && !id) {
+            try {
+                this.ruvSwarm.persistence.createAgent({
+                    id: agentId,
+                    swarmId: this.id,
+                    name: result.name,
+                    type,
+                    capabilities: result.capabilities,
+                    cognitive_pattern: result.cognitive_pattern,
+                    created: new Date().toISOString()
+                });
+            } catch (error) {
+                if (!error.message.includes('UNIQUE constraint failed')) {
+                    console.warn('Failed to persist agent:', error.message);
+                }
+            }
         }
 
         console.log(`🤖 Spawned agent: ${result.name} (${type})`);

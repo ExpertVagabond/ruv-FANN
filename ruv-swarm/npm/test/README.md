@@ -7,7 +7,7 @@ This directory contains comprehensive test suites for the ruv-swarm MCP (Model C
 ## Test Structure
 
 ### 1. MCP Integration Tests (`mcp-integration.test.js`)
-Comprehensive tests for all 12 MCP tools:
+Comprehensive tests for all 16 MCP tools:
 - **swarm_init** - Initialize swarm with topology
 - **swarm_status** - Get swarm status
 - **swarm_monitor** - Real-time monitoring
@@ -17,9 +17,15 @@ Comprehensive tests for all 12 MCP tools:
 - **task_orchestrate** - Orchestrate tasks across swarm
 - **task_status** - Check task progress
 - **task_results** - Retrieve task results
+- **task_create** - Create individual tasks
 - **benchmark_run** - Execute performance benchmarks
 - **features_detect** - Detect runtime capabilities
 - **memory_usage** - Get memory statistics
+- **memory_store** - Store persistent data
+- **memory_get** - Retrieve stored data
+- **neural_status** - Neural network status
+- **neural_train** - Train neural networks
+- **neural_patterns** - Analyze cognitive patterns
 
 ### 2. Persistence Layer Tests (`persistence.test.js`)
 Tests for SQLite database persistence:

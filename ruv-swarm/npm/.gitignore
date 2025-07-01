@@ -63,3 +63,18 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Test reports
+test-reports/
+
+# Database files
+*.db-journal
+*.db-wal
+
+# Session data
+.claude/sessions/
+.ruv-swarm/
+
+# Archive
+archive/
+bin/archive/

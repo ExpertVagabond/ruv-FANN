@@ -18,8 +18,11 @@ ruv-swarm is the **industry-leading distributed agent orchestration platform** t
 💰 **Cost Optimization** - **32.3% token reduction** with maintained accuracy  
 🧠 **Cognitive Diversity Engine** - **27+ neural models** with specialized agent types  
 🔗 **Claude Code Integration** - Native MCP protocol with **16 production tools**  
+🪝 **Claude Code Hooks** - Automated pre/post operation hooks for seamless coordination  
 🌐 **Flexible Topologies** - Mesh, hierarchical, clustered, pipeline, and custom architectures  
 💾 **Enterprise Persistence** - SQLite-backed memory with cross-session continuity  
+🔄 **Git Integration** - Automatic commits with detailed agent reports  
+⚡ **Parallel Agent Execution** - Concurrent task processing for maximum efficiency  
 📊 **Real-time Monitoring** - Advanced metrics and performance analytics  
 
 ---
@@ -51,6 +54,10 @@ Get started with ruv-swarm in under 2 minutes:
 npx ruv-swarm init mesh 5
 npx ruv-swarm spawn researcher "AI Research Agent"
 npx ruv-swarm orchestrate "Research the latest advances in neural architecture search"
+
+# Use Claude Code hooks for automated coordination
+npx ruv-swarm hook pre-task --description "Your task description"
+npx ruv-swarm hook post-task --task-id "task-123" --analyze-performance true
 ```
 
 Or use programmatically:
@@ -124,7 +131,7 @@ cargo install ruv-swarm-cli
 
 # Add to Cargo.toml
 [dependencies]
-ruv-swarm = "0.1.0"
+ruv-swarm = "0.2.0"
 ```
 
 ### Docker
@@ -433,11 +440,12 @@ npx ruv-swarm mcp tools
 
 | Tool Category | Tools | Description |
 |---------------|-------|-------------|
-| **Agent Management** | `ruv-swarm.spawn`, `ruv-swarm.agent.list` | Create and manage agents |
-| **Task Orchestration** | `ruv-swarm.orchestrate`, `ruv-swarm.task.create` | Coordinate swarm tasks |
-| **Memory Operations** | `ruv-swarm.memory.store`, `ruv-swarm.memory.get` | Persistent data management |
-| **Monitoring** | `ruv-swarm.query`, `ruv-swarm.monitor` | Real-time swarm monitoring |
-| **Optimization** | `ruv-swarm.optimize`, `ruv-swarm.benchmark` | Performance tuning |
+| **Swarm Management** | `swarm_init`, `swarm_status`, `swarm_monitor` | Initialize and manage swarms |
+| **Agent Management** | `agent_spawn`, `agent_list`, `agent_metrics` | Create and manage agents |
+| **Task Orchestration** | `task_orchestrate`, `task_status`, `task_results` | Coordinate swarm tasks |
+| **Memory Operations** | `memory_store`, `memory_get`, `memory_usage` | Persistent data management |
+| **Neural Features** | `neural_status`, `neural_train`, `neural_patterns` | Neural network operations |
+| **Performance** | `benchmark_run`, `features_detect` | Performance testing & optimization |
 
 ### Claude Configuration
 
@@ -706,6 +714,67 @@ const scalableSwarm = await RuvSwarm.initialize({
     cooldownPeriod: 60000    // 1 minute
   }
 });
+```
+
+### 🪝 Claude Code Hooks System
+
+ruv-swarm provides comprehensive hooks for Claude Code operations:
+
+```javascript
+// Pre-operation hooks
+await swarm.hook('pre-edit', { file: 'src/app.js' });
+await swarm.hook('pre-task', { description: 'Build authentication system' });
+await swarm.hook('pre-search', { pattern: '*.test.js' });
+
+// Post-operation hooks with performance analysis
+await swarm.hook('post-edit', { 
+  file: 'src/app.js',
+  memoryKey: 'edit-history/app-js'
+});
+
+await swarm.hook('post-task', {
+  taskId: 'auth-system',
+  analyzePerformance: true,
+  generateReport: true
+});
+
+// Git integration hooks
+await swarm.hook('agent-complete', {
+  agent: 'coder-123',
+  commitToGit: true,
+  generateReport: true
+});
+```
+
+### 🔄 Git Integration
+
+Automatic Git commits with detailed agent reports:
+
+```bash
+# Enable Git integration
+export RUV_SWARM_AUTO_COMMIT=true
+export RUV_SWARM_GENERATE_REPORTS=true
+
+# Agent work is automatically committed
+npx ruv-swarm orchestrate "Implement user authentication"
+# Creates commit: "feat(auth): Implement user authentication system"
+# Includes: Performance metrics, agent decisions, code changes
+```
+
+**Hook Configuration** in `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [{
+      "condition": "${tool.result.success}",
+      "hooks": [{
+        "type": "command",
+        "command": "npx ruv-swarm hook agent-complete --agent '${tool.params.description}' --commit-to-git true"
+      }]
+    }]
+  }
+}
 ```
 
 ---
@@ -1384,7 +1453,7 @@ This dual licensing provides maximum flexibility for both open source and commer
 
 ## 🤝 Contributing
 
-We welcome contributions! See our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! See our [Contributing Guide](../docs/guides/CONTRIBUTING.md) for details.
 
 ### Ways to Contribute
 
@@ -1428,8 +1497,8 @@ npm test
 - 🌟 [Roadmap](https://github.com/ruvnet/ruv-FANN/projects)
 
 ### Technical
-- ⚡ [Performance Benchmarks](OPTIMIZATION_REPORT.md)
-- 🧪 [Testing Strategy](TESTING_REPORT.md)
+- ⚡ [Performance Benchmarks](../docs/implementation/OPTIMIZATION_REPORT.md)
+- 🧪 [Testing Strategy](test/README.md)
 - 🔧 [Architecture Overview](https://github.com/ruvnet/ruv-FANN/blob/main/ruv-swarm/plans/ruv-swarm-architecture.md)
 
 ---
