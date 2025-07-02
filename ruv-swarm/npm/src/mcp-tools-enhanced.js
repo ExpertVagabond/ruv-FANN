@@ -6,6 +6,7 @@
 import { RuvSwarm } from './index-enhanced.js';
 import { NeuralNetworkManager } from './neural-network-manager.js';
 import { SwarmPersistence } from './persistence.js';
+import { MCPBenchmarks } from './mcp-tools-benchmarks.js';
 
 // Custom error class for MCP validation errors
 class MCPValidationError extends Error {
@@ -46,6 +47,7 @@ class EnhancedMCPTools {
         this.activeSwarms = new Map();
         this.toolMetrics = new Map();
         this.persistence = new SwarmPersistence();
+        this.benchmarks = null; // Will be initialized when needed
     }
 
     async initialize(ruvSwarmInstance = null) {
@@ -720,42 +722,28 @@ class EnhancedMCPTools {
         const startTime = performance.now();
         
         try {
+            await this.initialize();
+            
             const {
                 type = 'all',
-                iterations = 10,
-                includeWasmBenchmarks = true,
-                includeNeuralBenchmarks = true,
-                includeSwarmBenchmarks = true
+                iterations = 10
             } = params;
 
             const benchmarks = {};
 
+            // Use existing methods for core benchmarks
             if (type === 'all' || type === 'wasm') {
                 benchmarks.wasm = await this.runWasmBenchmarks(iterations);
             }
 
             if (type === 'all' || type === 'neural') {
-                if (includeNeuralBenchmarks && this.ruvSwarm.features.neural_networks) {
+                if (this.ruvSwarm.features.neural_networks) {
                     benchmarks.neural = await this.runNeuralBenchmarks(iterations);
                 }
             }
 
             if (type === 'all' || type === 'swarm') {
-                if (includeSwarmBenchmarks) {
-                    console.log('Running swarm benchmarks with iterations:', iterations);
-                    try {
-                        benchmarks.swarm = await this.runSwarmBenchmarks(iterations);
-                        console.log('Swarm benchmarks result:', benchmarks.swarm);
-                    } catch (error) {
-                        console.error('Swarm benchmark error:', error);
-                        benchmarks.swarm = {
-                            swarm_creation: { avg_ms: 0, min_ms: 0, max_ms: 0 },
-                            agent_spawning: { avg_ms: 0, min_ms: 0, max_ms: 0 },
-                            task_orchestration: { avg_ms: 0, min_ms: 0, max_ms: 0 },
-                            error: error.message
-                        };
-                    }
-                }
+                benchmarks.swarm = await this.runSwarmBenchmarks(iterations);
             }
 
             if (type === 'all' || type === 'agent') {
@@ -766,6 +754,18 @@ class EnhancedMCPTools {
                 benchmarks.task = await this.runTaskBenchmarks(iterations);
             }
 
+            // Use imported benchmarks class for specialized tests
+            if (type === 'all' || type === 'memory') {
+                // Initialize benchmarks class if not already done
+                if (!this.benchmarks) {
+                    this.benchmarks = new MCPBenchmarks(this.ruvSwarm, this.persistence);
+                }
+                const memoryResult = await this.benchmarks.runBenchmarks('memory', iterations);
+                if (memoryResult.results.memory) {
+                    benchmarks.memory = memoryResult.results.memory;
+                }
+            }
+
             const result = {
                 benchmark_type: type,
                 iterations,
@@ -773,7 +773,7 @@ class EnhancedMCPTools {
                 environment: {
                     features: this.ruvSwarm.features,
                     memory_usage_mb: this.ruvSwarm.wasmLoader.getTotalMemoryUsage() / (1024 * 1024),
-                    runtime_features: RuvSwarm.getRuntimeFeatures()
+                    runtime_features: this.ruvSwarm.getRuntimeFeatures ? this.ruvSwarm.getRuntimeFeatures() : {}
                 },
                 performance: {
                     total_benchmark_time_ms: performance.now() - startTime
@@ -1183,7 +1183,7 @@ class EnhancedMCPTools {
         }
     }
 
-    // Helper methods for benchmarking
+    // Helper methods for benchmarking - restored after accidental deletion
     async runWasmBenchmarks(iterations) {
         await this.initialize();
         const results = {};
