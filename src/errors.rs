@@ -402,7 +402,9 @@ impl ErrorLogger {
             }
 
             #[cfg(feature = "logging")]
-            log::log!(self.log_level, "{}", serde_json::Value::Object(fields));
+            {
+                log::log!(self.log_level, "{}", serde_json::Value::Object(fields));
+            }
         }
 
         #[cfg(not(feature = "serde"))]
@@ -411,9 +413,12 @@ impl ErrorLogger {
             let _ = error;
             let _ = context;
         }
+<<<<<<< HEAD
 
         #[cfg(all(feature = "logging", not(feature = "serde")))]
         log::log!(self.log_level, "Error: {}", error);
+=======
+>>>>>>> abaf27d (Fix compilation errors in Rust code)
     }
 
     fn log_simple_error(&self, error: &RuvFannError, context: Option<&ErrorContext>) {
