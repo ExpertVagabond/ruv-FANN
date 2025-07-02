@@ -1,8 +1,8 @@
 //! JSON serialization support
 
+use crate::io::error::IoResult;
+use serde::{Deserialize, Serialize};
 use std::io::{Read, Write};
-use serde::{Serialize, Deserialize};
-use crate::io::error::{IoError, IoResult};
 
 /// Read JSON data from a reader
 pub fn read_json<T, R>(reader: &mut R) -> IoResult<T>
@@ -12,7 +12,7 @@ where
 {
     let mut buffer = Vec::new();
     reader.read_to_end(&mut buffer)?;
-    
+
     let value = serde_json::from_slice(&buffer)?;
     Ok(value)
 }
@@ -36,7 +36,7 @@ where
 {
     let mut buffer = Vec::new();
     reader.read_to_end(&mut buffer)?;
-    
+
     if pretty {
         // For pretty reading, we just use the regular deserializer
         let value = serde_json::from_slice(&buffer)?;
@@ -58,7 +58,7 @@ where
     } else {
         serde_json::to_string(data)?
     };
-    
+
     writer.write_all(json_string.as_bytes())?;
     Ok(())
 }
@@ -80,7 +80,7 @@ impl JsonConfig {
             include_null: false,
         }
     }
-    
+
     /// Create a compact JSON config (no pretty printing)
     pub fn compact() -> Self {
         Self {
@@ -88,7 +88,7 @@ impl JsonConfig {
             include_null: false,
         }
     }
-    
+
     /// Create a pretty JSON config (with indentation)
     pub fn pretty() -> Self {
         Self {
@@ -116,12 +116,12 @@ impl JsonReader {
             config: JsonConfig::new(),
         }
     }
-    
+
     /// Create a new JSON reader with custom config
     pub fn with_config(config: JsonConfig) -> Self {
         Self { config }
     }
-    
+
     /// Read data from a reader
     pub fn read<T, R>(&self, reader: &mut R) -> IoResult<T>
     where
@@ -150,12 +150,12 @@ impl JsonWriter {
             config: JsonConfig::new(),
         }
     }
-    
+
     /// Create a new JSON writer with custom config
     pub fn with_config(config: JsonConfig) -> Self {
         Self { config }
     }
-    
+
     /// Write data to a writer
     pub fn write<T, W>(&self, data: &T, writer: &mut W) -> IoResult<()>
     where

@@ -3,10 +3,9 @@
 //! This module provides a unified error handling framework with detailed error categories,
 //! context information, and recovery mechanisms for robust neural network operations.
 
-use std::fmt;
+use crate::{NetworkError, TrainingError};
 use std::error::Error;
 use thiserror::Error;
-use crate::{NetworkError, TrainingError};
 
 /// Main error type for all ruv-FANN operations
 #[derive(Error, Debug)]
@@ -308,7 +307,10 @@ impl RecoveryContext {
 
 /// Professional error logging and debugging facilities
 pub struct ErrorLogger {
+    #[cfg(feature = "logging")]
     log_level: log::Level,
+    #[cfg(not(feature = "logging"))]
+    log_level: u8, // Simple placeholder when log feature is disabled
     structured_logging: bool,
     performance_tracking: bool,
 }
@@ -316,14 +318,24 @@ pub struct ErrorLogger {
 impl ErrorLogger {
     pub fn new() -> Self {
         Self {
+            #[cfg(feature = "logging")]
             log_level: log::Level::Warn,
+            #[cfg(not(feature = "logging"))]
+            log_level: 2, // 2 as a placeholder for Warn level
             structured_logging: true,
             performance_tracking: false,
         }
     }
 
+    #[cfg(feature = "logging")]
     pub fn with_level(mut self, level: log::Level) -> Self {
         self.log_level = level;
+        self
+    }
+
+    #[cfg(not(feature = "logging"))]
+    pub fn with_level(self, _level: u8) -> Self {
+        // No-op when logging is disabled
         self
     }
 
@@ -346,28 +358,62 @@ impl ErrorLogger {
     }
 
     fn log_structured_error(&self, error: &RuvFannError, context: Option<&ErrorContext>) {
-        let mut fields = serde_json::Map::new();
-        fields.insert("error_type".to_string(), serde_json::Value::String(format!("{:?}", error)));
-        fields.insert("message".to_string(), serde_json::Value::String(error.to_string()));
+        #[cfg(feature = "serde")]
+        {
+            let mut fields = serde_json::Map::new();
+            fields.insert(
+                "error_type".to_string(),
+                serde_json::Value::String(format!("{error:?}")),
+            );
+            fields.insert(
+                "message".to_string(),
+                serde_json::Value::String(error.to_string()),
+            );
 
-        if let Some(ctx) = context {
-            fields.insert("operation".to_string(), serde_json::Value::String(ctx.operation.clone()));
-            if let Some(ref network_id) = ctx.network_id {
-                fields.insert("network_id".to_string(), serde_json::Value::String(network_id.clone()));
+            if let Some(ctx) = context {
+                fields.insert(
+                    "operation".to_string(),
+                    serde_json::Value::String(ctx.operation.clone()),
+                );
+                if let Some(ref network_id) = ctx.network_id {
+                    fields.insert(
+                        "network_id".to_string(),
+                        serde_json::Value::String(network_id.clone()),
+                    );
+                }
+                if let Some(layer_idx) = ctx.layer_index {
+                    fields.insert(
+                        "layer_index".to_string(),
+                        serde_json::Value::Number(serde_json::Number::from(layer_idx)),
+                    );
+                }
+                if let Some(neuron_idx) = ctx.neuron_index {
+                    fields.insert(
+                        "neuron_index".to_string(),
+                        serde_json::Value::Number(serde_json::Number::from(neuron_idx)),
+                    );
+                }
+                if let Some(epoch) = ctx.epoch {
+                    fields.insert(
+                        "epoch".to_string(),
+                        serde_json::Value::Number(serde_json::Number::from(epoch)),
+                    );
+                }
             }
-            if let Some(layer_idx) = ctx.layer_index {
-                fields.insert("layer_index".to_string(), serde_json::Value::Number(serde_json::Number::from(layer_idx)));
-            }
-            if let Some(neuron_idx) = ctx.neuron_index {
-                fields.insert("neuron_index".to_string(), serde_json::Value::Number(serde_json::Number::from(neuron_idx)));
-            }
-            if let Some(epoch) = ctx.epoch {
-                fields.insert("epoch".to_string(), serde_json::Value::Number(serde_json::Number::from(epoch)));
-            }
+
+            #[cfg(feature = "logging")]
+            log::log!(self.log_level, "{}", serde_json::Value::Object(fields));
         }
 
-        #[cfg(feature = "logging")]
-        log::log!(self.log_level, "{}", serde_json::Value::Object(fields));
+        #[cfg(not(feature = "serde"))]
+        {
+            // Simple fallback when serde_json is not available
+            let _ = error;
+            let _ = context;
+        }
+
+        #[cfg(all(feature = "logging", not(feature = "serde")))]
+        log::log!(self.log_level, "Error: {}", error);
     }
 
     fn log_simple_error(&self, error: &RuvFannError, context: Option<&ErrorContext>) {
@@ -376,7 +422,7 @@ impl ErrorLogger {
             .unwrap_or_default();
 
         #[cfg(feature = "logging")]
-        log::log!(self.log_level, "Error{}: {}", context_str, error);
+        log::log!(self.log_level, "Error{context_str}: {error}");
     }
 }
 
@@ -390,34 +436,26 @@ impl Default for ErrorLogger {
 impl From<NetworkError> for RuvFannError {
     fn from(error: NetworkError) -> Self {
         match error {
-            NetworkError::InputSizeMismatch { expected, actual } => {
-                RuvFannError::Network {
-                    category: NetworkErrorCategory::Topology,
-                    message: format!("Input size mismatch: expected {}, got {}", expected, actual),
-                    context: None,
-                }
-            }
-            NetworkError::WeightCountMismatch { expected, actual } => {
-                RuvFannError::Network {
-                    category: NetworkErrorCategory::Weights,
-                    message: format!("Weight count mismatch: expected {}, got {}", expected, actual),
-                    context: None,
-                }
-            }
-            NetworkError::InvalidLayerConfiguration => {
-                RuvFannError::Network {
-                    category: NetworkErrorCategory::Layers,
-                    message: "Invalid layer configuration".to_string(),
-                    context: None,
-                }
-            }
-            NetworkError::NoLayers => {
-                RuvFannError::Network {
-                    category: NetworkErrorCategory::Topology,
-                    message: "Network has no layers".to_string(),
-                    context: None,
-                }
-            }
+            NetworkError::InputSizeMismatch { expected, actual } => RuvFannError::Network {
+                category: NetworkErrorCategory::Topology,
+                message: format!("Input size mismatch: expected {expected}, got {actual}"),
+                context: None,
+            },
+            NetworkError::WeightCountMismatch { expected, actual } => RuvFannError::Network {
+                category: NetworkErrorCategory::Weights,
+                message: format!("Weight count mismatch: expected {expected}, got {actual}"),
+                context: None,
+            },
+            NetworkError::InvalidLayerConfiguration => RuvFannError::Network {
+                category: NetworkErrorCategory::Layers,
+                message: "Invalid layer configuration".to_string(),
+                context: None,
+            },
+            NetworkError::NoLayers => RuvFannError::Network {
+                category: NetworkErrorCategory::Topology,
+                message: "Network has no layers".to_string(),
+                context: None,
+            },
         }
     }
 }
@@ -425,27 +463,21 @@ impl From<NetworkError> for RuvFannError {
 impl From<TrainingError> for RuvFannError {
     fn from(error: TrainingError) -> Self {
         match error {
-            TrainingError::InvalidData(msg) => {
-                RuvFannError::Validation {
-                    category: ValidationErrorCategory::InputData,
-                    message: msg,
-                    details: vec![],
-                }
-            }
-            TrainingError::NetworkError(msg) => {
-                RuvFannError::Network {
-                    category: NetworkErrorCategory::Topology,
-                    message: msg,
-                    context: None,
-                }
-            }
-            TrainingError::TrainingFailed(msg) => {
-                RuvFannError::Training {
-                    category: TrainingErrorCategory::Algorithm,
-                    message: msg,
-                    context: None,
-                }
-            }
+            TrainingError::InvalidData(msg) => RuvFannError::Validation {
+                category: ValidationErrorCategory::InputData,
+                message: msg,
+                details: vec![],
+            },
+            TrainingError::NetworkError(msg) => RuvFannError::Network {
+                category: NetworkErrorCategory::Topology,
+                message: msg,
+                context: None,
+            },
+            TrainingError::TrainingFailed(msg) => RuvFannError::Training {
+                category: TrainingErrorCategory::Algorithm,
+                message: msg,
+                context: None,
+            },
         }
     }
 }

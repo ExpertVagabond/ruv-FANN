@@ -1,4 +1,4 @@
-use ruv_fann::{NetworkBuilder, ActivationFunction};
+use ruv_fann::{ActivationFunction, NetworkBuilder};
 
 fn main() {
     // Create a neural network with 2 inputs, 3 hidden neurons, and 1 output
@@ -18,24 +18,22 @@ fn main() {
     // Run the network with some test inputs
     let inputs = vec![0.5, 0.7];
     let outputs = network.run(&inputs);
-    
-    println!("Inputs: {:?}", inputs);
-    println!("Outputs: {:?}", outputs);
+
+    println!("Inputs: {inputs:?}");
+    println!("Outputs: {outputs:?}");
 
     // Get and display current weights
     let weights = network.get_weights();
     println!("Number of weights: {}", weights.len());
-    
+
     // Example of setting new weights (normally done by training algorithm)
-    let new_weights: Vec<f32> = (0..weights.len())
-        .map(|i| (i as f32) * 0.1 - 0.5)
-        .collect();
-    
+    let new_weights: Vec<f32> = (0..weights.len()).map(|i| (i as f32) * 0.1 - 0.5).collect();
+
     if let Ok(()) = network.set_weights(&new_weights) {
         println!("Successfully updated weights");
-        
+
         // Run again with new weights
         let new_outputs = network.run(&inputs);
-        println!("New outputs: {:?}", new_outputs);
+        println!("New outputs: {new_outputs:?}");
     }
 }

@@ -1,6 +1,7 @@
-use num_traits::Float;
-use serde::{Deserialize, Serialize};
 use crate::{ActivationFunction, Connection};
+use num_traits::Float;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 /// Represents a single neuron in the neural network
 #[derive(Debug, Clone)]
@@ -8,19 +9,19 @@ use crate::{ActivationFunction, Connection};
 pub struct Neuron<T: Float> {
     /// The sum of inputs multiplied by weights
     pub sum: T,
-    
+
     /// The output value after applying the activation function
     pub value: T,
-    
+
     /// The steepness parameter for the activation function
     pub activation_steepness: T,
-    
+
     /// The activation function to use
     pub activation_function: ActivationFunction,
-    
+
     /// Incoming connections to this neuron
     pub connections: Vec<Connection<T>>,
-    
+
     /// Whether this is a bias neuron
     pub is_bias: bool,
 }
@@ -35,7 +36,7 @@ impl<T: Float> Neuron<T> {
     /// # Example
     /// ```
     /// use ruv_fann::{Neuron, ActivationFunction};
-    /// 
+    ///
     /// let neuron = Neuron::<f32>::new(ActivationFunction::Sigmoid, 1.0);
     /// assert_eq!(neuron.activation_function, ActivationFunction::Sigmoid);
     /// ```
@@ -70,7 +71,8 @@ impl<T: Float> Neuron<T> {
     /// * `weight` - Initial weight of the connection
     pub fn add_connection(&mut self, from_neuron: usize, weight: T) {
         let neuron_index = self.connections.len();
-        self.connections.push(Connection::new(from_neuron, neuron_index, weight));
+        self.connections
+            .push(Connection::new(from_neuron, neuron_index, weight));
     }
 
     /// Clears all connections
@@ -174,7 +176,7 @@ mod tests {
         let mut neuron = Neuron::<f32>::new(ActivationFunction::ReLU, 1.0);
         neuron.add_connection(0, 0.5);
         neuron.add_connection(1, -0.3);
-        
+
         assert_eq!(neuron.connections.len(), 2);
         assert_eq!(neuron.connections[0].from_neuron, 0);
         assert_eq!(neuron.connections[0].weight, 0.5);
@@ -187,7 +189,7 @@ mod tests {
         let mut neuron = Neuron::<f32>::new(ActivationFunction::Sigmoid, 1.0);
         neuron.sum = 5.0;
         neuron.value = 2.5;
-        
+
         neuron.reset();
         assert_eq!(neuron.sum, 0.0);
         assert_eq!(neuron.value, 0.0);
@@ -198,7 +200,7 @@ mod tests {
         let mut bias = Neuron::<f32>::new_bias();
         bias.sum = 5.0;
         bias.value = 2.5;
-        
+
         bias.reset();
         assert_eq!(bias.sum, 1.0);
         assert_eq!(bias.value, 1.0);
@@ -207,9 +209,10 @@ mod tests {
     #[test]
     fn test_set_value() {
         let mut neuron = Neuron::<f32>::new(ActivationFunction::Linear, 1.0);
-        neuron.set_value(3.14);
-        assert_eq!(neuron.value, 3.14);
-        assert_eq!(neuron.sum, 3.14);
+        // Use std::f32::consts::PI instead of hardcoded value
+        neuron.set_value(std::f32::consts::PI);
+        assert_eq!(neuron.value, std::f32::consts::PI);
+        assert_eq!(neuron.sum, std::f32::consts::PI);
     }
 
     #[test]
@@ -218,10 +221,10 @@ mod tests {
         neuron.add_connection(0, 0.5);
         neuron.add_connection(1, -0.3);
         neuron.add_connection(2, 0.2);
-        
+
         let inputs = vec![1.0, 2.0, -1.0];
         neuron.calculate(&inputs);
-        
+
         // 1.0 * 0.5 + 2.0 * -0.3 + -1.0 * 0.2 = 0.5 - 0.6 - 0.2 = -0.3
         assert_eq!(neuron.sum, -0.3);
     }

@@ -45,6 +45,10 @@ class WasmBindingsLoader {
       // Load the WASM binary
       const wasmBinary = await fs.readFile(wasmBinaryPath);
       
+      // Import the ES module version of the WASM bindings
+      const wasmBindingsUrl = new URL(`file://${wasmJsPath}`);
+      const wasmBindings = await import(wasmBindingsUrl.href);
+      
       // Create imports object matching the expected structure
       const imports = this.createImports();
       
@@ -57,15 +61,17 @@ class WasmBindingsLoader {
       // Store memory
       this.memory = this.wasm.memory;
       
-      // Copy all exports to this object
-      for (const key in this.wasm) {
-        if (typeof this.wasm[key] === 'function') {
-          this[key] = this.wasm[key].bind(this.wasm);
-        } else {
-          Object.defineProperty(this, key, {
-            get: () => this.wasm[key],
-            configurable: true
-          });
+      // Copy all exports from the ES module to this object
+      for (const key in wasmBindings) {
+        if (key !== 'default') {
+          if (typeof wasmBindings[key] === 'function') {
+            this[key] = wasmBindings[key];
+          } else {
+            Object.defineProperty(this, key, {
+              get: () => wasmBindings[key],
+              configurable: true
+            });
+          }
         }
       }
       

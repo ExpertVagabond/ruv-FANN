@@ -1,4 +1,5 @@
 use num_traits::Float;
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// Represents a connection between two neurons with a weight
@@ -24,7 +25,7 @@ impl<T: Float> Connection<T> {
     /// # Example
     /// ```
     /// use ruv_fann::Connection;
-    /// 
+    ///
     /// let conn = Connection::new(0, 1, 0.5_f32);
     /// assert_eq!(conn.from_neuron, 0);
     /// assert_eq!(conn.to_neuron, 1);
@@ -75,7 +76,7 @@ mod tests {
         let mut conn = Connection::new(0, 1, 0.5_f32);
         conn.update_weight(0.2);
         assert_relative_eq!(conn.weight, 0.7_f32);
-        
+
         conn.update_weight(-0.3);
         assert_relative_eq!(conn.weight, 0.4_f32);
     }

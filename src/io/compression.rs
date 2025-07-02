@@ -1,8 +1,8 @@
 //! Compression support for file formats
 
+use crate::io::error::IoResult;
+use flate2::{read::GzDecoder, write::GzEncoder, Compression};
 use std::io::{Read, Write};
-use flate2::{Compression, read::GzDecoder, write::GzEncoder};
-use crate::io::error::{IoError, IoResult};
 
 /// Compress data using gzip
 pub fn compress_data<R, W>(reader: &mut R, writer: &mut W) -> IoResult<()>
@@ -60,7 +60,7 @@ impl CompressionConfig {
             fast: false,
         }
     }
-    
+
     /// Create a config optimized for speed
     pub fn fast() -> Self {
         Self {
@@ -68,7 +68,7 @@ impl CompressionConfig {
             fast: true,
         }
     }
-    
+
     /// Create a config optimized for compression ratio
     pub fn best() -> Self {
         Self {
@@ -76,7 +76,7 @@ impl CompressionConfig {
             fast: false,
         }
     }
-    
+
     /// Create a config with custom compression level
     pub fn with_level(level: u32) -> Self {
         Self {
@@ -104,17 +104,17 @@ impl<R: Read> CompressedReader<R> {
             inner: GzDecoder::new(reader),
         }
     }
-    
+
     /// Get a reference to the inner reader
     pub fn get_ref(&self) -> &GzDecoder<R> {
         &self.inner
     }
-    
+
     /// Get a mutable reference to the inner reader
     pub fn get_mut(&mut self) -> &mut GzDecoder<R> {
         &mut self.inner
     }
-    
+
     /// Consume the reader and return the inner reader
     pub fn into_inner(self) -> GzDecoder<R> {
         self.inner
@@ -139,14 +139,14 @@ impl<W: Write> CompressedWriter<W> {
             inner: GzEncoder::new(writer, Compression::default()),
         }
     }
-    
+
     /// Create a new compressed writer with custom compression level
     pub fn with_level(writer: W, level: u32) -> Self {
         Self {
             inner: GzEncoder::new(writer, Compression::new(level)),
         }
     }
-    
+
     /// Create a new compressed writer with config
     pub fn with_config(writer: W, config: CompressionConfig) -> Self {
         let compression = if config.fast {
@@ -154,22 +154,22 @@ impl<W: Write> CompressedWriter<W> {
         } else {
             Compression::new(config.level)
         };
-        
+
         Self {
             inner: GzEncoder::new(writer, compression),
         }
     }
-    
+
     /// Finish compression and return the inner writer
     pub fn finish(self) -> std::io::Result<W> {
         self.inner.finish()
     }
-    
+
     /// Get a reference to the inner writer
     pub fn get_ref(&self) -> &W {
         self.inner.get_ref()
     }
-    
+
     /// Get a mutable reference to the inner writer
     pub fn get_mut(&mut self) -> &mut W {
         self.inner.get_mut()
@@ -180,7 +180,7 @@ impl<W: Write> Write for CompressedWriter<W> {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
         self.inner.write(buf)
     }
-    
+
     fn flush(&mut self) -> std::io::Result<()> {
         self.inner.flush()
     }
@@ -189,7 +189,7 @@ impl<W: Write> Write for CompressedWriter<W> {
 /// Utilities for compression analysis
 pub mod analyze {
     use super::*;
-    
+
     /// Calculate compression ratio
     pub fn compression_ratio(original_size: usize, compressed_size: usize) -> f64 {
         if original_size == 0 {
@@ -198,7 +198,7 @@ pub mod analyze {
             compressed_size as f64 / original_size as f64
         }
     }
-    
+
     /// Calculate space savings percentage
     pub fn space_savings(original_size: usize, compressed_size: usize) -> f64 {
         if original_size == 0 {
@@ -207,11 +207,11 @@ pub mod analyze {
             (1.0 - compression_ratio(original_size, compressed_size)) * 100.0
         }
     }
-    
+
     /// Test compression effectiveness on data
     pub fn test_compression(data: &[u8]) -> IoResult<CompressionStats> {
         let compressed = compress_bytes(data)?;
-        
+
         Ok(CompressionStats {
             original_size: data.len(),
             compressed_size: compressed.len(),
@@ -219,7 +219,7 @@ pub mod analyze {
             savings_percent: space_savings(data.len(), compressed.len()),
         })
     }
-    
+
     /// Compression statistics
     #[derive(Debug, Clone)]
     pub struct CompressionStats {
