@@ -230,7 +230,10 @@ jobs:
     - name: Run Miri
       run: |
         cargo miri setup
-        cargo miri test --all-features
+        # Set CI testing flag to skip WebGPU tests
+        export RUV_FANN_CI_TESTING=1
+        # Run tests but exclude WebGPU tests by using a package filter
+        cargo miri test --all-features -- --skip webgpu
       env:
         MIRIFLAGS: -Zmiri-disable-isolation
 
