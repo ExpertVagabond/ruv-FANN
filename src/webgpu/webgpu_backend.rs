@@ -7,7 +7,7 @@
 //!
 //! - **GPU Acceleration**: High-performance matrix operations using WebGPU compute shaders
 //! - **DAA Integration**: Seamless compatibility with Decentralized Autonomous Agents
-//! - **ComputeContext Bridge**: Direct Network<T> integration for performance
+//! - **ComputeContext Bridge**: Direct `Network<T>` integration for performance
 //! - **Pipeline Caching**: Advanced shader pipeline caching and optimization
 //! - **Memory Pooling**: Intelligent GPU buffer management with automatic cleanup
 //! - **Performance Monitoring**: Real-time performance tracking and optimization
@@ -40,7 +40,7 @@
 //! 1. **Compute Backend**: Core mathematical operations (matrix multiplication, activation functions)
 //! 2. **Memory Manager**: Advanced GPU buffer allocation, pooling, and optimization
 //! 3. **Shader Manager**: WGSL shader compilation, caching, and pipeline management
-//! 4. **ComputeContext**: Bridge for Network<T> integration and DAA compatibility
+//! 4. **ComputeContext**: Bridge for `Network<T>` integration and DAA compatibility
 //!
 //! # Performance Characteristics
 //!
