@@ -133,6 +133,7 @@ If you encounter WASM loading issues, see the [Troubleshooting](#-troubleshootin
 ```bash
 # Run directly without installation - works on any remote server
 npx ruv-swarm --help
+npx ruv-swarm init --claude
 npx ruv-swarm init mesh 10
 npx ruv-swarm benchmark --test swe-bench
 
