@@ -51,14 +51,14 @@ async fn test_data_loading() {
     let loader = StreamDataLoader::new(500, 10);
     let events = create_test_events();
     let event_count = events.len();
-    
+
     let dataset = loader.load_from_stream(events.into_iter()).await.unwrap();
-    
+
     assert!(dataset.sequences.len() > 0);
     assert_eq!(dataset.metadata.sequence_length, 10);
     assert!(dataset.metadata.feature_count > 0);
     assert_eq!(dataset.sequences.len(), dataset.labels.len());
-    
+
     // Check that sequences have the right length
     for sequence in &dataset.sequences {
         assert_eq!(sequence.timestamps.len(), 10);
@@ -71,7 +71,7 @@ async fn test_model_training() {
     let loader = StreamDataLoader::new(100, 5);
     let events = create_test_events();
     let dataset = loader.load_from_stream(events.into_iter()).await.unwrap();
-    
+
     let config = TrainingConfig {
         epochs: 5,
         batch_size: 16,
@@ -80,13 +80,13 @@ async fn test_model_training() {
         save_checkpoints: false,
         checkpoint_dir: "/tmp/test".to_string(),
     };
-    
+
     // Test LSTM training
     let mut lstm = LSTMModel::new(32, 1);
     let metrics = lstm.train(&dataset, &config).unwrap();
     assert!(metrics.best_loss < f64::INFINITY);
     assert!(metrics.epoch_losses.len() > 0);
-    
+
     // Test prediction
     let prediction = lstm.predict(&dataset.sequences[0]).unwrap();
     assert_eq!(prediction.len(), 3); // Should predict 3 values
@@ -97,24 +97,29 @@ async fn test_hyperparameter_optimization() {
     let loader = StreamDataLoader::new(100, 5);
     let events = create_test_events();
     let dataset = loader.load_from_stream(events.into_iter()).await.unwrap();
-    
+
     let mut parameters = HashMap::new();
     parameters.insert(
         "hidden_size".to_string(),
-        ParameterRange::Discrete { values: vec![16.0, 32.0] },
+        ParameterRange::Discrete {
+            values: vec![16.0, 32.0],
+        },
     );
     parameters.insert(
         "learning_rate".to_string(),
-        ParameterRange::Continuous { min: 0.001, max: 0.01 },
+        ParameterRange::Continuous {
+            min: 0.001,
+            max: 0.01,
+        },
     );
-    
+
     let search_space = SearchSpace { parameters };
     let optimizer = HyperparameterOptimizer::new(
         search_space,
         OptimizationMethod::RandomSearch,
         3, // Just 3 trials for testing
     );
-    
+
     let config = TrainingConfig {
         epochs: 2,
         batch_size: 16,
@@ -123,13 +128,12 @@ async fn test_hyperparameter_optimization() {
         save_checkpoints: false,
         checkpoint_dir: "/tmp/test".to_string(),
     };
-    
-    let result = optimizer.optimize(
-        || Box::new(LSTMModel::new(32, 1)),
-        &dataset,
-        &config,
-    ).await.unwrap();
-    
+
+    let result = optimizer
+        .optimize(|| Box::new(LSTMModel::new(32, 1)), &dataset, &config)
+        .await
+        .unwrap();
+
     assert!(result.best_score > 0.0);
     assert_eq!(result.trial_results.len(), 3);
     assert!(result.best_parameters.contains_key("learning_rate"));
@@ -140,7 +144,7 @@ async fn test_model_evaluation() {
     let loader = StreamDataLoader::new(100, 5);
     let events = create_test_events();
     let dataset = loader.load_from_stream(events.into_iter()).await.unwrap();
-    
+
     let config = TrainingConfig {
         epochs: 3,
         batch_size: 16,
@@ -149,24 +153,24 @@ async fn test_model_evaluation() {
         save_checkpoints: false,
         checkpoint_dir: "/tmp/test".to_string(),
     };
-    
+
     // Train models
     let mut models: Vec<Box<dyn NeuroDivergentModel>> = vec![
         Box::new(LSTMModel::new(32, 1)),
         Box::new(TCNModel::new(vec![16, 16], 3)),
     ];
-    
+
     for model in &mut models {
         model.train(&dataset, &config).unwrap();
     }
-    
+
     // Evaluate
     let evaluator = ModelEvaluator::new();
     let result = evaluator.evaluate_and_select(models, &dataset).unwrap();
-    
+
     assert!(!result.best_model.is_empty());
     assert_eq!(result.all_scores.len(), 2);
-    
+
     for score in &result.all_scores {
         assert!(score.scores.contains_key("MSE"));
         assert!(score.scores.contains_key("MAE"));
@@ -184,12 +188,12 @@ async fn test_full_pipeline() {
         save_checkpoints: false,
         checkpoint_dir: "/tmp/test_pipeline".to_string(),
     };
-    
+
     let mut pipeline = TrainingPipeline::new(config);
     let events = create_test_events();
-    
+
     let result = pipeline.run(events.into_iter()).await.unwrap();
-    
+
     assert!(!result.best_model.is_empty());
     assert!(result.model_scores.len() >= 3); // Should have at least 3 models
     assert!(result.dataset_metadata.total_samples > 0);
@@ -198,19 +202,19 @@ async fn test_full_pipeline() {
 #[test]
 fn test_hyperparameter_getters_setters() {
     let mut lstm = LSTMModel::new(128, 2);
-    
+
     // Test getters
     let params = lstm.get_hyperparameters();
     assert_eq!(params.get("hidden_size"), Some(&128.0));
     assert_eq!(params.get("num_layers"), Some(&2.0));
-    
+
     // Test setters
     let mut new_params = HashMap::new();
     new_params.insert("hidden_size".to_string(), 256.0);
     new_params.insert("learning_rate".to_string(), 0.005);
-    
+
     lstm.set_hyperparameters(new_params);
-    
+
     let updated = lstm.get_hyperparameters();
     assert_eq!(updated.get("hidden_size"), Some(&256.0));
     assert_eq!(updated.get("learning_rate"), Some(&0.005));
@@ -220,7 +224,7 @@ fn test_hyperparameter_getters_setters() {
 fn test_model_names() {
     let lstm = LSTMModel::new(128, 2);
     assert_eq!(lstm.name(), "LSTM");
-    
+
     let tcn = TCNModel::new(vec![64, 64], 3);
     assert_eq!(tcn.name(), "TCN");
     

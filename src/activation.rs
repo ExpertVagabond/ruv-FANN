@@ -1,3 +1,4 @@
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// Activation functions available for neurons
@@ -7,73 +8,75 @@ use serde::{Deserialize, Serialize};
 /// some specialized variants.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Default)]
 pub enum ActivationFunction {
     /// Linear activation function: f(x) = x * steepness
     Linear,
-    
+
     /// Threshold activation function: f(x) = 0 if x < 0, 1 if x >= 0
     /// Note: Cannot be used during training due to zero derivative
     Threshold,
-    
+
     /// Symmetric threshold: f(x) = -1 if x < 0, 1 if x >= 0
     /// Note: Cannot be used during training due to zero derivative
     ThresholdSymmetric,
-    
+
     /// Sigmoid activation function: f(x) = 1 / (1 + exp(-2 * steepness * x))
     /// Output range: (0, 1)
+    #[default]
     Sigmoid,
-    
+
     /// Symmetric sigmoid (tanh): f(x) = tanh(steepness * x)
     /// Output range: (-1, 1)
     SigmoidSymmetric,
-    
+
     /// Hyperbolic tangent: alias for SigmoidSymmetric
     Tanh,
-    
+
     /// Gaussian activation: f(x) = exp(-x * steepness * x * steepness)
     /// Output range: (0, 1], peaks at x=0
     Gaussian,
-    
+
     /// Symmetric gaussian: f(x) = exp(-x * steepness * x * steepness) * 2 - 1
     /// Output range: (-1, 1], peaks at x=0
     GaussianSymmetric,
-    
+
     /// Elliott activation: f(x) = ((x * steepness) / 2) / (1 + |x * steepness|) + 0.5
     /// Fast approximation to sigmoid, output range: (0, 1)
     Elliot,
-    
+
     /// Symmetric Elliott: f(x) = (x * steepness) / (1 + |x * steepness|)
     /// Fast approximation to tanh, output range: (-1, 1)
     ElliotSymmetric,
-    
+
     /// Bounded linear: f(x) = max(0, min(1, x * steepness))
     /// Output range: [0, 1]
     LinearPiece,
-    
+
     /// Symmetric bounded linear: f(x) = max(-1, min(1, x * steepness))
     /// Output range: [-1, 1]
     LinearPieceSymmetric,
-    
+
     /// Rectified Linear Unit (ReLU): f(x) = max(0, x)
     /// Output range: [0, ∞)
     ReLU,
-    
+
     /// Leaky ReLU: f(x) = x if x > 0, 0.01 * x if x <= 0
     /// Output range: (-∞, ∞)
     ReLULeaky,
-    
+
     /// Sine activation: f(x) = sin(x * steepness) / 2 + 0.5
     /// Output range: [0, 1]
     Sin,
-    
+
     /// Cosine activation: f(x) = cos(x * steepness) / 2 + 0.5
     /// Output range: [0, 1]
     Cos,
-    
+
     /// Symmetric sine: f(x) = sin(x * steepness)
     /// Output range: [-1, 1]
     SinSymmetric,
-    
+
     /// Symmetric cosine: f(x) = cos(x * steepness)
     /// Output range: [-1, 1]
     CosSymmetric,
@@ -107,7 +110,10 @@ impl ActivationFunction {
     /// Returns whether this activation function can be used during training
     /// (i.e., has a computable derivative)
     pub fn is_trainable(&self) -> bool {
-        !matches!(self, ActivationFunction::Threshold | ActivationFunction::ThresholdSymmetric)
+        !matches!(
+            self,
+            ActivationFunction::Threshold | ActivationFunction::ThresholdSymmetric
+        )
     }
 
     /// Returns the output range of the activation function
@@ -129,12 +135,6 @@ impl ActivationFunction {
             ActivationFunction::Sin | ActivationFunction::Cos => ("0", "1"),
             ActivationFunction::SinSymmetric | ActivationFunction::CosSymmetric => ("-1", "1"),
         }
-    }
-}
-
-impl Default for ActivationFunction {
-    fn default() -> Self {
-        ActivationFunction::Sigmoid
     }
 }
 

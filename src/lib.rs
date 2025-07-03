@@ -12,35 +12,38 @@ pub use network::{Network, NetworkBuilder, NetworkError};
 pub use neuron::Neuron;
 
 // Re-export training types
-pub use training::{TrainingAlgorithm as TrainingAlgorithmTrait, TrainingData, TrainingError, TrainingState, ParallelTrainingOptions};
+pub use training::{
+    ParallelTrainingOptions, TrainingAlgorithm as TrainingAlgorithmTrait, TrainingData,
+    TrainingError, TrainingState,
+};
 
 /// Enumeration of available training algorithms
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TrainingAlgorithm {
     IncrementalBackprop,
     BatchBackprop,
-    Batch,  // Alias for BatchBackprop
-    Backpropagation,  // Alias for IncrementalBackprop
+    Batch,           // Alias for BatchBackprop
+    Backpropagation, // Alias for IncrementalBackprop
     RProp,
     QuickProp,
 }
 
 // Re-export cascade training types
-pub use cascade::{CascadeTrainer, CascadeConfig, CascadeError, CascadeNetwork};
+pub use cascade::{CascadeConfig, CascadeError, CascadeNetwork, CascadeTrainer};
 
 // Re-export comprehensive error handling
-pub use errors::{RuvFannError, ErrorCategory, ValidationError};
+pub use errors::{ErrorCategory, RuvFannError, ValidationError};
 
 // Modules
 pub mod activation;
+pub mod cascade;
 pub mod connection;
+pub mod errors;
+pub mod integration;
 pub mod layer;
 pub mod network;
 pub mod neuron;
 pub mod training;
-pub mod cascade;
-pub mod errors;
-pub mod integration;
 
 // Optional I/O module
 #[cfg(feature = "io")]

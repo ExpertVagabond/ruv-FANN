@@ -1,22 +1,22 @@
 //! I/O and serialization module for rUv-FANN
 
-mod error;
-mod fann_format;
-mod training_data;
-mod dot_export;
-#[cfg(feature = "serde")]
-mod json;
 #[cfg(feature = "binary")]
 mod binary;
 #[cfg(feature = "compression")]
 mod compression;
+mod dot_export;
+mod error;
+mod fann_format;
+#[cfg(feature = "serde")]
+mod json;
 mod streaming;
+mod training_data;
 
 // Re-export types
+pub use dot_export::DotExporter;
 pub use error::{IoError, IoResult};
 pub use fann_format::{FannReader, FannWriter};
-pub use training_data::{TrainingDataReader, TrainingDataWriter, TrainingDataStreamReader};
-pub use dot_export::DotExporter;
+pub use training_data::{TrainingDataReader, TrainingDataStreamReader, TrainingDataWriter};
 
 #[cfg(feature = "serde")]
 pub use json::{read_json, write_json};

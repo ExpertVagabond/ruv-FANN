@@ -28,13 +28,13 @@ pub enum IoError {
 impl fmt::Display for IoError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            IoError::Io(err) => write!(f, "I/O error: {}", err),
-            IoError::InvalidFileFormat(msg) => write!(f, "Invalid file format: {}", msg),
-            IoError::ParseError(msg) => write!(f, "Parse error: {}", msg),
-            IoError::SerializationError(msg) => write!(f, "Serialization error: {}", msg),
-            IoError::CompressionError(msg) => write!(f, "Compression error: {}", msg),
-            IoError::InvalidNetwork(msg) => write!(f, "Invalid network: {}", msg),
-            IoError::InvalidTrainingData(msg) => write!(f, "Invalid training data: {}", msg),
+            IoError::Io(err) => write!(f, "I/O error: {err}"),
+            IoError::InvalidFileFormat(msg) => write!(f, "Invalid file format: {msg}"),
+            IoError::ParseError(msg) => write!(f, "Parse error: {msg}"),
+            IoError::SerializationError(msg) => write!(f, "Serialization error: {msg}"),
+            IoError::CompressionError(msg) => write!(f, "Compression error: {msg}"),
+            IoError::InvalidNetwork(msg) => write!(f, "Invalid network: {msg}"),
+            IoError::InvalidTrainingData(msg) => write!(f, "Invalid training data: {msg}"),
         }
     }
 }
@@ -64,18 +64,18 @@ impl From<serde_json::Error> for IoError {
 #[cfg(feature = "binary")]
 impl From<bincode::Error> for IoError {
     fn from(err: bincode::Error) -> Self {
-        IoError::SerializationError(format!("Bincode error: {}", err))
+        IoError::SerializationError(format!("Bincode error: {err}"))
     }
 }
 
 impl From<std::num::ParseFloatError> for IoError {
     fn from(err: std::num::ParseFloatError) -> Self {
-        IoError::ParseError(format!("Float parse error: {}", err))
+        IoError::ParseError(format!("Float parse error: {err}"))
     }
 }
 
 impl From<std::num::ParseIntError> for IoError {
     fn from(err: std::num::ParseIntError) -> Self {
-        IoError::ParseError(format!("Integer parse error: {}", err))
+        IoError::ParseError(format!("Integer parse error: {err}"))
     }
 }

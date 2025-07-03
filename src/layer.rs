@@ -1,7 +1,8 @@
+use crate::{ActivationFunction, Neuron};
 use num_traits::Float;
-use serde::{Deserialize, Serialize};
-use crate::{Neuron, ActivationFunction};
 use rand::Rng;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 /// Represents a layer of neurons in the neural network
 #[derive(Debug, Clone)]
@@ -22,15 +23,19 @@ impl<T: Float> Layer<T> {
     /// # Example
     /// ```
     /// use ruv_fann::{Layer, ActivationFunction};
-    /// 
+    ///
     /// let layer = Layer::<f32>::new(3, ActivationFunction::Sigmoid, 1.0);
     /// assert_eq!(layer.neurons.len(), 3);
     /// ```
-    pub fn new(num_neurons: usize, activation_function: ActivationFunction, activation_steepness: T) -> Self {
+    pub fn new(
+        num_neurons: usize,
+        activation_function: ActivationFunction,
+        activation_steepness: T,
+    ) -> Self {
         let neurons = (0..num_neurons)
             .map(|_| Neuron::new(activation_function, activation_steepness))
             .collect();
-        
+
         Layer { neurons }
     }
 
@@ -40,17 +45,21 @@ impl<T: Float> Layer<T> {
     /// * `num_neurons` - Number of regular neurons (bias will be added)
     /// * `activation_function` - Activation function for regular neurons
     /// * `activation_steepness` - Steepness parameter for the activation function
-    pub fn with_bias(num_neurons: usize, activation_function: ActivationFunction, activation_steepness: T) -> Self {
+    pub fn with_bias(
+        num_neurons: usize,
+        activation_function: ActivationFunction,
+        activation_steepness: T,
+    ) -> Self {
         let mut neurons = Vec::with_capacity(num_neurons + 1);
-        
+
         // Add regular neurons
         for _ in 0..num_neurons {
             neurons.push(Neuron::new(activation_function, activation_steepness));
         }
-        
+
         // Add bias neuron
         neurons.push(Neuron::new_bias());
-        
+
         Layer { neurons }
     }
 
@@ -124,12 +133,12 @@ impl<T: Float> Layer<T> {
         let one = T::one();
         let should_connect = connection_rate >= one;
         let mut rng = rand::thread_rng();
-        
+
         // For each neuron in the next layer (except bias)
         let next_layer_size = next_layer.num_regular_neurons();
         for i in 0..next_layer_size {
             let next_neuron = &mut next_layer.neurons[i];
-            
+
             // Connect from each neuron in this layer
             for (j, _) in self.neurons.iter().enumerate() {
                 let random_val = T::from(rng.gen::<f64>()).unwrap();
@@ -154,11 +163,11 @@ impl<T: Float> Layer<T> {
         if inputs.len() != regular_neurons {
             return Err("Input size does not match layer size");
         }
-        
+
         for (i, &input) in inputs.iter().enumerate() {
             self.neurons[i].set_value(input);
         }
-        
+
         Ok(())
     }
 
@@ -187,7 +196,7 @@ mod tests {
         let layer = Layer::<f32>::new(3, ActivationFunction::Sigmoid, 1.0);
         assert_eq!(layer.neurons.len(), 3);
         assert!(!layer.has_bias());
-        
+
         for neuron in &layer.neurons {
             assert_eq!(neuron.activation_function, ActivationFunction::Sigmoid);
             assert_eq!(neuron.activation_steepness, 1.0);
@@ -200,7 +209,7 @@ mod tests {
         assert_eq!(layer.neurons.len(), 4);
         assert_eq!(layer.num_regular_neurons(), 3);
         assert!(layer.has_bias());
-        
+
         // Check bias neuron
         let bias = layer.bias_neuron().unwrap();
         assert!(bias.is_bias);
@@ -211,20 +220,29 @@ mod tests {
     fn test_set_activation_function() {
         let mut layer = Layer::<f32>::with_bias(2, ActivationFunction::Sigmoid, 1.0);
         layer.set_activation_function(ActivationFunction::ReLU);
-        
+
         // Regular neurons should have new activation function
-        assert_eq!(layer.neurons[0].activation_function, ActivationFunction::ReLU);
-        assert_eq!(layer.neurons[1].activation_function, ActivationFunction::ReLU);
-        
+        assert_eq!(
+            layer.neurons[0].activation_function,
+            ActivationFunction::ReLU
+        );
+        assert_eq!(
+            layer.neurons[1].activation_function,
+            ActivationFunction::ReLU
+        );
+
         // Bias neuron should remain unchanged
-        assert_eq!(layer.neurons[2].activation_function, ActivationFunction::Linear);
+        assert_eq!(
+            layer.neurons[2].activation_function,
+            ActivationFunction::Linear
+        );
     }
 
     #[test]
     fn test_set_inputs() {
         let mut layer = Layer::<f32>::with_bias(3, ActivationFunction::Linear, 1.0);
         let inputs = vec![1.0, 2.0, 3.0];
-        
+
         assert!(layer.set_inputs(&inputs).is_ok());
         assert_eq!(layer.neurons[0].value, 1.0);
         assert_eq!(layer.neurons[1].value, 2.0);
@@ -236,7 +254,7 @@ mod tests {
     fn test_set_inputs_wrong_size() {
         let mut layer = Layer::<f32>::new(3, ActivationFunction::Linear, 1.0);
         let inputs = vec![1.0, 2.0]; // Too few
-        
+
         assert!(layer.set_inputs(&inputs).is_err());
     }
 
@@ -245,7 +263,7 @@ mod tests {
         let mut layer = Layer::<f32>::with_bias(2, ActivationFunction::Linear, 1.0);
         layer.neurons[0].value = 0.5;
         layer.neurons[1].value = 0.7;
-        
+
         let outputs = layer.get_outputs();
         assert_eq!(outputs, vec![0.5, 0.7, 1.0]); // Including bias
     }
@@ -254,9 +272,9 @@ mod tests {
     fn test_connect_layers() {
         let layer1 = Layer::<f32>::with_bias(2, ActivationFunction::Sigmoid, 1.0);
         let mut layer2 = Layer::<f32>::new(2, ActivationFunction::Sigmoid, 1.0);
-        
+
         layer1.connect_to(&mut layer2, 1.0);
-        
+
         // Each neuron in layer2 should have 3 connections (2 regular + 1 bias from layer1)
         assert_eq!(layer2.neurons[0].connections.len(), 3);
         assert_eq!(layer2.neurons[1].connections.len(), 3);

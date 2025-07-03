@@ -110,6 +110,16 @@ npm install -g ruv-swarm
 npm install ruv-swarm --save-dev
 ```
 
+### ⚠️ WASM Requirements
+
+**Important**: ruv-swarm requires WebAssembly support. Ensure your environment meets these requirements:
+
+- **Node.js**: Version 14.0.0 or higher (v18+ recommended)
+- **Browser**: Modern browsers with WASM support (Chrome 70+, Firefox 65+, Safari 14+)
+- **WASM Files**: The package includes pre-built WASM binaries that must be accessible
+
+If you encounter WASM loading issues, see the [Troubleshooting](#-troubleshooting) section.
+
 ### 🚀 NPX (No Installation - Perfect for Remote Servers)
 
 ```bash
@@ -1349,15 +1359,32 @@ pm2 start 'npx ruv-swarm mcp start --port 3000' --name ruv-swarm
 **WASM Module Not Loading**
 ```bash
 # Verify WASM support on remote server
-npx ruv-swarm --version
-npx ruv-swarm features
+npx ruv-swarm --version  # Should show version without errors
+npx ruv-swarm features   # Lists available features
 
-# Force download and rebuild
+# If you see "Invalid or unexpected token" error (v1.0.5 bug - fixed in v1.0.6)
+npm update ruv-swarm@latest  # Update to v1.0.6+
+
+# Force clean reinstall
 npm cache clean --force
-npx ruv-swarm@latest --help
+npm uninstall -g ruv-swarm
+npm install -g ruv-swarm@latest
 
-# Check system compatibility
-node --version  # Should be 14.0+
+# Verify Node.js version
+node --version  # Should be 14.0+ (v18+ recommended)
+
+# Check WASM files are present
+ls node_modules/ruv-swarm/wasm/  # Should contain .wasm files
+```
+
+**NPX Execution Errors (Fixed in v1.0.6)**
+```bash
+# If you encounter syntax errors with v1.0.5:
+# Update to v1.0.6 which fixes the wasm-loader.js syntax issues
+npm install ruv-swarm@latest
+
+# For global installations
+npm install -g ruv-swarm@latest
 ```
 
 **Remote Server Connection Issues**
@@ -1416,12 +1443,13 @@ npx ruv-swarm profile <command>
 
 ### System Requirements
 
-| Platform | Minimum | Recommended |
-|----------|---------|-------------|
-| **Node.js** | 14.0+ | 18.0+ |
-| **RAM** | 1GB | 4GB+ |
-| **CPU** | 2 cores | 4+ cores |
-| **Storage** | 100MB | 1GB+ |
+| Platform | Minimum | Recommended | Notes |
+|----------|---------|-------------|-------|
+| **Node.js** | 14.0+ | 18.0+ | v22+ fully supported |
+| **RAM** | 1GB | 4GB+ | More for large swarms |
+| **CPU** | 2 cores | 4+ cores | SIMD support recommended |
+| **Storage** | 100MB | 1GB+ | Includes WASM binaries |
+| **WASM** | Required | Required | WebAssembly support |
 
 ### Browser Support
 

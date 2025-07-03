@@ -1,8 +1,8 @@
 //! Binary serialization support using bincode
 
-use std::io::{Read, Write};
-use serde::{Serialize, Deserialize};
 use crate::io::error::{IoError, IoResult};
+use serde::{Deserialize, Serialize};
+use std::io::{Read, Write};
 
 /// Read binary data from a reader
 pub fn read_binary<T, R>(reader: &mut R) -> IoResult<T>
@@ -12,7 +12,7 @@ where
 {
     let mut buffer = Vec::new();
     reader.read_to_end(&mut buffer)?;
-    
+
     let value = bincode::deserialize(&buffer)?;
     Ok(value)
 }
@@ -45,7 +45,7 @@ impl BinaryConfig {
             varint_encoding: false,
         }
     }
-    
+
     /// Create a config optimized for size (variable length encoding)
     pub fn compact() -> Self {
         Self {
@@ -53,7 +53,7 @@ impl BinaryConfig {
             varint_encoding: true,
         }
     }
-    
+
     /// Create a config optimized for speed (fixed length encoding)
     pub fn fast() -> Self {
         Self {
@@ -81,12 +81,12 @@ impl BinaryReader {
             config: BinaryConfig::new(),
         }
     }
-    
+
     /// Create a new binary reader with custom config
     pub fn with_config(config: BinaryConfig) -> Self {
         Self { config }
     }
-    
+
     /// Read data from a reader
     pub fn read<T, R>(&self, reader: &mut R) -> IoResult<T>
     where
@@ -95,7 +95,7 @@ impl BinaryReader {
     {
         read_binary(reader)
     }
-    
+
     /// Read data with size limit to prevent memory exhaustion
     pub fn read_with_limit<T, R>(&self, reader: &mut R, limit: u64) -> IoResult<T>
     where
@@ -105,13 +105,13 @@ impl BinaryReader {
         let mut buffer = Vec::new();
         let mut limited_reader = reader.take(limit);
         limited_reader.read_to_end(&mut buffer)?;
-        
+
         if buffer.len() as u64 == limit {
             return Err(IoError::SerializationError(
-                "Data exceeds size limit".to_string()
+                "Data exceeds size limit".to_string(),
             ));
         }
-        
+
         let value = bincode::deserialize(&buffer)?;
         Ok(value)
     }
@@ -135,12 +135,12 @@ impl BinaryWriter {
             config: BinaryConfig::new(),
         }
     }
-    
+
     /// Create a new binary writer with custom config
     pub fn with_config(config: BinaryConfig) -> Self {
         Self { config }
     }
-    
+
     /// Write data to a writer
     pub fn write<T, W>(&self, data: &T, writer: &mut W) -> IoResult<()>
     where
@@ -149,7 +149,7 @@ impl BinaryWriter {
     {
         write_binary(data, writer)
     }
-    
+
     /// Get the size of serialized data without writing
     pub fn serialized_size<T>(&self, data: &T) -> IoResult<u64>
     where
@@ -169,7 +169,7 @@ impl Default for BinaryWriter {
 /// Utilities for binary format inspection
 pub mod inspect {
     use super::*;
-    
+
     /// Get the size of data when serialized
     pub fn serialized_size<T>(data: &T) -> IoResult<u64>
     where
@@ -178,7 +178,7 @@ pub mod inspect {
         let size = bincode::serialized_size(data)?;
         Ok(size)
     }
-    
+
     /// Check if data can be serialized without errors
     pub fn validate_serializable<T>(data: &T) -> IoResult<()>
     where
