@@ -48,7 +48,7 @@ impl GpuDevice {
             // Return a mock device for CI testing
             return Err(ComputeError::GpuUnavailable);
         }
-        
+
         // Create WebGPU instance
         let instance = ::wgpu::Instance::new(::wgpu::InstanceDescriptor {
             backends: ::wgpu::Backends::all(),

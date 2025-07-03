@@ -200,9 +200,7 @@ impl<T: Float + Send + Sync + std::fmt::Debug + 'static> ComputeContext<T> {
 
         let output_size = non_bias_neurons.len();
 
-        println!(
-            "  Matrix dimensions: {output_size}x{input_size} (output_size x input_size)"
-        );
+        println!("  Matrix dimensions: {output_size}x{input_size} (output_size x input_size)");
 
         if input_size == 0 || output_size == 0 {
             return Err(ComputeError::InvalidDimensions(format!(
