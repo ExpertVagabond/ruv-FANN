@@ -24,9 +24,11 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        # Specify versions that support Cargo.lock version 4 (introduced in Rust 1.70.0)
+        # Specify versions that support dependencies like bumpalo 3.19.0 (requires Rust 1.71.1)
         rust: [stable, beta, nightly]
         include:
+          - os: ubuntu-latest
+            rust: 1.71.1  # Test against MSRV (Minimum Supported Rust Version)
           - os: ubuntu-latest
             rust: stable
     
@@ -98,8 +100,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.70.0 to support Cargo.lock version 4
-        min-version: 1.70.0
+        # Ensure minimum version is at least 1.71.1 to support dependencies like bumpalo 3.19.0
+        min-version: 1.71.1
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -173,8 +175,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.70.0 to support Cargo.lock version 4
-        min-version: 1.70.0
+        # Ensure minimum version is at least 1.71.1 to support dependencies like bumpalo 3.19.0
+        min-version: 1.71.1
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -263,8 +265,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.70.0 to support Cargo.lock version 4
-        min-version: 1.70.0
+        # Ensure minimum version is at least 1.71.1 to support dependencies like bumpalo 3.19.0
+        min-version: 1.71.1
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -301,8 +303,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.70.0 to support Cargo.lock version 4
-        min-version: 1.70.0
+        # Ensure minimum version is at least 1.71.1 to support dependencies like bumpalo 3.19.0
+        min-version: 1.71.1
         targets: ${{ matrix.target }}
     
     - name: Install cross
@@ -322,8 +324,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.70.0 to support Cargo.lock version 4
-        min-version: 1.70.0
+        # Ensure minimum version is at least 1.71.1 to support dependencies like bumpalo 3.19.0
+        min-version: 1.71.1
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -357,8 +359,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.70.0 to support Cargo.lock version 4
-        min-version: 1.70.0
+        # Ensure minimum version is at least 1.71.1 to support dependencies like bumpalo 3.19.0
+        min-version: 1.71.1
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -380,17 +382,17 @@ jobs:
     - name: Run basic usage example
       run: timeout 60s cargo run --example basic_usage || [ $? -eq 124 ]
 
-  minimum-versions:
-    name: Minimum Supported Rust Version
+  msrv:
+    name: MSRV (1.71.1)
     runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install minimum Rust version
+    - name: Install Rust 1.71.1
       uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.70.0  # MSRV
+        toolchain: 1.71.1  # MSRV updated to support dependencies like bumpalo 3.19.0
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -417,8 +419,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.70.0 to support Cargo.lock version 4
-        min-version: 1.70.0
+        # Ensure minimum version is at least 1.71.1 to support dependencies like bumpalo 3.19.0
+        min-version: 1.71.1
     
     - name: Check if version bumped
       id: version-check
