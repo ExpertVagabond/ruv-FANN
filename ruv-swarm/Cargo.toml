@@ -19,7 +19,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "1.0.5"
+version = "1.0.7"
 edition = "2021"
 authors = ["rUv Contributors <noreply@ruvnet.com>"]
 license = "MIT OR Apache-2.0"

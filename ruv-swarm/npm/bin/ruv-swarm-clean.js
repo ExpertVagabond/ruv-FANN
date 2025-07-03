@@ -463,7 +463,7 @@ async function startMcpServer(args) {
                 params: {
                     serverInfo: {
                         name: 'ruv-swarm',
-                        version: '1.0.5',
+                        version: '1.0.8',
                         capabilities: {
                             tools: true,
                             prompts: false,
@@ -1032,7 +1032,7 @@ async function handleMcpRequest(request, mcpTools) {
                     },
                     serverInfo: {
                         name: 'ruv-swarm',
-                        version: '1.0.5'
+                        version: '1.0.8'
                     }
                 };
                 break;
@@ -1257,6 +1257,7 @@ async function handleMcpRequest(request, mcpTools) {
                             text: typeof result === 'string' ? result : JSON.stringify(result, null, 2)
                         }]
                     };
+                } else {
                     response.error = {
                         code: -32601,
                         message: 'Method not found',
@@ -1512,6 +1513,24 @@ For detailed documentation, check .claude/commands/ after running init --claude
 
 async function main() {
     const args = process.argv.slice(2);
+    
+    // Handle --version flag
+    if (args.includes('--version') || args.includes('-v')) {
+        try {
+            const fs = await import('fs');
+            const path = await import('path');
+            const { fileURLToPath } = await import('url');
+            const __filename = fileURLToPath(import.meta.url);
+            const __dirname = path.dirname(__filename);
+            const packagePath = path.join(__dirname, '..', 'package.json');
+            const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+            console.log(packageJson.version);
+        } catch (error) {
+            console.log('1.0.8');
+        }
+        return;
+    }
+    
     const command = args[0] || 'help';
 
     try {
@@ -1562,7 +1581,7 @@ async function main() {
                     const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
                     console.log('ruv-swarm v' + packageJson.version);
                 } catch (error) {
-                    console.log('ruv-swarm v1.0.5');
+                    console.log('ruv-swarm v1.0.8');
                 }
                 console.log('Enhanced WASM-powered neural swarm orchestration');
                 console.log('Modular Claude Code integration with remote execution support');
