@@ -35,10 +35,10 @@ pub mod webgpu_backend;
 pub mod device;
 
 // Autonomous GPU resource management system
-#[cfg(any(feature = "gpu", feature = "webgpu"))]
+#[cfg(all(any(feature = "gpu", feature = "webgpu"), not(target_arch = "wasm32")))]
 pub mod autonomous_gpu_resource_manager;
 // WASM GPU bridge for browser deployment
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "experimental-webgpu"))]
 pub mod wasm_gpu_bridge;
 
 // Re-export main types
@@ -85,7 +85,7 @@ pub use shaders::*;
 pub use device::GpuDevice;
 
 // Re-export autonomous resource management
-#[cfg(any(feature = "gpu", feature = "webgpu"))]
+#[cfg(all(any(feature = "gpu", feature = "webgpu"), not(target_arch = "wasm32")))]
 pub use autonomous_gpu_resource_manager::{
     AgentResourceAllocation,
     AllocationEngine,
@@ -124,7 +124,7 @@ pub use autonomous_gpu_resource_manager::{
 };
 
 // Re-export WASM GPU bridge for browser deployment
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "experimental-webgpu"))]
 pub use wasm_gpu_bridge::{
     BrowserCompatibility, CrossOriginManager, CrossTabCoordinator, DaaWebRuntime,
     ServiceWorkerAgent, SharedBuffer, WasmGpuBridge, WasmMemoryManager, WasmPerformanceMonitor,

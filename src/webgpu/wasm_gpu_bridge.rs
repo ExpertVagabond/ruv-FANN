@@ -1,5 +1,8 @@
 //! WASM GPU Bridge for browser deployment of ruv-FANN with WebGPU acceleration
 //!
+//! Note: This module is currently not fully functional due to WebGPU types
+//! not being available in web-sys. This is a placeholder for future implementation.
+//!
 //! This module provides the essential bridge between WebAssembly runtime and WebGPU,
 //! enabling ruv-FANN neural networks to run with GPU acceleration in web browsers.
 //!
@@ -22,14 +25,22 @@ use std::sync::{Arc, Mutex, RwLock};
 use wasm_bindgen::prelude::*;
 
 #[cfg(target_arch = "wasm32")]
+use wasm_bindgen_futures::JsFuture;
+
+#[cfg(target_arch = "wasm32")]
 use js_sys::{Array, Float32Array, Float64Array, Object, Promise, Uint8Array};
 
 #[cfg(target_arch = "wasm32")]
 use web_sys::{
-    console, BroadcastChannel, Gpu, GpuAdapter, GpuBindGroup, GpuBuffer, GpuCanvasContext,
-    GpuCommandEncoder, GpuComputePassEncoder, GpuComputePipeline, GpuDevice, GpuQueue, GpuTexture,
-    HtmlCanvasElement, MessageChannel, MessagePort, Navigator, Performance, ServiceWorkerContainer,
-    Window, Worker,
+    console, BroadcastChannel, Document, Element, HtmlCanvasElement, MessageChannel, MessagePort,
+    Navigator, Performance, ServiceWorkerContainer, Window, Worker,
+};
+
+// WebGPU types - conditionally compiled when available
+#[cfg(all(target_arch = "wasm32", feature = "experimental-webgpu"))]
+use web_sys::{
+    Gpu, GpuAdapter, GpuBindGroup, GpuBuffer, GpuCanvasContext, GpuCommandEncoder,
+    GpuComputePassEncoder, GpuComputePipeline, GpuDevice, GpuQueue, GpuTexture,
 };
 
 /// WASM GPU Bridge - Main interface for browser WebGPU integration
@@ -583,6 +594,7 @@ pub struct WorkerSecurityContext {
 
 // Implementation for WASM environment
 #[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 impl WasmGpuBridge {
     /// Create a new WASM GPU bridge instance
     #[wasm_bindgen(constructor)]
@@ -605,19 +617,22 @@ impl WasmGpuBridge {
 
     /// Initialize WebGPU context from JavaScript
     #[wasm_bindgen]
+    #[cfg(feature = "experimental-webgpu")]
     pub async fn initialize_webgpu(&self, canvas_id: Option<String>) -> Result<(), JsValue> {
         let window = web_sys::window().ok_or("No window object")?;
         let navigator = window.navigator();
 
-        // Get GPU interface
-        let gpu = navigator.gpu().ok_or("WebGPU not available")?;
+        // Get GPU interface using Reflect
+        let gpu = js_sys::Reflect::get(&navigator.into(), &"gpu".into())
+            .map_err(|_| "WebGPU not available")?;
+        let gpu: Gpu = gpu.into();
 
         // Request adapter with high performance preference
         let adapter_options = web_sys::GpuRequestAdapterOptions::new();
         adapter_options.set_power_preference(web_sys::GpuPowerPreference::HighPerformance);
 
         let adapter_promise = gpu.request_adapter_with_options(&adapter_options);
-        let adapter_result = wasm_bindgen_futures::JsFuture::from(adapter_promise).await?;
+        let adapter_result = JsFuture::from(adapter_promise).await?;
         let adapter: GpuAdapter = adapter_result.into();
 
         // Request device with required features
@@ -625,7 +640,7 @@ impl WasmGpuBridge {
         device_descriptor.set_label("ruv-FANN WebGPU Device");
 
         let device_promise = adapter.request_device_with_descriptor(&device_descriptor);
-        let device_result = wasm_bindgen_futures::JsFuture::from(device_promise).await?;
+        let device_result = JsFuture::from(device_promise).await?;
         let device: GpuDevice = device_result.into();
 
         let queue = device.queue();
@@ -675,7 +690,16 @@ impl WasmGpuBridge {
         Ok(())
     }
 
+    /// Fallback initialization when WebGPU is not available
+    #[wasm_bindgen]
+    #[cfg(not(feature = "experimental-webgpu"))]
+    pub async fn initialize_webgpu(&self, _canvas_id: Option<String>) -> Result<(), JsValue> {
+        console::log_1(&"WebGPU not available, using CPU fallback".into());
+        Ok(())
+    }
+
     /// Get WebGPU capabilities
+    #[cfg(feature = "experimental-webgpu")]
     async fn get_webgpu_capabilities(
         &self,
         adapter: &GpuAdapter,
@@ -1178,7 +1202,13 @@ impl BrowserCompatibility {
             BrowserType::Unknown(user_agent)
         };
 
-        let webgpu_support_level = if navigator.gpu().is_some() {
+        // Check WebGPU support properly
+        let webgpu_support_level = if js_sys::Reflect::get(&js_sys::global(), &"navigator".into())
+            .ok()
+            .and_then(|nav| js_sys::Reflect::get(&nav, &"gpu".into()).ok())
+            .map(|gpu| gpu.is_object())
+            .unwrap_or(false)
+        {
             WebGpuSupportLevel::Full
         } else {
             WebGpuSupportLevel::None
@@ -1201,7 +1231,11 @@ impl CrossOriginManager {
         Ok(Self {
             cors_policies: CorsPolicy::default(),
             csp_compliance: CspCompliance::default(),
-            shared_array_buffer_support: js_sys::global().get("SharedArrayBuffer").is_object(),
+            shared_array_buffer_support: js_sys::Reflect::has(
+                &js_sys::global(),
+                &"SharedArrayBuffer".into(),
+            )
+            .unwrap_or(false),
             worker_security_context: WorkerSecurityContext::default(),
         })
     }
@@ -1211,9 +1245,9 @@ impl CrossOriginManager {
 #[cfg(target_arch = "wasm32")]
 impl JsHeapMonitor {
     pub fn new() -> Result<Self, JsValue> {
-        let memory_api = js_sys::global()
-            .get("performance")
-            .and_then(|perf| perf.get("memory"))
+        let memory_api = js_sys::Reflect::get(&js_sys::global(), &"performance".into())
+            .ok()
+            .and_then(|perf| js_sys::Reflect::get(&perf, &"memory".into()).ok())
             .filter(|mem| mem.is_object())
             .map(|mem| mem.into());
 
@@ -1305,9 +1339,9 @@ impl WebMessageRouter {
 #[cfg(target_arch = "wasm32")]
 impl MemoryUsageTracker {
     pub fn new() -> Result<Self, JsValue> {
-        let performance_memory = js_sys::global()
-            .get("performance")
-            .and_then(|perf| perf.get("memory"))
+        let performance_memory = js_sys::Reflect::get(&js_sys::global(), &"performance".into())
+            .ok()
+            .and_then(|perf| js_sys::Reflect::get(&perf, &"memory".into()).ok())
             .filter(|mem| mem.is_object())
             .map(|mem| mem.into());
 
@@ -1328,15 +1362,20 @@ impl PolyfillManager {
             active_polyfills: Vec::new(),
             polyfill_registry: HashMap::new(),
             feature_detection: FeatureDetection {
-                webgpu_available: js_sys::global()
-                    .get("navigator")
-                    .and_then(|nav| nav.get("gpu"))
-                    .is_object(),
-                shared_array_buffer_available: js_sys::global()
-                    .get("SharedArrayBuffer")
-                    .is_object(),
-                bigint_available: js_sys::global().get("BigInt").is_object(),
-                atomics_available: js_sys::global().get("Atomics").is_object(),
+                webgpu_available: js_sys::Reflect::get(&js_sys::global(), &"navigator".into())
+                    .ok()
+                    .and_then(|nav| js_sys::Reflect::get(&nav, &"gpu".into()).ok())
+                    .map(|gpu| gpu.is_object())
+                    .unwrap_or(false),
+                shared_array_buffer_available: js_sys::Reflect::has(
+                    &js_sys::global(),
+                    &"SharedArrayBuffer".into(),
+                )
+                .unwrap_or(false),
+                bigint_available: js_sys::Reflect::has(&js_sys::global(), &"BigInt".into())
+                    .unwrap_or(false),
+                atomics_available: js_sys::Reflect::has(&js_sys::global(), &"Atomics".into())
+                    .unwrap_or(false),
                 wasm_simd_available: false, // Would need feature detection
                 wasm_threads_available: false, // Would need feature detection
             },

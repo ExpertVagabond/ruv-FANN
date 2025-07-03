@@ -2,6 +2,7 @@
 name = "ruv-fann"
 version = "0.1.5"
 edition = "2021"
+rust-version = "1.70"
 authors = ["rUv Contributors"]
 description = "A pure Rust implementation of the Fast Artificial Neural Network (FANN) library"
 repository = "https://github.com/ruvnet/ruv-FANN"
@@ -45,6 +46,21 @@ bytemuck = { version = "1.14", features = ["derive"], optional = true }
 tokio = { version = "1.0", features = ["rt", "sync", "time"], optional = true }
 async-trait = { version = "0.1", optional = true }
 
+# WASM dependencies
+wasm-bindgen = { version = "0.2", optional = true }
+js-sys = { version = "0.3", optional = true }
+web-sys = { version = "0.3", features = [
+  "Window", "console", "Performance", "Navigator", "Worker", "MessageChannel", "MessagePort",
+  "HtmlCanvasElement", "BroadcastChannel", "ServiceWorkerContainer",
+  "Gpu", "GpuAdapter", "GpuDevice", "GpuQueue", "GpuBuffer", "GpuTexture", "GpuBindGroup",
+  "GpuCanvasContext", "GpuCommandEncoder", "GpuComputePassEncoder", "GpuComputePipeline",
+  "MessageEvent", "Storage", "GpuRequestAdapterOptions", "GpuPowerPreference", "GpuDeviceDescriptor",
+  "Document", "Element", "CanvasRenderingContext2d", "ImageData"
+], optional = true }
+console_error_panic_hook = { version = "0.1", optional = true }
+wasm-bindgen-futures = { version = "0.4", optional = true }
+getrandom = { version = "0.2", features = ["js"] }
+
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
 proptest = "1.4"
@@ -71,11 +87,12 @@ io = ["binary", "compression", "serde"]
 no_std = []
 
 # WASM support
-wasm = ["no_std", "serde", "logging"]
+wasm = ["no_std", "serde", "logging", "dep:wasm-bindgen", "dep:js-sys", "dep:web-sys", "dep:console_error_panic_hook", "dep:wasm-bindgen-futures"]
 
 # GPU acceleration support
 gpu = ["dep:wgpu", "dep:futures", "dep:pollster", "dep:bytemuck", "dep:tokio", "dep:async-trait", "std"]
-webgpu = ["gpu"]
+webgpu = ["dep:wgpu", "dep:futures", "dep:bytemuck", "wasm"]
+wasm-gpu = ["webgpu", "wasm"]
 
 # Swarm integration - external features that may not be available
 ruv-swarm = []
