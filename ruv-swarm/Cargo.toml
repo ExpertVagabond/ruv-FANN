@@ -8,7 +8,7 @@ members = [
     "crates/ruv-swarm-ml",
     "crates/ruv-swarm-mcp",
     "crates/ruv-swarm-wasm",
-    # "crates/ruv-swarm-wasm-unified", # Unified WASM module - excluded due to edition 2024 issues
+    "crates/ruv-swarm-wasm-unified", # Unified WASM module for all features
     "crates/ruv-swarm-daa",          # DAA integration for autonomous agents
     "crates/swe-bench-adapter",      # SWE-Bench adapter for evaluation
     "crates/ruv-swarm-cli",
@@ -17,7 +17,7 @@ members = [
 ]
 
 resolver = "2"
-exclude = ["crates/ruv-swarm-wasm-unified"]  # Exclude unified crate with edition 2024 issues
+exclude = []  # No exclusions
 
 [workspace.package]
 version = "1.0.7"
