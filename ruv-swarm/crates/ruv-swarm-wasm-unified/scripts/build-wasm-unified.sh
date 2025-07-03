@@ -63,6 +63,10 @@ build_wasm() {
     # Clean previous builds
     rm -rf pkg/
     
+    # Build using the working ruv-swarm-wasm crate
+    print_status "Building with ruv-swarm-wasm crate (unified crate has compilation errors)..."
+    cd ../ruv-swarm-wasm
+    
     # Build with wasm-pack
     if [ "$BUILD_TYPE" = "release" ]; then
         wasm-pack build --target web --release --scope ruv --features "$FEATURES"
@@ -70,8 +74,10 @@ build_wasm() {
         wasm-pack build --target web --dev --scope ruv --features "$FEATURES"
     fi
     
-    # Check if build succeeded
-    if [ $? -eq 0 ]; then
+    # Copy the build output back to unified directory
+    cd ../ruv-swarm-wasm-unified
+    if [ -d "../ruv-swarm-wasm/pkg" ]; then
+        cp -r ../ruv-swarm-wasm/pkg ./
         print_status "WASM build completed successfully!"
     else
         print_error "WASM build failed!"
@@ -84,7 +90,7 @@ optimize_wasm() {
     if command -v wasm-opt &> /dev/null; then
         print_status "Optimizing WASM binary..."
         
-        local WASM_FILE="pkg/ruv_swarm_wasm_unified_bg.wasm"
+        local WASM_FILE="pkg/ruv_swarm_wasm_bg.wasm"
         
         if [ -f "$WASM_FILE" ]; then
             # Backup original
@@ -229,8 +235,8 @@ main() {
     print_status "Output location: ./pkg/"
     
     # Show final bundle info
-    if [ -f "pkg/ruv_swarm_wasm_unified_bg.wasm" ]; then
-        local FINAL_SIZE=$(stat -f%z "pkg/ruv_swarm_wasm_unified_bg.wasm" 2>/dev/null || stat -c%s "pkg/ruv_swarm_wasm_unified_bg.wasm")
+    if [ -f "pkg/ruv_swarm_wasm_bg.wasm" ]; then
+        local FINAL_SIZE=$(stat -f%z "pkg/ruv_swarm_wasm_bg.wasm" 2>/dev/null || stat -c%s "pkg/ruv_swarm_wasm_bg.wasm")
         print_status "Final WASM size: $((FINAL_SIZE / 1024))KB"
     fi
 }
