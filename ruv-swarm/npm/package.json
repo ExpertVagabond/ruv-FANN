@@ -1,13 +1,13 @@
 {
   "name": "ruv-swarm",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "High-performance neural network swarm orchestration in WebAssembly",
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "src/index.d.ts",
   "type": "module",
   "bin": {
-    "ruv-swarm": "./bin/ruv-swarm-clean.js"
+    "ruv-swarm": "bin/ruv-swarm-clean.js"
   },
   "publishConfig": {
     "access": "public",
@@ -89,7 +89,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ruvnet/ruv-FANN.git",
+    "url": "git+https://github.com/ruvnet/ruv-FANN.git",
     "directory": "ruv-swarm/npm"
   },
   "keywords": [

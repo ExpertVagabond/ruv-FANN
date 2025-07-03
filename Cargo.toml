@@ -7,8 +7,44 @@ authors = ["rUv Contributors"]
 description = "A pure Rust implementation of the Fast Artificial Neural Network (FANN) library"
 repository = "https://github.com/ruvnet/ruv-FANN"
 license = "MIT OR Apache-2.0"
-keywords = ["neural-network", "machine-learning", "fann", "ai", "deep-learning", "gpu", "webgpu"]
-categories = ["science", "algorithms", "mathematics", "graphics"]
+keywords = ["neural-network", "machine-learning", "fann", "ai", "deep-learning"]
+categories = ["science", "algorithms", "mathematics"]
+exclude = [
+    "node_modules/**",
+    ".git/**",
+    ".claude/**",
+    ".vscode/**",
+    "target/**",
+    "*.lock",
+    "*.log",
+    "tmp/**",
+    "claude-code-flow/**",
+    "ruv-swarm/npm/node_modules/**",
+    "ruv-swarm/npm/.nyc_output/**",
+    "ruv-swarm/npm/coverage/**",
+    "ruv-swarm/target/**",
+    "*.wasm",
+    "*.onnx",
+    "*.pt",
+    "*.pth",
+    "*.safetensors",
+    "*.bin",
+    ".claude.json",
+    "ruv-swarm/npm/**",
+    "*.o",
+    "*.a",
+    "*.so",
+    "*.dylib",
+    "*.dll",
+    "benchmarks/**",
+    "docs/**",
+    "examples/**",
+    "tests/**",
+    ".github/**",
+    ".gitignore",
+    ".gitmodules",
+    "ruv-swarm/**"
+]
 
 [workspace]
 # This makes this package a standalone workspace, not part of the parent workspace

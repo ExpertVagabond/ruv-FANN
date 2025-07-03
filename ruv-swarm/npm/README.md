@@ -1,31 +1,39 @@
 # ruv-swarm 🧠⚡
 
-**Next-Generation Distributed AI Agent Orchestration Platform**
+**What if every task, every file, every function could truly think?** Just for a moment. No LLM required. That's what ruv-swarm makes real.
 
 [![npm version](https://badge.fury.io/js/ruv-swarm.svg)](https://www.npmjs.com/package/ruv-swarm)
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://opensource.org/licenses/MIT)
 [![WebAssembly](https://img.shields.io/badge/WebAssembly-654FF0?logo=webassembly&logoColor=white)](https://webassembly.org/)
 [![Rust](https://img.shields.io/badge/Built%20with-Rust-000000?logo=rust&logoColor=white)](https://www.rust-lang.org/)
 
-ruv-swarm is the **industry-leading distributed agent orchestration platform** that achieves **84.8% SWE-Bench solve rate** - the highest performance among all coding AI systems. Combining **cognitive diversity**, **WASM performance**, and **intelligent coordination**, it delivers state-of-the-art multi-agent capabilities with native Claude Code integration and enterprise-grade persistence.
+## 🐝 Ephemeral Intelligence, Engineered in Rust
 
----
+```bash
+npx ruv-swarm@latest init --claude
+```
 
-## ✨ Key Highlights
+ruv-swarm lets you spin up ultra-lightweight custom neural networks that exist just long enough to solve the problem. Tiny purpose-built brains dedicated to solving very specific challenges.
 
-🏆 **Industry-Leading Performance** - **84.8% SWE-Bench solve rate** (14.5pp improvement over Claude 3.7 Sonnet)  
-🚀 **Blazing Fast WASM Performance** - **2.8-4.4x speed boost** with SIMD optimization  
-💰 **Cost Optimization** - **32.3% token reduction** with maintained accuracy  
-🧠 **Cognitive Diversity Engine** - **27+ neural models** with specialized agent types  
-🔗 **Claude Code Integration** - Native MCP protocol with **20+ production tools**  
-🪝 **Claude Code Hooks** - Automated pre/post operation hooks for seamless coordination  
-🌐 **Flexible Topologies** - Mesh, hierarchical, clustered, pipeline, and custom architectures  
-💾 **Enterprise Persistence** - SQLite-backed memory with cross-session continuity  
-🔄 **Git Integration** - Automatic commits with detailed agent reports  
-⚡ **Parallel Agent Execution** - Concurrent task processing for maximum efficiency  
-📊 **Real-time Monitoring** - Advanced metrics and performance analytics  
-🤖 **DAA Integration** - Decentralized Autonomous Agents with adaptive learning  
-🔧 **Enhanced Error Handling** - Robust resilience and recovery mechanisms  
+Think particular coding structures, custom communications, trading optimization - neural networks built on the fly just for the task they need to exist for, long enough to solve it, then gone.
+
+**Built for the GPU-poor:** These agents are CPU-native and GPU-optional. Rust compiles to high-speed WASM binaries that run anywhere - browser, edge, server - with zero external dependencies. You could even embed these in RISC-V or other low-power chip designs.
+
+### ⚡ Why ruv-swarm?
+
+- **Decisions in <100ms** - Complex interconnected reasoning in milliseconds
+- **84.8% SWE-Bench accuracy** - Outperforming Claude 3.7 by 14.5 points
+- **Zero GPU overhead** - No CUDA. No Python stack. Just pure cognition
+- **Instant deployment** - Launch from Claude Code in milliseconds
+- **27+ neural models** - LSTM, TCN, N-BEATS working in harmony
+
+Each agent behaves like a synthetic synapse, dynamically created and orchestrated as part of a living global swarm network. Topologies like mesh, ring, and hierarchy support collective learning, mutation/evolution, and real-time adaptation.
+
+**You're not calling a model. You're instantiating intelligence.**
+
+Temporary, composable, and surgically precise.
+
+  
 
 ---
 
@@ -47,7 +55,7 @@ ruv-swarm is the **industry-leading distributed agent orchestration platform** t
 
 ---
 
-## 🚀 Quick Start
+## 🚀 NPX Quick Start (Recommended)
 
 Get started with ruv-swarm in under 2 minutes:
 
@@ -125,6 +133,7 @@ If you encounter WASM loading issues, see the [Troubleshooting](#-troubleshootin
 ```bash
 # Run directly without installation - works on any remote server
 npx ruv-swarm --help
+npx ruv-swarm init --claude
 npx ruv-swarm init mesh 10
 npx ruv-swarm benchmark --test swe-bench
 

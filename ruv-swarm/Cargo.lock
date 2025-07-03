@@ -4077,8 +4077,9 @@ dependencies = [
 
 [[package]]
 name = "ruv-fann"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
+ "getrandom 0.2.16",
  "log",
  "num-traits",
  "rand 0.8.5",
@@ -4164,7 +4165,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-swarm-core"
-version = "1.0.5"
+version = "1.0.6"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -4188,7 +4189,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-swarm-daa"
-version = "1.0.5"
+version = "1.0.6"
 dependencies = [
  "anyhow",
  "async-trait",
