@@ -369,8 +369,19 @@ impl GpuDevice {
 mod tests {
     use super::*;
 
+    // Helper function to check if we're running in CI
+    fn is_ci_environment() -> bool {
+        std::env::var("RUV_FANN_CI_TESTING").is_ok()
+    }
+
     #[tokio::test]
     async fn test_device_creation() {
+        // Skip test in CI environment
+        if is_ci_environment() {
+            println!("Skipping WebGPU device test in CI environment");
+            return;
+        }
+
         // This test will only pass if WebGPU is available
         match GpuDevice::new().await {
             Ok(device) => {
@@ -405,6 +416,12 @@ mod tests {
 
     #[tokio::test]
     async fn test_workgroup_optimization() {
+        // Skip test in CI environment
+        if is_ci_environment() {
+            println!("Skipping WebGPU workgroup optimization test in CI environment");
+            return;
+        }
+
         if let Ok(device) = GpuDevice::new().await {
             let optimal_size = device.estimate_optimal_workgroup_size(1000);
             assert!(optimal_size > 0);
