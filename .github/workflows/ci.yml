@@ -71,8 +71,8 @@ jobs:
     
     - name: Run tests
       run: |
-        # Pin clap_lex to a version compatible with Rust 1.71.1
-        cargo update -p clap_lex --precise 0.5.0
+        # Pin clap to a version compatible with Rust 1.71.1
+        cargo update -p clap --precise 4.3.19
         
         cargo test --all-features
       env:
@@ -121,8 +121,8 @@ jobs:
     
     - name: Generate code coverage
       run: |
-        # Pin clap_lex to a version compatible with Rust 1.71.1
-        cargo update -p clap_lex --precise 0.5.0
+        # Pin clap to a version compatible with Rust 1.71.1
+        cargo update -p clap --precise 4.3.19
         
         cargo tarpaulin --verbose --all-features --workspace --timeout 300 --out xml
     
@@ -197,8 +197,8 @@ jobs:
     # Criterion is a library dependency, not a binary to install
     - name: Run benchmarks
       run: |
-        # Pin clap_lex to a version compatible with Rust 1.71.1
-        cargo update -p clap_lex --precise 0.5.0
+        # Pin clap to a version compatible with Rust 1.71.1
+        cargo update -p clap --precise 4.3.19
         
         cargo bench --all-features
     
@@ -240,8 +240,8 @@ jobs:
     
     - name: Run Miri
       run: |
-        # Pin clap_lex to a version compatible with Rust 1.71.1
-        cargo update -p clap_lex --precise 0.5.0
+        # Pin clap to a version compatible with Rust 1.71.1
+        cargo update -p clap --precise 4.3.19
         
         cargo miri setup
         # Set CI testing flag to skip WebGPU tests
@@ -329,8 +329,8 @@ jobs:
     
     - name: Cross-compile
       run: |
-        # Pin clap_lex to a version compatible with Rust 1.71.1
-        cargo update -p clap_lex --precise 0.5.0
+        # Pin clap to a version compatible with Rust 1.71.1
+        cargo update -p clap --precise 4.3.19
         
         cross build --target ${{ matrix.target }} --all-features
 
@@ -359,8 +359,8 @@ jobs:
     
     - name: Build documentation
       run: |
-        # Pin clap_lex to a version compatible with Rust 1.71.1
-        cargo update -p clap_lex --precise 0.5.0
+        # Pin clap to a version compatible with Rust 1.71.1
+        cargo update -p clap --precise 4.3.19
         
         cargo doc --all-features --no-deps --document-private-items
       env:
@@ -430,8 +430,8 @@ jobs:
     
     - name: Check MSRV
       run: |
-        # Pin clap_lex to a version compatible with Rust 1.71.1
-        cargo update -p clap_lex --precise 0.5.0
+        # Pin clap to a version compatible with Rust 1.71.1
+        cargo update -p clap --precise 4.3.19
         
         cargo check --all-features
 
@@ -470,14 +470,14 @@ jobs:
     
     - name: Check package
       run: |
-        # Pin clap_lex to a version compatible with Rust 1.71.1
-        cargo update -p clap_lex --precise 0.5.0
+        # Pin clap to a version compatible with Rust 1.71.1
+        cargo update -p clap --precise 4.3.19
         
         cargo package --all-features
     
     - name: Check publish readiness
       run: |
-        # Pin clap_lex to a version compatible with Rust 1.71.1
-        cargo update -p clap_lex --precise 0.5.0
+        # Pin clap to a version compatible with Rust 1.71.1
+        cargo update -p clap --precise 4.3.19
         
         cargo publish --dry-run --all-features
