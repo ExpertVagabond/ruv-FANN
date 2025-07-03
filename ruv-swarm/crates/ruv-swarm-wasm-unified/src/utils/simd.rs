@@ -337,7 +337,7 @@ impl SIMDProcessor {
 #[wasm_bindgen]
 pub fn benchmark_simd_performance(size: usize) -> JsValue {
     let processor = SIMDProcessor::new();
-    let timer = crate::utils::PerformanceTimer::new();
+    let mut timer = crate::utils::PerformanceTimer::new();
     
     // Create test data
     let a: Vec<f32> = (0..size).map(|i| i as f32).collect();

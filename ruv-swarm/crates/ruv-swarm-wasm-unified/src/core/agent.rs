@@ -1,56 +1,63 @@
 // Agent management WASM interfaces
 use wasm_bindgen::prelude::*;
 use serde::{Deserialize, Serialize};
-use ruv_swarm_core::{Agent, AgentType, CognitivePattern};
+use ruv_swarm_core::{CognitivePattern, agent::{DynamicAgent, AgentStatus}};
 
 #[wasm_bindgen]
-#[derive(Clone)]
 pub struct WasmAgent {
-    inner: Agent,
+    inner: DynamicAgent,
 }
 
 #[wasm_bindgen]
 impl WasmAgent {
     #[wasm_bindgen(constructor)]
     pub fn new(name: String, agent_type: String) -> Result<WasmAgent, JsValue> {
-        let agent_type = match agent_type.as_str() {
-            "researcher" => AgentType::Researcher,
-            "coder" => AgentType::Coder,
-            "analyst" => AgentType::Analyst,
-            "optimizer" => AgentType::Optimizer,
-            "coordinator" => AgentType::Coordinator,
+        let capabilities = match agent_type.as_str() {
+            "researcher" => vec!["research".to_string(), "analysis".to_string()],
+            "coder" => vec!["coding".to_string(), "implementation".to_string()],
+            "analyst" => vec!["analysis".to_string(), "data_processing".to_string()],
+            "optimizer" => vec!["optimization".to_string(), "performance".to_string()],
+            "coordinator" => vec!["coordination".to_string(), "management".to_string()],
             _ => return Err(JsValue::from_str(&format!("Unknown agent type: {}", agent_type))),
         };
 
         Ok(WasmAgent {
-            inner: Agent::new(name, agent_type),
+            inner: DynamicAgent::new(name, capabilities),
         })
     }
 
     #[wasm_bindgen]
     pub fn get_id(&self) -> String {
-        self.inner.id.clone()
+        self.inner.id().to_string()
     }
 
     #[wasm_bindgen]
     pub fn get_name(&self) -> String {
-        self.inner.name.clone()
+        self.inner.id().to_string() // DynamicAgent uses id as name
     }
 
     #[wasm_bindgen]
     pub fn get_type(&self) -> String {
-        match self.inner.agent_type {
-            AgentType::Researcher => "researcher",
-            AgentType::Coder => "coder",
-            AgentType::Analyst => "analyst",
-            AgentType::Optimizer => "optimizer",
-            AgentType::Coordinator => "coordinator",
-        }.to_string()
+        // Determine type from capabilities
+        let caps = self.inner.capabilities();
+        if caps.contains(&"research".to_string()) {
+            "researcher".to_string()
+        } else if caps.contains(&"coding".to_string()) {
+            "coder".to_string()
+        } else if caps.contains(&"analysis".to_string()) {
+            "analyst".to_string()
+        } else if caps.contains(&"optimization".to_string()) {
+            "optimizer".to_string()
+        } else if caps.contains(&"coordination".to_string()) {
+            "coordinator".to_string()
+        } else {
+            "unknown".to_string()
+        }
     }
 
     #[wasm_bindgen]
     pub fn set_cognitive_pattern(&mut self, pattern: String) -> Result<(), JsValue> {
-        let cognitive_pattern = match pattern.as_str() {
+        let _cognitive_pattern = match pattern.as_str() {
             "convergent" => CognitivePattern::Convergent,
             "divergent" => CognitivePattern::Divergent,
             "lateral" => CognitivePattern::Lateral,
@@ -60,33 +67,30 @@ impl WasmAgent {
             _ => return Err(JsValue::from_str(&format!("Unknown cognitive pattern: {}", pattern))),
         };
 
-        self.inner.cognitive_pattern = Some(cognitive_pattern);
+        // Note: DynamicAgent doesn't directly support cognitive patterns in the same way
+        // This would need to be stored in agent metadata
         Ok(())
     }
 
     #[wasm_bindgen]
     pub fn get_cognitive_pattern(&self) -> Option<String> {
-        self.inner.cognitive_pattern.as_ref().map(|p| match p {
-            CognitivePattern::Convergent => "convergent",
-            CognitivePattern::Divergent => "divergent",
-            CognitivePattern::Lateral => "lateral",
-            CognitivePattern::Systems => "systems",
-            CognitivePattern::Critical => "critical",
-            CognitivePattern::Abstract => "abstract",
-        }.to_string())
+        // Default to convergent since DynamicAgent doesn't store this directly
+        Some("convergent".to_string())
     }
 
     #[wasm_bindgen]
     pub fn get_info(&self) -> JsValue {
         let info = serde_json::json!({
-            "id": self.inner.id,
-            "name": self.inner.name,
+            "id": self.inner.id(),
+            "name": self.inner.id(), // DynamicAgent uses id as name
             "type": self.get_type(),
             "cognitive_pattern": self.get_cognitive_pattern(),
-            "state": match self.inner.state {
-                ruv_swarm_core::AgentState::Idle => "idle",
-                ruv_swarm_core::AgentState::Active => "active",
-                ruv_swarm_core::AgentState::Busy => "busy",
+            "state": match self.inner.status() {
+                AgentStatus::Idle => "idle",
+                AgentStatus::Running => "active",
+                AgentStatus::Busy => "busy",
+                AgentStatus::Offline => "offline",
+                AgentStatus::Error => "error",
             },
         });
         

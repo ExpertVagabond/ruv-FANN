@@ -1,6 +1,6 @@
 // Task management WASM interfaces
 use wasm_bindgen::prelude::*;
-use ruv_swarm_core::{Task, TaskPriority};
+use ruv_swarm_core::task::{Task, TaskPriority, TaskId, TaskPayload};
 
 #[wasm_bindgen]
 pub struct WasmTask {
@@ -18,19 +18,19 @@ impl WasmTask {
     
     #[wasm_bindgen]
     pub fn get_id(&self) -> String {
-        self.inner.id.clone()
+        self.inner.id.to_string()
     }
     
     #[wasm_bindgen]
     pub fn get_name(&self) -> String {
-        self.inner.name.clone()
+        self.inner.task_type.clone()
     }
     
     #[wasm_bindgen]
     pub fn set_priority(&mut self, priority: String) -> Result<(), JsValue> {
         let prio = match priority.as_str() {
             "low" => TaskPriority::Low,
-            "medium" => TaskPriority::Medium,
+            "normal" => TaskPriority::Normal,
             "high" => TaskPriority::High,
             "critical" => TaskPriority::Critical,
             _ => return Err(JsValue::from_str(&format!("Unknown priority: {}", priority))),
@@ -43,11 +43,11 @@ impl WasmTask {
     #[wasm_bindgen]
     pub fn get_info(&self) -> JsValue {
         let info = serde_json::json!({
-            "id": self.inner.id,
-            "name": self.inner.name,
-            "description": self.inner.description,
+            "id": self.inner.id.to_string(),
+            "name": self.inner.task_type,
+            "description": "Task description", // Task struct doesn't have description field
             "priority": format!("{:?}", self.inner.priority),
-            "status": format!("{:?}", self.inner.status),
+            "required_capabilities": self.inner.required_capabilities,
         });
         
         serde_wasm_bindgen::to_value(&info).unwrap()

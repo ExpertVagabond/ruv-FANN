@@ -21,11 +21,13 @@ js-sys = "0.3"
 console_error_panic_hook = "0.1"
 wee_alloc = { version = "0.4", optional = true }
 rayon = { version = "1.8", optional = true }
+lazy_static = "1.4"
 
 # Internal crate dependencies with WASM features
 ruv-swarm-core = { path = "../ruv-swarm-core", features = ["wasm"], default-features = false }
 ruv-swarm-ml = { path = "../ruv-swarm-ml", features = ["wasm"], default-features = false }
 ruv-swarm-wasm = { path = "../ruv-swarm-wasm", default-features = false }
+ruv-swarm-persistence = { path = "../ruv-swarm-persistence", default-features = false }
 
 [dependencies.web-sys]
 version = "0.3"
@@ -45,6 +47,9 @@ simd = []
 parallel = ["rayon"]
 optimize = []
 wee_alloc_feature = ["wee_alloc"]
+console_error_panic_hook = []
+ruv-fann = []
+neuro-divergent = []
 
 [profile.release]
 opt-level = 3

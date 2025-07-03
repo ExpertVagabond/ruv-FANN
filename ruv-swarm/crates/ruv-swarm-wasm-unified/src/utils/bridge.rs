@@ -103,7 +103,7 @@ impl PerformanceBridge {
     #[wasm_bindgen]
     pub fn mark(&mut self, name: String) {
         if let Some(window) = web_sys::window() {
-            if let Ok(performance) = window.performance() {
+            if let Some(performance) = window.performance() {
                 self.marks.insert(name, performance.now());
             }
         }
@@ -206,14 +206,18 @@ pub fn enable_debug_mode() {
 
 #[wasm_bindgen]
 pub fn get_debug_info() -> JsValue {
+    // Convert JsValues to serializable format
+    let features_js = crate::get_features();
+    let capabilities_js = crate::utils::get_system_capabilities();
+    
     let info = serde_json::json!({
         "version": crate::get_version(),
-        "features": crate::get_features(),
+        "features": "see features endpoint", // JsValue not directly serializable
         "memory": {
-            "pages": wasm_bindgen::memory().buffer().byte_length() / (64 * 1024),
+            "pages": crate::utils::get_current_memory_usage() / 64, // Estimate pages
             "usage_kb": crate::utils::get_current_memory_usage(),
         },
-        "capabilities": crate::utils::get_system_capabilities(),
+        "capabilities": "see capabilities endpoint", // JsValue not directly serializable
     });
     
     serde_wasm_bindgen::to_value(&info).unwrap()

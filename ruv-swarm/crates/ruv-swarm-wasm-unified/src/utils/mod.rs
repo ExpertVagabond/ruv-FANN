@@ -4,7 +4,7 @@ use web_sys::window;
 
 mod memory;
 mod simd;
-mod bridge;
+pub mod bridge;
 
 pub use memory::*;
 pub use simd::*;
@@ -31,19 +31,23 @@ pub fn detect_worker_support() -> bool {
 
 // Calculate optimal memory allocation based on device capabilities
 pub fn calculate_optimal_memory() -> u32 {
-    // Try to get device memory info
-    let available = window()
-        .and_then(|w| w.navigator().device_memory())
-        .unwrap_or(4.0);
+    // Device memory is not widely supported, use fallback
+    let available = 4.0; // Default to 4GB
     
     // Use 1/8 of available device memory, minimum 4MB, maximum 64MB
-    ((available * 1024.0 / 8.0).max(4.0).min(64.0) / 0.0625) as u32
+    ((available * 1024.0f64 / 8.0).max(4.0).min(64.0) / 0.0625) as u32
 }
 
 // Get current memory usage
 pub fn get_current_memory_usage() -> u32 {
     let memory = wasm_bindgen::memory();
-    (memory.buffer().byte_length() / 1024) as u32 // Return in KB
+    // Get byte length safely
+    if let Ok(buffer) = js_sys::Reflect::get(&memory, &"buffer".into()) {
+        if let Ok(length) = js_sys::Reflect::get(&buffer, &"byteLength".into()) {
+            return (length.as_f64().unwrap_or(0.0) / 1024.0) as u32;
+        }
+    }
+    0 // Fallback
 }
 
 // Performance timing utilities
@@ -57,7 +61,7 @@ impl PerformanceTimer {
     #[wasm_bindgen(constructor)]
     pub fn new() -> PerformanceTimer {
         let start_time = window()
-            .and_then(|w| w.performance().ok())
+            .and_then(|w| w.performance())
             .map(|p| p.now())
             .unwrap_or(0.0);
             
@@ -67,7 +71,7 @@ impl PerformanceTimer {
     #[wasm_bindgen]
     pub fn elapsed(&self) -> f64 {
         window()
-            .and_then(|w| w.performance().ok())
+            .and_then(|w| w.performance())
             .map(|p| p.now() - self.start_time)
             .unwrap_or(0.0)
     }
@@ -75,7 +79,7 @@ impl PerformanceTimer {
     #[wasm_bindgen]
     pub fn reset(&mut self) {
         self.start_time = window()
-            .and_then(|w| w.performance().ok())
+            .and_then(|w| w.performance())
             .map(|p| p.now())
             .unwrap_or(0.0);
     }
