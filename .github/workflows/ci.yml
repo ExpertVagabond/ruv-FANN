@@ -25,7 +25,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         # Specify versions that support Cargo.lock version 4 (introduced in Rust 1.70.0)
-        rust: [stable, beta, nightly]
+        rust: [1.70.0, stable, beta, nightly]
         include:
           - os: ubuntu-latest
             rust: stable
@@ -37,11 +37,8 @@ jobs:
       uses: dtolnay/rust-toolchain@master
       with:
         toolchain: ${{ matrix.rust }}
-        # Specify a minimum version that supports Cargo.lock version 4
         # Cargo.lock version 4 was introduced in Rust 1.70.0
         components: rustfmt, clippy
-        # Ensure minimum version is at least 1.70.0
-        min-version: 1.70.0
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -95,8 +92,6 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.70.0 to support Cargo.lock version 4
-        min-version: 1.70.0
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -170,8 +165,6 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.70.0 to support Cargo.lock version 4
-        min-version: 1.70.0
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -209,8 +202,6 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@nightly
       with:
-        # Ensure nightly is recent enough to support Cargo.lock version 4
-        min-version: 1.70.0
         components: miri
     
     - name: Cache dependencies
@@ -260,8 +251,6 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.70.0 to support Cargo.lock version 4
-        min-version: 1.70.0
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -298,8 +287,6 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.70.0 to support Cargo.lock version 4
-        min-version: 1.70.0
         targets: ${{ matrix.target }}
     
     - name: Install cross
@@ -319,8 +306,6 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.70.0 to support Cargo.lock version 4
-        min-version: 1.70.0
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -354,8 +339,6 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.70.0 to support Cargo.lock version 4
-        min-version: 1.70.0
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -414,8 +397,6 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.70.0 to support Cargo.lock version 4
-        min-version: 1.70.0
     
     - name: Check if version bumped
       id: version-check
