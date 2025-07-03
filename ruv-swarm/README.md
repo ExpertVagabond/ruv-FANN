@@ -5,7 +5,43 @@
 [![License: MIT OR Apache-2.0](https://img.shields.io/crates/l/ruv-swarm-core.svg)](#license)
 [![CI](https://github.com/ruvnet/ruv-FANN/workflows/CI/badge.svg)](https://github.com/ruvnet/ruv-FANN/actions)
 
-**State-of-the-art multi-agent cognitive swarm system achieving 84.8% SWE-Bench solve rate** - the highest performance among all coding AI systems. Built with Rust, WebAssembly, and Model Context Protocol (MCP) integration for Claude Code.
+**What if every task, every file, every function could truly think?** Just for a moment. No LLM required. That's what ruv-swarm makes real.
+
+## 🐝 Ephemeral Intelligence, Engineered in Rust
+
+```bash
+npx ruv-swarm@latest init --claude
+```
+
+ruv-swarm lets you spin up ultra-lightweight custom neural networks that exist just long enough to solve the problem. Tiny purpose-built brains dedicated to solving very specific challenges.
+
+Think particular coding structures, custom communications, trading optimization - neural networks built on the fly just for the task they need to exist for, long enough to solve it, then gone.
+
+**You're not calling a model. You're instantiating intelligence.**
+
+Temporary, composable, and surgically precise.
+
+## ⚡ Built for the GPU-Poor
+
+We built this using ruv-FANN and distributed autonomous agents. The results are remarkable:
+
+- **Complex decisions in <100ms** - sometimes single milliseconds
+- **84.8% SWE-Bench accuracy** - outperforming Claude 3.7 by 14+ points
+- **CPU-native, GPU-optional** - Rust compiles to high-speed WASM
+- **Zero dependencies** - Runs anywhere: browser, edge, server, even RISC-V
+
+No CUDA. No Python stack. Just pure, embeddable swarm cognition launched from Claude Code in milliseconds.
+
+## 🧠 Living Global Swarm Network
+
+Each agent behaves like a synthetic synapse, dynamically created and orchestrated as part of a living network:
+
+- **Topologies**: Mesh, ring, hierarchical for collective learning
+- **27+ Neural Models**: LSTM, TCN, N-BEATS for adaptation
+- **Cognitive Specializations**: Coders, Analysts, Reviewers, Optimizers
+- **Real-time Evolution**: Mutation, adaptation, and forecasting
+
+Agents share resources through quantum-resistant QuDag networks, self-organizing to solve problems with surgical precision.
 
 ## 🏆 Performance Achievements
 
@@ -428,6 +464,12 @@ Dual-licensed under:
 - **Documentation**: https://docs.rs/ruv-swarm-core
 - **Repository**: https://github.com/ruvnet/ruv-FANN
 - **Performance Report**: [Research Report](./docs/RUV_SWARM_PERFORMANCE_RESEARCH_REPORT.md)
+
+---
+
+## 🙏 Acknowledgments
+
+Special thanks to Bron, Ocean, Jed, and Shep for their invaluable contributions to making ruv-swarm a reality.
 
 ---
 
