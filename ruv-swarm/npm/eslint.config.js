@@ -78,6 +78,13 @@ export default [
         afterEach: 'readonly',
         beforeAll: 'readonly',
         afterAll: 'readonly',
+        // Browser globals
+        localStorage: 'readonly',
+        sessionStorage: 'readonly',
+        navigator: 'readonly',
+        window: 'readonly',
+        document: 'readonly',
+        gc: 'readonly', // Node.js global for garbage collection
       },
     },
     rules: {
@@ -219,6 +226,13 @@ export default [
         afterEach: 'readonly',
         beforeAll: 'readonly',
         afterAll: 'readonly',
+        // Browser globals
+        localStorage: 'readonly',
+        sessionStorage: 'readonly',
+        navigator: 'readonly',
+        window: 'readonly',
+        document: 'readonly',
+        gc: 'readonly', // Node.js global for garbage collection
       },
     },
     rules: {

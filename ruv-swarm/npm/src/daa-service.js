@@ -16,7 +16,7 @@ class PerformanceMonitor {
       crossBoundaryCall: 1.0, // 1ms threshold
       agentSpawn: 10.0,
       stateSync: 5.0,
-      workflowStep: 20.0
+      workflowStep: 20.0,
     };
   }
 
@@ -25,14 +25,16 @@ class PerformanceMonitor {
     this.metrics.set(id, {
       operation,
       start: performance.now(),
-      id
+      id,
     });
     return id;
   }
 
   endTimer(id) {
     const metric = this.metrics.get(id);
-    if (!metric) return null;
+    if (!metric) {
+      return null;
+    }
 
     const duration = performance.now() - metric.start;
     this.metrics.delete(id);
@@ -45,16 +47,18 @@ class PerformanceMonitor {
     return {
       operation: metric.operation,
       duration,
-      withinThreshold: !threshold || duration <= threshold
+      withinThreshold: !threshold || duration <= threshold,
     };
   }
 
   getAverageLatency(operation) {
     const relevantMetrics = Array.from(this.metrics.values())
       .filter(m => m.operation === operation);
-    
-    if (relevantMetrics.length === 0) return 0;
-    
+
+    if (relevantMetrics.length === 0) {
+      return 0;
+    }
+
     const totalDuration = relevantMetrics.reduce((sum, m) => {
       const duration = performance.now() - m.start;
       return sum + duration;
@@ -78,7 +82,7 @@ class AgentStateManager {
     const stateEntry = {
       ...state,
       timestamp,
-      version: (this.states.get(agentId)?.version || 0) + 1
+      version: (this.states.get(agentId)?.version || 0) + 1,
     };
 
     this.states.set(agentId, stateEntry);
@@ -87,10 +91,10 @@ class AgentStateManager {
     if (!this.stateHistory.has(agentId)) {
       this.stateHistory.set(agentId, []);
     }
-    
+
     const history = this.stateHistory.get(agentId);
     history.push(stateEntry);
-    
+
     // Trim history if needed
     if (history.length > this.maxHistorySize) {
       history.shift();
@@ -144,7 +148,7 @@ class AgentStateManager {
   clearState(agentId) {
     this.states.delete(agentId);
     this.stateHistory.delete(agentId);
-    
+
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem(`daa-agent-state-${agentId}`);
     }
@@ -169,7 +173,7 @@ class WorkflowCoordinator {
       createdAt: Date.now(),
       completedSteps: new Set(),
       activeSteps: new Set(),
-      pendingSteps: new Set(steps.map(s => s.id))
+      pendingSteps: new Set(steps.map(s => s.id)),
     };
 
     this.workflows.set(workflowId, workflow);
@@ -178,10 +182,14 @@ class WorkflowCoordinator {
 
   async executeStep(workflowId, stepId, agents) {
     const workflow = this.workflows.get(workflowId);
-    if (!workflow) throw new Error(`Workflow ${workflowId} not found`);
+    if (!workflow) {
+      throw new Error(`Workflow ${workflowId} not found`);
+    }
 
     const step = workflow.steps.get(stepId);
-    if (!step) throw new Error(`Step ${stepId} not found in workflow ${workflowId}`);
+    if (!step) {
+      throw new Error(`Step ${stepId} not found in workflow ${workflowId}`);
+    }
 
     // Check dependencies
     const deps = workflow.dependencies[stepId] || [];
@@ -199,11 +207,11 @@ class WorkflowCoordinator {
     try {
       // Execute step with assigned agents
       const result = await this.runStepWithAgents(step, agents);
-      
+
       // Mark as completed
       workflow.activeSteps.delete(stepId);
       workflow.completedSteps.add(stepId);
-      
+
       // Check if workflow is complete
       if (workflow.pendingSteps.size === 0 && workflow.activeSteps.size === 0) {
         workflow.status = 'completed';
@@ -218,9 +226,9 @@ class WorkflowCoordinator {
 
   async runStepWithAgents(step, agents) {
     const results = [];
-    
+
     // Parallel execution for independent agent tasks
-    const promises = agents.map(async (agent) => {
+    const promises = agents.map(async(agent) => {
       if (step.agentFilter && !step.agentFilter(agent)) {
         return null;
       }
@@ -228,10 +236,10 @@ class WorkflowCoordinator {
       const task = step.task || step.action;
       if (typeof task === 'function') {
         return await task(agent);
-      } else {
-        // Direct WASM call
-        return await agent[task.method](...(task.args || []));
       }
+      // Direct WASM call
+      return await agent[task.method](...(task.args || []));
+
     });
 
     const agentResults = await Promise.all(promises);
@@ -240,7 +248,9 @@ class WorkflowCoordinator {
 
   getWorkflowStatus(workflowId) {
     const workflow = this.workflows.get(workflowId);
-    if (!workflow) return null;
+    if (!workflow) {
+      return null;
+    }
 
     return {
       id: workflow.id,
@@ -249,11 +259,11 @@ class WorkflowCoordinator {
         total: workflow.steps.size,
         completed: workflow.completedSteps.size,
         active: workflow.activeSteps.size,
-        pending: workflow.pendingSteps.size
+        pending: workflow.pendingSteps.size,
       },
       completedSteps: Array.from(workflow.completedSteps),
       activeSteps: Array.from(workflow.activeSteps),
-      pendingSteps: Array.from(workflow.pendingSteps)
+      pendingSteps: Array.from(workflow.pendingSteps),
     };
   }
 }
@@ -277,7 +287,9 @@ export class DAAService extends EventEmitter {
   }
 
   async initialize() {
-    if (this.initialized) return;
+    if (this.initialized) {
+      return;
+    }
 
     const timerId = this.performance.startTimer('initialization');
 
@@ -285,7 +297,7 @@ export class DAAService extends EventEmitter {
       // Try to initialize WASM loader with progressive strategy
       try {
         await this.wasmLoader.initialize('progressive');
-        
+
         // Load core module
         const coreModule = await this.wasmLoader.loadModule('core');
         this.wasmModule = coreModule.exports;
@@ -303,8 +315,8 @@ export class DAAService extends EventEmitter {
         if (this.wasmModule?.WasmResourceManager) {
           this.resourceManagerModule = new this.wasmModule.WasmResourceManager(1024); // 1GB limit
         }
-        
-        console.log(`✅ DAA Service initialized with WASM support`);
+
+        console.log('✅ DAA Service initialized with WASM support');
       } catch (wasmError) {
         console.warn(`⚠️ WASM initialization failed, using fallback: ${wasmError.message}`);
         // Continue with basic functionality
@@ -332,10 +344,10 @@ export class DAAService extends EventEmitter {
         autonomousLearning: false,
         peerCoordination: false,
         neuralIntegration: false,
-        cognitivePatterns: 0
+        cognitivePatterns: 0,
       };
     }
-    
+
     return {
       autonomousLearning: true,
       peerCoordination: true,
@@ -343,7 +355,7 @@ export class DAAService extends EventEmitter {
       cognitivePatterns: 6,
       wasmOptimized: true,
       crossBoundaryLatency: '< 1ms',
-      memoryPersistence: true
+      memoryPersistence: true,
     };
   }
 
@@ -360,12 +372,14 @@ export class DAAService extends EventEmitter {
       id = config.id;
       capabilities = config.capabilities || [];
     }
-    
+
     return this.createAgentInternal(id, capabilities, config);
   }
 
   async createAgentInternal(id, capabilities = [], config = {}) {
-    if (!this.initialized) await this.initialize();
+    if (!this.initialized) {
+      await this.initialize();
+    }
 
     const timerId = this.performance.startTimer('agentSpawn');
 
@@ -383,14 +397,14 @@ export class DAAService extends EventEmitter {
         wasmAgent = {
           id,
           capabilities: new Set(capabilities),
-          make_decision: async (context) => {
+          make_decision: async(context) => {
             // Simple decision logic
             return JSON.stringify({
               decision: 'proceed',
               confidence: 0.8,
-              reasoning: 'Autonomous decision based on context'
+              reasoning: 'Autonomous decision based on context',
             });
-          }
+          },
         };
       }
 
@@ -404,7 +418,7 @@ export class DAAService extends EventEmitter {
           learningRate: config.learningRate || 0.001,
           enableMemory: config.enableMemory !== false,
           autonomousMode: config.autonomousMode !== false,
-          ...config
+          ...config,
         },
         status: 'active',
         createdAt: Date.now(),
@@ -413,8 +427,8 @@ export class DAAService extends EventEmitter {
           decisionsMade: 0,
           tasksCompleted: 0,
           errors: 0,
-          averageResponseTime: 0
-        }
+          averageResponseTime: 0,
+        },
       };
 
       // Store agent
@@ -436,7 +450,7 @@ export class DAAService extends EventEmitter {
       this.agentStates.saveState(id, {
         status: agent.status,
         capabilities: Array.from(agent.capabilities),
-        metrics: agent.metrics
+        metrics: agent.metrics,
       });
 
       this.emit('agentCreated', { agentId: id, capabilities });
@@ -460,7 +474,7 @@ export class DAAService extends EventEmitter {
     }
 
     const previousPattern = agent.cognitivePattern || 'adaptive';
-    
+
     // Simple adaptation logic based on performance score
     let newPattern = previousPattern;
     if (adaptationData.performanceScore < 0.3) {
@@ -472,19 +486,19 @@ export class DAAService extends EventEmitter {
     }
 
     agent.cognitivePattern = newPattern;
-    
+
     // Update state
     this.agentStates.saveState(agentId, {
       cognitivePattern: newPattern,
       lastAdaptation: adaptationData,
-      adaptationHistory: agent.adaptationHistory || []
+      adaptationHistory: agent.adaptationHistory || [],
     });
 
     return {
       previousPattern,
       newPattern,
       improvement: Math.random() * 0.3, // Simulated improvement
-      insights: [`Adapted from ${previousPattern} to ${newPattern}`, 'Performance-based adaptation']
+      insights: [`Adapted from ${previousPattern} to ${newPattern}`, 'Performance-based adaptation'],
     };
   }
 
@@ -504,13 +518,13 @@ export class DAAService extends EventEmitter {
 
     if (parallel && agentIds.length > 1) {
       // Execute steps in parallel across agents
-      const promises = Array.from(workflow.steps.values()).map(async (step, index) => {
+      const promises = Array.from(workflow.steps.values()).map(async(step, index) => {
         const assignedAgent = agentIds[index % agentIds.length];
         const result = await this.executeWorkflowStep(workflowId, step.id, [assignedAgent]);
         completedSteps++;
         return result;
       });
-      
+
       const results = await Promise.all(promises);
       stepResults.push(...results);
     } else {
@@ -523,14 +537,14 @@ export class DAAService extends EventEmitter {
     }
 
     const executionTime = Date.now() - startTime;
-    
+
     return {
       complete: completedSteps === workflow.steps.size,
       stepsCompleted: completedSteps,
       totalSteps: workflow.steps.size,
       executionTime,
       agentsInvolved: agentIds,
-      stepResults
+      stepResults,
     };
   }
 
@@ -552,14 +566,14 @@ export class DAAService extends EventEmitter {
           source: sourceAgentId,
           content: knowledgeData.content,
           domain: knowledgeData.domain,
-          transferredAt: Date.now()
+          transferredAt: Date.now(),
         };
-        
+
         // Store in target agent's memory
         this.agentStates.saveState(targetId, {
-          sharedKnowledge: [...(targetAgent.sharedKnowledge || []), knowledge]
+          sharedKnowledge: [...(targetAgent.sharedKnowledge || []), knowledge],
         });
-        
+
         updatedAgents.push(targetId);
         transferRate += 0.1; // Simulated transfer rate
       }
@@ -567,7 +581,7 @@ export class DAAService extends EventEmitter {
 
     return {
       updatedAgents,
-      transferRate: Math.min(transferRate, 1.0)
+      transferRate: Math.min(transferRate, 1.0),
     };
   }
 
@@ -579,7 +593,7 @@ export class DAAService extends EventEmitter {
     }
 
     const state = this.agentStates.getState(agentId);
-    
+
     return {
       totalCycles: state?.learningCycles || 0,
       avgProficiency: 0.75 + Math.random() * 0.2, // Simulated
@@ -591,15 +605,15 @@ export class DAAService extends EventEmitter {
       detailedMetrics: {
         tasksCompleted: agent.metrics?.tasksCompleted || 0,
         successRate: 0.85 + Math.random() * 0.1,
-        averageResponseTime: agent.metrics?.averageResponseTime || 50
-      }
+        averageResponseTime: agent.metrics?.averageResponseTime || 50,
+      },
     };
   }
 
   // Get system-wide learning status
   async getSystemLearningStatus() {
     const allAgents = Array.from(this.agents.values());
-    
+
     return {
       totalCycles: allAgents.reduce((sum, agent) => sum + (agent.learningCycles || 0), 0),
       avgProficiency: 0.78,
@@ -611,8 +625,8 @@ export class DAAService extends EventEmitter {
       detailedMetrics: {
         totalAgents: allAgents.length,
         activeAgents: allAgents.filter(a => a.status === 'active').length,
-        systemUptime: Date.now() - (this.initTime || Date.now())
-      }
+        systemUptime: Date.now() - (this.initTime || Date.now()),
+      },
     };
   }
 
@@ -623,24 +637,24 @@ export class DAAService extends EventEmitter {
       if (!agent) {
         throw new Error(`Agent ${agentId} not found`);
       }
-      
+
       return {
         patterns: [agent.cognitivePattern || 'adaptive'],
         effectiveness: 0.8 + Math.random() * 0.15,
         recommendations: ['Consider adaptive pattern for versatility'],
-        optimizationScore: 0.75
+        optimizationScore: 0.75,
       };
     }
-    
+
     // System-wide analysis
     const allAgents = Array.from(this.agents.values());
     const patterns = allAgents.map(a => a.cognitivePattern || 'adaptive');
-    
+
     return {
       patterns: [...new Set(patterns)],
       effectiveness: 0.82,
       recommendations: ['Diversify cognitive patterns', 'Balance convergent and divergent thinking'],
-      optimizationScore: 0.78
+      optimizationScore: 0.78,
     };
   }
 
@@ -653,30 +667,30 @@ export class DAAService extends EventEmitter {
 
     const previousPattern = agent.cognitivePattern || 'adaptive';
     agent.cognitivePattern = pattern;
-    
+
     this.agentStates.saveState(agentId, {
       cognitivePattern: pattern,
       patternHistory: [...(agent.patternHistory || []), {
         from: previousPattern,
         to: pattern,
-        timestamp: Date.now()
-      }]
+        timestamp: Date.now(),
+      }],
     });
 
     return {
       previousPattern,
       success: true,
-      expectedImprovement: 0.1 + Math.random() * 0.2
+      expectedImprovement: 0.1 + Math.random() * 0.2,
     };
   }
 
   // Perform meta-learning across domains
   async performMetaLearning(options) {
     const { sourceDomain, targetDomain, transferMode = 'adaptive', agentIds } = options;
-    
+
     const affectedAgents = agentIds || Array.from(this.agents.keys());
     const knowledgeItems = Math.floor(5 + Math.random() * 10);
-    
+
     // Simulate meta-learning process
     for (const agentId of affectedAgents) {
       const agent = this.agents.get(agentId);
@@ -687,8 +701,8 @@ export class DAAService extends EventEmitter {
             targetDomain,
             transferMode,
             knowledgeTransferred: knowledgeItems,
-            timestamp: Date.now()
-          }
+            timestamp: Date.now(),
+          },
         });
       }
     }
@@ -700,17 +714,17 @@ export class DAAService extends EventEmitter {
       insights: [
         `Transferred ${knowledgeItems} knowledge items`,
         `Applied ${transferMode} transfer mode`,
-        `Enhanced ${targetDomain} domain understanding`
-      ]
+        `Enhanced ${targetDomain} domain understanding`,
+      ],
     };
   }
 
   // Get comprehensive performance metrics
   async getPerformanceMetrics(options = {}) {
     const { category = 'all', timeRange = '1h' } = options;
-    
+
     const allAgents = Array.from(this.agents.values());
-    
+
     return {
       totalAgents: allAgents.length,
       activeAgents: allAgents.filter(a => a.status === 'active').length,
@@ -726,13 +740,15 @@ export class DAAService extends EventEmitter {
       memoryOptimization: 0.65,
       neuralModelsActive: allAgents.length * 3,
       avgInferenceTime: 0.8 + Math.random() * 0.4,
-      totalTrainingIterations: allAgents.length * 100
+      totalTrainingIterations: allAgents.length * 100,
     };
   }
 
   async destroyAgent(id) {
     const agent = this.agents.get(id);
-    if (!agent) return false;
+    if (!agent) {
+      return false;
+    }
 
     try {
       // Remove from coordinator
@@ -760,14 +776,16 @@ export class DAAService extends EventEmitter {
   // Cross-boundary communication with < 1ms latency
   async makeDecision(agentId, context) {
     const agent = this.agents.get(agentId);
-    if (!agent) throw new Error(`Agent ${agentId} not found`);
+    if (!agent) {
+      throw new Error(`Agent ${agentId} not found`);
+    }
 
     const timerId = this.performance.startTimer('crossBoundaryCall');
 
     try {
       // Prepare context for WASM
       const contextJson = JSON.stringify(context);
-      
+
       // Make decision through WASM
       const decisionPromise = agent.wasmAgent.make_decision(contextJson);
       const decision = await decisionPromise;
@@ -780,21 +798,21 @@ export class DAAService extends EventEmitter {
       this.agentStates.saveState(agentId, {
         lastDecision: decision,
         lastContext: context,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       const timing = this.performance.endTimer(timerId);
-      
+
       // Update average response time
       const prevAvg = agent.metrics.averageResponseTime;
-      agent.metrics.averageResponseTime = 
+      agent.metrics.averageResponseTime =
         (prevAvg * (agent.metrics.decisionsMade - 1) + timing.duration) / agent.metrics.decisionsMade;
 
-      this.emit('decisionMade', { 
-        agentId, 
-        decision, 
+      this.emit('decisionMade', {
+        agentId,
+        decision,
         latency: timing.duration,
-        withinThreshold: timing.withinThreshold 
+        withinThreshold: timing.withinThreshold,
       });
 
       return decision;
@@ -809,11 +827,11 @@ export class DAAService extends EventEmitter {
   // Multi-agent workflow coordination
   async createWorkflow(workflowId, steps, dependencies) {
     const workflow = this.workflows.createWorkflow(workflowId, steps, dependencies);
-    
-    this.emit('workflowCreated', { 
-      workflowId, 
+
+    this.emit('workflowCreated', {
+      workflowId,
       steps: steps.map(s => s.id),
-      dependencies 
+      dependencies,
     });
 
     return workflow;
@@ -826,7 +844,9 @@ export class DAAService extends EventEmitter {
       // Get agents for execution
       const agents = agentIds.map(id => {
         const agent = this.agents.get(id);
-        if (!agent) throw new Error(`Agent ${id} not found`);
+        if (!agent) {
+          throw new Error(`Agent ${id} not found`);
+        }
         return agent.wasmAgent;
       });
 
@@ -834,19 +854,19 @@ export class DAAService extends EventEmitter {
       const result = await this.workflows.executeStep(workflowId, stepId, agents);
 
       const timing = this.performance.endTimer(timerId);
-      
+
       this.emit('workflowStepCompleted', {
         workflowId,
         stepId,
         agentIds,
         duration: timing.duration,
-        result
+        result,
       });
 
       return result;
 
     } catch (error) {
-      console.error(`Workflow step execution failed:`, error);
+      console.error('Workflow step execution failed:', error);
       throw error;
     }
   }
@@ -874,7 +894,7 @@ export class DAAService extends EventEmitter {
 
       this.emit('statesSynchronized', {
         agentIds,
-        duration: timing.duration
+        duration: timing.duration,
       });
 
       return states;
@@ -892,15 +912,15 @@ export class DAAService extends EventEmitter {
       return {
         memoryOptimized: true,
         cpuOptimized: true,
-        optimizationGain: 0.15 + Math.random() * 0.1
+        optimizationGain: 0.15 + Math.random() * 0.1,
       };
     }
 
     try {
       const result = await this.resourceManagerModule.optimize();
-      
+
       this.emit('resourcesOptimized', { result });
-      
+
       return result;
 
     } catch (error) {
@@ -921,9 +941,9 @@ export class DAAService extends EventEmitter {
           crossBoundaryCall: this.performance.getAverageLatency('crossBoundaryCall'),
           agentSpawn: this.performance.getAverageLatency('agentSpawn'),
           stateSync: this.performance.getAverageLatency('stateSync'),
-          workflowStep: this.performance.getAverageLatency('workflowStep')
-        }
-      }
+          workflowStep: this.performance.getAverageLatency('workflowStep'),
+        },
+      },
     };
 
     // Collect per-agent metrics
@@ -931,7 +951,7 @@ export class DAAService extends EventEmitter {
       metrics.agents[id] = {
         ...agent.metrics,
         uptime: Date.now() - agent.createdAt,
-        status: agent.status
+        status: agent.status,
       };
     }
 
@@ -946,7 +966,7 @@ export class DAAService extends EventEmitter {
   // Batch operations for efficiency
   async batchCreateAgents(configs) {
     const results = [];
-    
+
     for (const config of configs) {
       try {
         const agent = await this.createAgent(config.id, config.capabilities || []);
@@ -960,7 +980,7 @@ export class DAAService extends EventEmitter {
   }
 
   async batchMakeDecisions(decisions) {
-    const promises = decisions.map(async ({ agentId, context }) => {
+    const promises = decisions.map(async({ agentId, context }) => {
       try {
         const decision = await this.makeDecision(agentId, context);
         return { success: true, agentId, decision };
@@ -985,9 +1005,9 @@ export class DAAService extends EventEmitter {
 
       // Optimize memory
       const optimization = this.wasmLoader.optimizeMemory();
-      
+
       console.log('🧹 DAA Service cleanup completed', optimization);
-      
+
       this.emit('cleanup', optimization);
 
     } catch (error) {
@@ -1002,18 +1022,18 @@ export class DAAService extends EventEmitter {
       agents: {
         count: this.agents.size,
         ids: Array.from(this.agents.keys()),
-        states: this.agentStates.states.size
+        states: this.agentStates.states.size,
       },
       workflows: {
         count: this.workflows.workflows.size,
         active: Array.from(this.workflows.workflows.values())
-          .filter(w => w.status === 'running').length
+          .filter(w => w.status === 'running').length,
       },
       wasm: {
         modules: this.wasmLoader.getModuleStatus(),
-        memoryUsage: this.wasmLoader.getTotalMemoryUsage()
+        memoryUsage: this.wasmLoader.getTotalMemoryUsage(),
       },
-      performance: this.getPerformanceMetrics()
+      performance: this.getPerformanceMetrics(),
     };
   }
 }

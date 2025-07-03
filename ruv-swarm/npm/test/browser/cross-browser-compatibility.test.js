@@ -19,7 +19,7 @@ describe('Cross-Browser WASM Compatibility', () => {
   let serverUrl;
   const browsers = [];
 
-  beforeAll(async () => {
+  beforeAll(async() => {
     // Start local server to serve test files
     server = createServer((request, response) => {
       return handler(request, response, {
@@ -29,20 +29,20 @@ describe('Cross-Browser WASM Compatibility', () => {
             source: '**/*.wasm',
             headers: [{
               key: 'Content-Type',
-              value: 'application/wasm'
-            }]
+              value: 'application/wasm',
+            }],
           },
           {
             source: '**/*',
             headers: [{
               key: 'Cross-Origin-Embedder-Policy',
-              value: 'require-corp'
+              value: 'require-corp',
             }, {
               key: 'Cross-Origin-Opener-Policy',
-              value: 'same-origin'
-            }]
-          }
-        ]
+              value: 'same-origin',
+            }],
+          },
+        ],
       });
     });
 
@@ -59,19 +59,19 @@ describe('Cross-Browser WASM Compatibility', () => {
     const browserTypes = [
       { name: 'chromium', launcher: chromium },
       { name: 'firefox', launcher: firefox },
-      { name: 'webkit', launcher: webkit }
+      { name: 'webkit', launcher: webkit },
     ];
 
     for (const { name, launcher } of browserTypes) {
       const browser = await launcher.launch({
         headless: true,
-        args: name === 'chromium' ? ['--enable-unsafe-webgpu'] : []
+        args: name === 'chromium' ? ['--enable-unsafe-webgpu'] : [],
       });
       browsers.push({ name, browser });
     }
   });
 
-  afterAll(async () => {
+  afterAll(async() => {
     // Close all browsers
     for (const { browser } of browsers) {
       await browser.close();
@@ -85,7 +85,7 @@ describe('Cross-Browser WASM Compatibility', () => {
 
   describe('Basic WASM Support', () => {
     for (const { name, browser } of browsers) {
-      it(`should detect WASM support in ${name}`, async () => {
+      it(`should detect WASM support in ${name}`, async() => {
         const context = await browser.newContext();
         const page = await context.newPage();
 
@@ -101,13 +101,13 @@ describe('Cross-Browser WASM Compatibility', () => {
         await context.close();
       });
 
-      it(`should load WASM module in ${name}`, async () => {
+      it(`should load WASM module in ${name}`, async() => {
         const context = await browser.newContext();
         const page = await context.newPage();
 
         await page.goto(`${serverUrl}/test/browser/wasm-test.html`);
 
-        const moduleLoaded = await page.evaluate(async () => {
+        const moduleLoaded = await page.evaluate(async() => {
           try {
             const response = await fetch('/wasm/ruv_swarm_wasm_bg.wasm');
             const buffer = await response.arrayBuffer();
@@ -128,20 +128,20 @@ describe('Cross-Browser WASM Compatibility', () => {
 
   describe('SIMD Support', () => {
     for (const { name, browser } of browsers) {
-      it(`should detect SIMD support in ${name}`, async () => {
+      it(`should detect SIMD support in ${name}`, async() => {
         const context = await browser.newContext();
         const page = await context.newPage();
 
         await page.goto(`${serverUrl}/test/browser/wasm-test.html`);
 
-        const simdInfo = await page.evaluate(async () => {
+        const simdInfo = await page.evaluate(async() => {
           // Load RuvSwarm module
           const { RuvSwarm } = await import('/src/index-enhanced.js');
           const swarm = await RuvSwarm.initialize({ debug: true });
-          
+
           return {
             simdDetected: swarm.features.simd,
-            simdInWasm: await swarm.wasmLoader.detectSIMDSupport()
+            simdInWasm: await swarm.wasmLoader.detectSIMDSupport(),
           };
         });
 
@@ -159,7 +159,7 @@ describe('Cross-Browser WASM Compatibility', () => {
 
   describe('Memory Management', () => {
     for (const { name, browser } of browsers) {
-      it(`should handle SharedArrayBuffer in ${name}`, async () => {
+      it(`should handle SharedArrayBuffer in ${name}`, async() => {
         const context = await browser.newContext();
         const page = await context.newPage();
 
@@ -181,18 +181,18 @@ describe('Cross-Browser WASM Compatibility', () => {
             if (typeof Atomics !== 'undefined') {
               Atomics.store(view, 0, 123);
               const value = Atomics.load(view, 0);
-              return { 
-                available: true, 
+              return {
+                available: true,
                 atomicsSupported: true,
-                testValue: value 
+                testValue: value,
               };
             }
 
             return { available: true, atomicsSupported: false };
           } catch (error) {
-            return { 
-              available: false, 
-              reason: error.message 
+            return {
+              available: false,
+              reason: error.message,
             };
           }
         });
@@ -207,18 +207,18 @@ describe('Cross-Browser WASM Compatibility', () => {
         await context.close();
       });
 
-      it(`should handle memory growth in ${name}`, async () => {
+      it(`should handle memory growth in ${name}`, async() => {
         const context = await browser.newContext();
         const page = await context.newPage();
 
         await page.goto(`${serverUrl}/test/browser/wasm-test.html`);
 
-        const memoryTest = await page.evaluate(async () => {
+        const memoryTest = await page.evaluate(async() => {
           const { RuvSwarm } = await import('/src/index-enhanced.js');
           const swarm = await RuvSwarm.initialize({ debug: false });
 
           const initialMemory = swarm.wasmLoader.getMemorySize();
-          
+
           // Allocate large amount of memory
           const allocations = [];
           for (let i = 0; i < 10; i++) {
@@ -236,7 +236,7 @@ describe('Cross-Browser WASM Compatibility', () => {
           return {
             initial: initialMemory,
             afterAlloc: afterAllocMemory,
-            grew: afterAllocMemory > initialMemory
+            grew: afterAllocMemory > initialMemory,
           };
         });
 
@@ -250,17 +250,17 @@ describe('Cross-Browser WASM Compatibility', () => {
 
   describe('Neural Network Operations', () => {
     for (const { name, browser } of browsers) {
-      it(`should run neural network in ${name}`, async () => {
+      it(`should run neural network in ${name}`, async() => {
         const context = await browser.newContext();
         const page = await context.newPage();
 
         await page.goto(`${serverUrl}/test/browser/wasm-test.html`);
 
-        const nnTest = await page.evaluate(async () => {
+        const nnTest = await page.evaluate(async() => {
           const { RuvSwarm } = await import('/src/index-enhanced.js');
-          const swarm = await RuvSwarm.initialize({ 
+          const swarm = await RuvSwarm.initialize({
             enableNeuralNetworks: true,
-            debug: false 
+            debug: false,
           });
 
           // Create simple neural network
@@ -268,8 +268,8 @@ describe('Cross-Browser WASM Compatibility', () => {
             type: 'mlp',
             layers: [
               { units: 10, activation: 'relu' },
-              { units: 5, activation: 'softmax' }
-            ]
+              { units: 5, activation: 'softmax' },
+            ],
           });
 
           // Run inference
@@ -282,7 +282,7 @@ describe('Cross-Browser WASM Compatibility', () => {
             success: true,
             outputLength: output.length,
             inferenceTime,
-            outputSum: Array.from(output).reduce((a, b) => a + b, 0)
+            outputSum: Array.from(output).reduce((a, b) => a + b, 0),
           };
         });
 
@@ -298,13 +298,13 @@ describe('Cross-Browser WASM Compatibility', () => {
 
   describe('Swarm Operations', () => {
     for (const { name, browser } of browsers) {
-      it(`should create and manage swarm in ${name}`, async () => {
+      it(`should create and manage swarm in ${name}`, async() => {
         const context = await browser.newContext();
         const page = await context.newPage();
 
         await page.goto(`${serverUrl}/test/browser/wasm-test.html`);
 
-        const swarmTest = await page.evaluate(async () => {
+        const swarmTest = await page.evaluate(async() => {
           const { RuvSwarm } = await import('/src/index-enhanced.js');
           const ruvSwarm = await RuvSwarm.initialize({ debug: false });
 
@@ -312,33 +312,33 @@ describe('Cross-Browser WASM Compatibility', () => {
           const swarm = await ruvSwarm.createSwarm({
             name: 'browser-test-swarm',
             topology: 'mesh',
-            maxAgents: 5
+            maxAgents: 5,
           });
 
           // Spawn agents
           const agents = [];
           for (let i = 0; i < 3; i++) {
             const agent = await swarm.spawn({
-              type: ['researcher', 'coder', 'analyst'][i]
+              type: ['researcher', 'coder', 'analyst'][i],
             });
             agents.push({
               id: agent.id,
               type: agent.type,
-              status: agent.status
+              status: agent.status,
             });
           }
 
           // Execute task
           const result = await swarm.orchestrate({
             task: 'test-task',
-            strategy: 'parallel'
+            strategy: 'parallel',
           });
 
           return {
             swarmCreated: true,
             agentCount: agents.length,
             agents,
-            taskCompleted: result.completed
+            taskCompleted: result.completed,
           };
         });
 
@@ -353,17 +353,17 @@ describe('Cross-Browser WASM Compatibility', () => {
 
   describe('Performance Characteristics', () => {
     for (const { name, browser } of browsers) {
-      it(`should measure WASM performance in ${name}`, async () => {
+      it(`should measure WASM performance in ${name}`, async() => {
         const context = await browser.newContext();
         const page = await context.newPage();
 
         await page.goto(`${serverUrl}/test/browser/wasm-test.html`);
 
-        const perfTest = await page.evaluate(async () => {
+        const perfTest = await page.evaluate(async() => {
           const { RuvSwarm } = await import('/src/index-enhanced.js');
-          const swarm = await RuvSwarm.initialize({ 
+          const swarm = await RuvSwarm.initialize({
             useSIMD: true,
-            debug: false 
+            debug: false,
           });
 
           const benchmarks = {};
@@ -384,7 +384,7 @@ describe('Cross-Browser WASM Compatibility', () => {
 
           const matrixStart = performance.now();
           const matrixResult = await swarm.wasmLoader.matrixMultiply(
-            matA, matB, matrixSize, matrixSize, matrixSize
+            matA, matB, matrixSize, matrixSize, matrixSize,
           );
           benchmarks.matrixOps = performance.now() - matrixStart;
 
@@ -394,8 +394,8 @@ describe('Cross-Browser WASM Compatibility', () => {
             layers: [
               { units: 100, activation: 'relu' },
               { units: 50, activation: 'relu' },
-              { units: 10, activation: 'softmax' }
-            ]
+              { units: 10, activation: 'softmax' },
+            ],
           });
 
           const nnInput = new Float32Array(100).fill(0.5);
@@ -427,13 +427,13 @@ describe('Cross-Browser WASM Compatibility', () => {
 
   describe('Error Handling', () => {
     for (const { name, browser } of browsers) {
-      it(`should handle WASM errors gracefully in ${name}`, async () => {
+      it(`should handle WASM errors gracefully in ${name}`, async() => {
         const context = await browser.newContext();
         const page = await context.newPage();
 
         await page.goto(`${serverUrl}/test/browser/wasm-test.html`);
 
-        const errorTest = await page.evaluate(async () => {
+        const errorTest = await page.evaluate(async() => {
           const { RuvSwarm } = await import('/src/index-enhanced.js');
           const swarm = await RuvSwarm.initialize({ debug: false });
 
@@ -447,7 +447,7 @@ describe('Cross-Browser WASM Compatibility', () => {
             errors.push({
               test: 'invalid-agent-type',
               caught: true,
-              message: error.message
+              message: error.message,
             });
           }
 
@@ -458,7 +458,7 @@ describe('Cross-Browser WASM Compatibility', () => {
             errors.push({
               test: 'memory-allocation',
               caught: true,
-              message: error.message
+              message: error.message,
             });
           }
 
@@ -466,13 +466,13 @@ describe('Cross-Browser WASM Compatibility', () => {
           try {
             await swarm.neuralManager.createNetwork({
               type: 'invalid',
-              layers: []
+              layers: [],
             });
           } catch (error) {
             errors.push({
               test: 'invalid-network',
               caught: true,
-              message: error.message
+              message: error.message,
             });
           }
 
@@ -492,13 +492,13 @@ describe('Cross-Browser WASM Compatibility', () => {
 
   describe('WebWorker Integration', () => {
     for (const { name, browser } of browsers) {
-      it(`should run WASM in WebWorker in ${name}`, async () => {
+      it(`should run WASM in WebWorker in ${name}`, async() => {
         const context = await browser.newContext();
         const page = await context.newPage();
 
         await page.goto(`${serverUrl}/test/browser/wasm-test.html`);
 
-        const workerTest = await page.evaluate(async () => {
+        const workerTest = await page.evaluate(async() => {
           // Create worker script
           const workerScript = `
             importScripts('/src/index.js');
@@ -523,7 +523,7 @@ describe('Cross-Browser WASM Compatibility', () => {
             worker.onmessage = (e) => resolve(e.data);
             worker.postMessage({
               a: new Float32Array([1, 2, 3, 4]),
-              b: new Float32Array([5, 6, 7, 8])
+              b: new Float32Array([5, 6, 7, 8]),
             });
           });
 
@@ -600,6 +600,6 @@ export async function createTestHTML() {
 
   await writeFile(
     path.join(__dirname, 'wasm-test.html'),
-    html
+    html,
   );
 }

@@ -7,7 +7,7 @@
 import path from 'path';
 process.chdir(path.join(__dirname, '..'));
 
-import { EnhancedMCPTools  } from '../src/mcp-tools-enhanced';
+import { EnhancedMCPTools } from '../src/mcp-tools-enhanced';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
@@ -207,16 +207,14 @@ async function comprehensiveOrchestrationTest() {
 }
 
 // Run the comprehensive test
-// Direct execution block
-{
-  comprehensiveOrchestrationTest()
-    .then(success => {
-      process.exit(success ? 0 : 1);
-    })
-    .catch(error => {
-      console.error('Unhandled error:', error);
-      process.exit(1);
-    });
-}
+// Direct execution
+comprehensiveOrchestrationTest()
+  .then(success => {
+    process.exit(success ? 0 : 1);
+  })
+  .catch(error => {
+    console.error('Unhandled error:', error);
+    process.exit(1);
+  });
 
 export { comprehensiveOrchestrationTest };

@@ -230,6 +230,11 @@ class RuvSwarm {
       throw new Error(`Failed to create swarm: ${error.message}`);
     }
   }
+
+  // Instance method that delegates to static method for API convenience
+  detectSIMDSupport() {
+    return RuvSwarm.detectSIMDSupport();
+  }
 }
 
 /**

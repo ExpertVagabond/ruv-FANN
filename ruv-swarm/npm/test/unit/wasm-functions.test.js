@@ -11,12 +11,12 @@ describe('WASM Functions Unit Tests', () => {
   let wasmModule;
   let loader;
 
-  beforeAll(async () => {
+  beforeAll(async() => {
     loader = new WasmModuleLoader();
     wasmModule = await loader.loadModule('core');
   });
 
-  afterAll(async () => {
+  afterAll(async() => {
     if (loader) {
       await loader.cleanup();
     }
@@ -72,7 +72,7 @@ describe('WASM Functions Unit Tests', () => {
       const newState = { status: 'busy', currentTask: 'test-task-1' };
       const result = wasmModule.exports.updateAgentState(agentId, newState);
       expect(result).toBe(true);
-      
+
       const status = wasmModule.exports.getAgentStatus(agentId);
       expect(status.status).toBe('busy');
     });
@@ -88,7 +88,7 @@ describe('WASM Functions Unit Tests', () => {
       expect(agentId).toBeDefined();
       const result = wasmModule.exports.removeAgent(agentId);
       expect(result).toBe(true);
-      
+
       const agents = wasmModule.exports.listAgents();
       expect(agents.some(a => a.id === agentId)).toBe(false);
     });
@@ -101,7 +101,7 @@ describe('WASM Functions Unit Tests', () => {
       const config = {
         name: 'test-swarm',
         topology: 'mesh',
-        maxAgents: 10
+        maxAgents: 10,
       };
       swarmId = wasmModule.exports.createSwarm(config);
       expect(swarmId).toBeDefined();
@@ -123,19 +123,19 @@ describe('WASM Functions Unit Tests', () => {
       const agentId = wasmModule.exports.createAgent('coder', ['coding', 'testing']);
       const result = wasmModule.exports.addAgentToSwarm(swarmId, agentId);
       expect(result).toBe(true);
-      
+
       const status = wasmModule.exports.getSwarmStatus(swarmId);
       expect(status.agentCount).toBe(1);
     });
 
-    it('should orchestrate task in swarm', async () => {
+    it('should orchestrate task in swarm', async() => {
       expect(swarmId).toBeDefined();
       const task = {
         description: 'Test task',
         priority: 'high',
-        requiredCapabilities: ['coding']
+        requiredCapabilities: ['coding'],
       };
-      
+
       const taskId = await wasmModule.exports.orchestrateTask(swarmId, task);
       expect(taskId).toBeDefined();
       expect(typeof taskId).toBe('string');
@@ -154,7 +154,7 @@ describe('WASM Functions Unit Tests', () => {
       expect(swarmId).toBeDefined();
       const result = wasmModule.exports.removeSwarm(swarmId);
       expect(result).toBe(true);
-      
+
       expect(() => wasmModule.exports.getSwarmStatus(swarmId)).toThrow();
     });
   });
@@ -168,7 +168,7 @@ describe('WASM Functions Unit Tests', () => {
         inputSize: 10,
         hiddenSize: 20,
         outputSize: 5,
-        layers: 2
+        layers: 2,
       };
       networkId = wasmModule.exports.createNeuralNetwork(config);
       expect(networkId).toBeDefined();
@@ -195,7 +195,7 @@ describe('WASM Functions Unit Tests', () => {
       expect(networkId).toBeDefined();
       const trainingData = {
         inputs: [new Float32Array(10).fill(0.5)],
-        targets: [new Float32Array(5).fill(0.8)]
+        targets: [new Float32Array(5).fill(0.8)],
       };
       const loss = wasmModule.exports.train(networkId, trainingData, { epochs: 1, learningRate: 0.01 });
       expect(typeof loss).toBe('number');
@@ -206,15 +206,15 @@ describe('WASM Functions Unit Tests', () => {
       expect(networkId).toBeDefined();
       const weights = wasmModule.exports.getNetworkWeights(networkId);
       expect(weights).toBeInstanceOf(Float32Array);
-      
+
       const newNetworkId = wasmModule.exports.createNeuralNetwork({
         type: 'lstm',
         inputSize: 10,
         hiddenSize: 20,
         outputSize: 5,
-        layers: 2
+        layers: 2,
       });
-      
+
       const result = wasmModule.exports.setNetworkWeights(newNetworkId, weights);
       expect(result).toBe(true);
     });
@@ -231,36 +231,36 @@ describe('WASM Functions Unit Tests', () => {
       const size = 1024;
       const ptr = wasmModule.exports.allocate(size);
       expect(ptr).toBeGreaterThan(0);
-      
+
       wasmModule.exports.deallocate(ptr);
     });
 
     it('should copy memory between JS and WASM', () => {
       const data = new Float32Array([1.0, 2.0, 3.0, 4.0, 5.0]);
       const ptr = wasmModule.exports.allocateFloat32Array(data.length);
-      
+
       wasmModule.exports.copyFloat32ArrayToWasm(data, ptr);
       const result = wasmModule.exports.copyFloat32ArrayFromWasm(ptr, data.length);
-      
+
       expect(result).toEqual(data);
       wasmModule.exports.deallocateFloat32Array(ptr);
     });
 
     it('should handle memory pressure', () => {
       const memoryBefore = wasmModule.exports.getMemoryUsage();
-      
+
       // Allocate a large amount of memory
       const allocations = [];
       for (let i = 0; i < 100; i++) {
         allocations.push(wasmModule.exports.allocate(1024 * 1024)); // 1MB each
       }
-      
+
       const memoryAfter = wasmModule.exports.getMemoryUsage();
       expect(memoryAfter.heapUsed).toBeGreaterThan(memoryBefore.heapUsed);
-      
+
       // Cleanup
       allocations.forEach(ptr => wasmModule.exports.deallocate(ptr));
-      
+
       // Force garbage collection if available
       if (wasmModule.exports.collectGarbage) {
         wasmModule.exports.collectGarbage();
@@ -274,11 +274,11 @@ describe('WASM Functions Unit Tests', () => {
         console.log('SIMD not supported, skipping test');
         return;
       }
-      
+
       const a = new Float32Array([1, 2, 3, 4]);
       const b = new Float32Array([5, 6, 7, 8]);
       const result = wasmModule.exports.simdVectorAdd(a, b);
-      
+
       expect(result).toEqual(new Float32Array([6, 8, 10, 12]));
     });
 
@@ -287,11 +287,11 @@ describe('WASM Functions Unit Tests', () => {
         console.log('SIMD not supported, skipping test');
         return;
       }
-      
+
       const a = new Float32Array([1, 2, 3, 4]); // 2x2 matrix
       const b = new Float32Array([5, 6, 7, 8]); // 2x2 matrix
       const result = wasmModule.exports.simdMatMul(a, 2, 2, b, 2, 2);
-      
+
       expect(result).toEqual(new Float32Array([19, 22, 43, 50]));
     });
 
@@ -299,22 +299,22 @@ describe('WASM Functions Unit Tests', () => {
       const size = 1000000;
       const a = new Float32Array(size).fill(1.0);
       const b = new Float32Array(size).fill(2.0);
-      
+
       // Non-SIMD benchmark
       const nonSimdStart = performance.now();
       const nonSimdResult = wasmModule.exports.vectorAddNonSIMD(a, b);
       const nonSimdTime = performance.now() - nonSimdStart;
-      
+
       // SIMD benchmark (if supported)
       if (wasmModule.exports.detectSIMDSupport()) {
         const simdStart = performance.now();
         const simdResult = wasmModule.exports.vectorAddSIMD(a, b);
         const simdTime = performance.now() - simdStart;
-        
+
         console.log(`Non-SIMD time: ${nonSimdTime.toFixed(2)}ms`);
         console.log(`SIMD time: ${simdTime.toFixed(2)}ms`);
         console.log(`Speedup: ${(nonSimdTime / simdTime).toFixed(2)}x`);
-        
+
         expect(simdTime).toBeLessThan(nonSimdTime);
       }
     });
@@ -329,7 +329,7 @@ describe('WASM Functions Unit Tests', () => {
       const invalidConfig = {
         name: '',
         topology: 'invalid',
-        maxAgents: -1
+        maxAgents: -1,
       };
       expect(() => wasmModule.exports.createSwarm(invalidConfig)).toThrow();
     });
@@ -344,7 +344,7 @@ describe('WASM Functions Unit Tests', () => {
         type: 'unknown',
         inputSize: -1,
         hiddenSize: 0,
-        outputSize: 0
+        outputSize: 0,
       };
       expect(() => wasmModule.exports.createNeuralNetwork(invalidConfig)).toThrow();
     });
@@ -354,15 +354,15 @@ describe('WASM Functions Unit Tests', () => {
     it('should benchmark agent creation performance', () => {
       const iterations = 1000;
       const start = performance.now();
-      
+
       for (let i = 0; i < iterations; i++) {
         const agentId = wasmModule.exports.createAgent('researcher', ['research']);
         wasmModule.exports.removeAgent(agentId);
       }
-      
+
       const time = performance.now() - start;
       const avgTime = time / iterations;
-      
+
       console.log(`Agent creation average time: ${avgTime.toFixed(3)}ms`);
       expect(avgTime).toBeLessThan(1); // Should be less than 1ms per agent
     });
@@ -373,22 +373,22 @@ describe('WASM Functions Unit Tests', () => {
         inputSize: 100,
         hiddenSize: 50,
         outputSize: 10,
-        layers: 3
+        layers: 3,
       });
-      
+
       const input = new Float32Array(100).fill(0.5);
       const iterations = 1000;
-      
+
       const start = performance.now();
       for (let i = 0; i < iterations; i++) {
         wasmModule.exports.forward(network, input);
       }
       const time = performance.now() - start;
-      
+
       const avgTime = time / iterations;
       console.log(`Neural network inference average time: ${avgTime.toFixed(3)}ms`);
       expect(avgTime).toBeLessThan(0.5); // Should be less than 0.5ms per inference
-      
+
       wasmModule.exports.removeNeuralNetwork(network);
     });
 
@@ -396,7 +396,7 @@ describe('WASM Functions Unit Tests', () => {
       const size = 1024 * 1024; // 1MB
       const data = new Float32Array(size / 4).fill(1.0);
       const iterations = 100;
-      
+
       const start = performance.now();
       for (let i = 0; i < iterations; i++) {
         const ptr = wasmModule.exports.allocateFloat32Array(data.length);
@@ -405,10 +405,10 @@ describe('WASM Functions Unit Tests', () => {
         wasmModule.exports.deallocateFloat32Array(ptr);
       }
       const time = performance.now() - start;
-      
+
       const avgTime = time / iterations;
       const throughput = (size * iterations) / (time / 1000) / (1024 * 1024); // MB/s
-      
+
       console.log(`Memory operation average time: ${avgTime.toFixed(3)}ms`);
       console.log(`Memory throughput: ${throughput.toFixed(2)} MB/s`);
       expect(throughput).toBeGreaterThan(100); // Should be at least 100 MB/s

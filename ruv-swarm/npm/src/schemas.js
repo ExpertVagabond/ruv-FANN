@@ -19,7 +19,7 @@ class BaseValidator {
       throw new ValidationError(
         `Validation failed for ${fieldName}: ${error.message}`,
         fieldName,
-        value
+        value,
       );
     }
   }
@@ -31,7 +31,7 @@ class BaseValidator {
         `${fieldName} is required`,
         fieldName,
         value,
-        schema.type
+        schema.type,
       );
     }
 
@@ -46,7 +46,7 @@ class BaseValidator {
         `${fieldName} must be of type ${schema.type}`,
         fieldName,
         value,
-        schema.type
+        schema.type,
       );
     }
 
@@ -57,7 +57,7 @@ class BaseValidator {
           `${fieldName} must be at least ${schema.min}`,
           fieldName,
           value,
-          schema.type
+          schema.type,
         );
       }
       if (schema.max !== undefined && value > schema.max) {
@@ -65,7 +65,7 @@ class BaseValidator {
           `${fieldName} must be at most ${schema.max}`,
           fieldName,
           value,
-          schema.type
+          schema.type,
         );
       }
       if (schema.integer && !Number.isInteger(value)) {
@@ -73,7 +73,7 @@ class BaseValidator {
           `${fieldName} must be an integer`,
           fieldName,
           value,
-          'integer'
+          'integer',
         );
       }
     }
@@ -86,7 +86,7 @@ class BaseValidator {
           `${fieldName} must be at least ${schema.minLength} characters/items long`,
           fieldName,
           value,
-          schema.type
+          schema.type,
         );
       }
       if (schema.maxLength !== undefined && length > schema.maxLength) {
@@ -94,7 +94,7 @@ class BaseValidator {
           `${fieldName} must be at most ${schema.maxLength} characters/items long`,
           fieldName,
           value,
-          schema.type
+          schema.type,
         );
       }
     }
@@ -105,7 +105,7 @@ class BaseValidator {
         `${fieldName} must be one of: ${schema.enum.join(', ')}`,
         fieldName,
         value,
-        `enum(${schema.enum.join('|')})`
+        `enum(${schema.enum.join('|')})`,
       );
     }
 
@@ -117,7 +117,7 @@ class BaseValidator {
           `${fieldName} does not match the required pattern`,
           fieldName,
           value,
-          'string(pattern)'
+          'string(pattern)',
         );
       }
     }
@@ -132,7 +132,7 @@ class BaseValidator {
             `${fieldName}.${propName} is required`,
             `${fieldName}.${propName}`,
             undefined,
-            propSchema.type
+            propSchema.type,
           );
         }
       }
@@ -150,20 +150,20 @@ class BaseValidator {
 
   static validateType(value, expectedType) {
     switch (expectedType) {
-      case 'string':
-        return typeof value === 'string';
-      case 'number':
-        return typeof value === 'number' && !isNaN(value) && isFinite(value);
-      case 'boolean':
-        return typeof value === 'boolean';
-      case 'array':
-        return Array.isArray(value);
-      case 'object':
-        return typeof value === 'object' && value !== null && !Array.isArray(value);
-      case 'function':
-        return typeof value === 'function';
-      default:
-        return true;
+    case 'string':
+      return typeof value === 'string';
+    case 'number':
+      return typeof value === 'number' && !isNaN(value) && isFinite(value);
+    case 'boolean':
+      return typeof value === 'boolean';
+    case 'array':
+      return Array.isArray(value);
+    case 'object':
+      return typeof value === 'object' && value !== null && !Array.isArray(value);
+    case 'function':
+      return typeof value === 'function';
+    default:
+      return true;
     }
   }
 }
@@ -177,64 +177,64 @@ const MCPSchemas = {
     topology: {
       type: 'string',
       enum: ['mesh', 'hierarchical', 'ring', 'star'],
-      default: 'mesh'
+      default: 'mesh',
     },
     maxAgents: {
       type: 'number',
       integer: true,
       min: 1,
       max: 100,
-      default: 5
+      default: 5,
     },
     strategy: {
       type: 'string',
       enum: ['balanced', 'specialized', 'adaptive'],
-      default: 'balanced'
+      default: 'balanced',
     },
     enableCognitiveDiversity: {
       type: 'boolean',
-      default: true
+      default: true,
     },
     enableNeuralAgents: {
       type: 'boolean',
-      default: true
+      default: true,
     },
     enableForecasting: {
       type: 'boolean',
-      default: false
-    }
+      default: false,
+    },
   },
 
   agent_spawn: {
     type: {
       type: 'string',
       enum: ['researcher', 'coder', 'analyst', 'optimizer', 'coordinator', 'tester', 'reviewer', 'documenter'],
-      default: 'researcher'
+      default: 'researcher',
     },
     name: {
       type: 'string',
       minLength: 1,
       maxLength: 100,
-      required: false
+      required: false,
     },
     capabilities: {
       type: 'array',
       items: {
         type: 'string',
-        minLength: 1
+        minLength: 1,
       },
-      required: false
+      required: false,
     },
     cognitivePattern: {
       type: 'string',
       enum: ['convergent', 'divergent', 'lateral', 'systems', 'critical', 'adaptive'],
-      required: false
+      required: false,
     },
     swarmId: {
       type: 'string',
       pattern: '^[a-fA-F0-9-]+$',
-      required: false
-    }
+      required: false,
+    },
   },
 
   task_orchestrate: {
@@ -242,155 +242,155 @@ const MCPSchemas = {
       type: 'string',
       required: true,
       minLength: 1,
-      maxLength: 1000
+      maxLength: 1000,
     },
     priority: {
       type: 'string',
       enum: ['low', 'medium', 'high', 'critical'],
-      default: 'medium'
+      default: 'medium',
     },
     strategy: {
       type: 'string',
       enum: ['parallel', 'sequential', 'adaptive'],
-      default: 'adaptive'
+      default: 'adaptive',
     },
     maxAgents: {
       type: 'number',
       integer: true,
       min: 1,
       max: 50,
-      required: false
+      required: false,
     },
     swarmId: {
       type: 'string',
       pattern: '^[a-fA-F0-9-]+$',
-      required: false
+      required: false,
     },
     requiredCapabilities: {
       type: 'array',
       items: {
         type: 'string',
-        minLength: 1
+        minLength: 1,
       },
-      required: false
+      required: false,
     },
     estimatedDuration: {
       type: 'number',
       min: 1000,
       max: 3600000, // 1 hour max
-      required: false
-    }
+      required: false,
+    },
   },
 
   swarm_status: {
     verbose: {
       type: 'boolean',
-      default: false
+      default: false,
     },
     swarmId: {
       type: 'string',
       pattern: '^[a-fA-F0-9-]+$',
-      required: false
-    }
+      required: false,
+    },
   },
 
   task_status: {
     taskId: {
       type: 'string',
       pattern: '^[a-fA-F0-9-]+$',
-      required: false
+      required: false,
     },
     detailed: {
       type: 'boolean',
-      default: false
-    }
+      default: false,
+    },
   },
 
   task_results: {
     taskId: {
       type: 'string',
       required: true,
-      pattern: '^[a-fA-F0-9-]+$'
+      pattern: '^[a-fA-F0-9-]+$',
     },
     format: {
       type: 'string',
       enum: ['summary', 'detailed', 'raw', 'performance'],
-      default: 'summary'
+      default: 'summary',
     },
     includeAgentResults: {
       type: 'boolean',
-      default: true
-    }
+      default: true,
+    },
   },
 
   agent_list: {
     filter: {
       type: 'string',
       enum: ['all', 'active', 'idle', 'busy'],
-      default: 'all'
+      default: 'all',
     },
     swarmId: {
       type: 'string',
       pattern: '^[a-fA-F0-9-]+$',
-      required: false
-    }
+      required: false,
+    },
   },
 
   agent_metrics: {
     agentId: {
       type: 'string',
       pattern: '^[a-fA-F0-9-]+$',
-      required: false
+      required: false,
     },
     swarmId: {
       type: 'string',
       pattern: '^[a-fA-F0-9-]+$',
-      required: false
+      required: false,
     },
     metric: {
       type: 'string',
       enum: ['all', 'cpu', 'memory', 'tasks', 'performance', 'neural'],
-      default: 'all'
-    }
+      default: 'all',
+    },
   },
 
   benchmark_run: {
     type: {
       type: 'string',
       enum: ['all', 'wasm', 'swarm', 'agent', 'task', 'neural'],
-      default: 'all'
+      default: 'all',
     },
     iterations: {
       type: 'number',
       integer: true,
       min: 1,
       max: 100,
-      default: 10
+      default: 10,
     },
     includeNeuralBenchmarks: {
       type: 'boolean',
-      default: true
+      default: true,
     },
     includeSwarmBenchmarks: {
       type: 'boolean',
-      default: true
-    }
+      default: true,
+    },
   },
 
   features_detect: {
     category: {
       type: 'string',
       enum: ['all', 'wasm', 'simd', 'memory', 'platform', 'neural', 'forecasting'],
-      default: 'all'
-    }
+      default: 'all',
+    },
   },
 
   memory_usage: {
     detail: {
       type: 'string',
       enum: ['summary', 'detailed', 'by-agent'],
-      default: 'summary'
-    }
+      default: 'summary',
+    },
   },
 
   // Neural Network Tools
@@ -398,63 +398,63 @@ const MCPSchemas = {
     agentId: {
       type: 'string',
       pattern: '^[a-fA-F0-9-]+$',
-      required: false
-    }
+      required: false,
+    },
   },
 
   neural_train: {
     agentId: {
       type: 'string',
       required: true,
-      pattern: '^[a-fA-F0-9-]+$'
+      pattern: '^[a-fA-F0-9-]+$',
     },
     iterations: {
       type: 'number',
       integer: true,
       min: 1,
       max: 1000,
-      default: 10
+      default: 10,
     },
     learningRate: {
       type: 'number',
       min: 0.00001,
       max: 1.0,
-      default: 0.001
+      default: 0.001,
     },
     modelType: {
       type: 'string',
       enum: ['feedforward', 'lstm', 'transformer', 'attention', 'cnn', 'rnn', 'gru'],
-      default: 'feedforward'
+      default: 'feedforward',
     },
     trainingData: {
       type: 'object',
-      required: false
-    }
+      required: false,
+    },
   },
 
   neural_patterns: {
     pattern: {
       type: 'string',
       enum: ['all', 'convergent', 'divergent', 'lateral', 'systems', 'critical', 'abstract', 'adaptive'],
-      default: 'all'
-    }
+      default: 'all',
+    },
   },
 
   // DAA (Decentralized Autonomous Agents) Tools
   daa_init: {
     enableCoordination: {
       type: 'boolean',
-      default: true
+      default: true,
     },
     enableLearning: {
       type: 'boolean',
-      default: true
+      default: true,
     },
     persistenceMode: {
       type: 'string',
       enum: ['auto', 'memory', 'disk'],
-      default: 'auto'
-    }
+      default: 'auto',
+    },
   },
 
   daa_agent_create: {
@@ -462,59 +462,59 @@ const MCPSchemas = {
       type: 'string',
       required: true,
       minLength: 1,
-      maxLength: 100
+      maxLength: 100,
     },
     capabilities: {
       type: 'array',
       items: {
         type: 'string',
-        minLength: 1
+        minLength: 1,
       },
-      required: false
+      required: false,
     },
     cognitivePattern: {
       type: 'string',
       enum: ['convergent', 'divergent', 'lateral', 'systems', 'critical', 'adaptive'],
-      required: false
+      required: false,
     },
     enableMemory: {
       type: 'boolean',
-      default: true
+      default: true,
     },
     learningRate: {
       type: 'number',
       min: 0.001,
       max: 1.0,
-      default: 0.1
-    }
+      default: 0.1,
+    },
   },
 
   daa_agent_adapt: {
     agentId: {
       type: 'string',
       required: true,
-      minLength: 1
+      minLength: 1,
     },
     feedback: {
       type: 'string',
       minLength: 1,
       maxLength: 1000,
-      required: false
+      required: false,
     },
     performanceScore: {
       type: 'number',
       min: 0,
       max: 1,
-      required: false
+      required: false,
     },
     suggestions: {
       type: 'array',
       items: {
         type: 'string',
-        minLength: 1
+        minLength: 1,
       },
-      required: false
-    }
+      required: false,
+    },
   },
 
   daa_workflow_create: {
@@ -522,142 +522,142 @@ const MCPSchemas = {
       type: 'string',
       required: true,
       minLength: 1,
-      maxLength: 100
+      maxLength: 100,
     },
     name: {
       type: 'string',
       required: true,
       minLength: 1,
-      maxLength: 200
+      maxLength: 200,
     },
     steps: {
       type: 'array',
       items: {
-        type: 'object'
+        type: 'object',
       },
-      required: false
+      required: false,
     },
     dependencies: {
       type: 'object',
-      required: false
+      required: false,
     },
     strategy: {
       type: 'string',
       enum: ['parallel', 'sequential', 'adaptive'],
-      default: 'adaptive'
-    }
+      default: 'adaptive',
+    },
   },
 
   daa_workflow_execute: {
     workflowId: {
       type: 'string',
       required: true,
-      minLength: 1
+      minLength: 1,
     },
     agentIds: {
       type: 'array',
       items: {
         type: 'string',
-        minLength: 1
+        minLength: 1,
       },
-      required: false
+      required: false,
     },
     parallelExecution: {
       type: 'boolean',
-      default: true
-    }
+      default: true,
+    },
   },
 
   daa_knowledge_share: {
     sourceAgentId: {
       type: 'string',
       required: true,
-      minLength: 1
+      minLength: 1,
     },
     targetAgentIds: {
       type: 'array',
       items: {
         type: 'string',
-        minLength: 1
+        minLength: 1,
       },
       required: true,
-      minLength: 1
+      minLength: 1,
     },
     knowledgeDomain: {
       type: 'string',
       minLength: 1,
-      required: false
+      required: false,
     },
     knowledgeContent: {
       type: 'object',
-      required: false
-    }
+      required: false,
+    },
   },
 
   daa_learning_status: {
     agentId: {
       type: 'string',
-      required: false
+      required: false,
     },
     detailed: {
       type: 'boolean',
-      default: false
-    }
+      default: false,
+    },
   },
 
   daa_cognitive_pattern: {
     agentId: {
       type: 'string',
-      required: false
+      required: false,
     },
     pattern: {
       type: 'string',
       enum: ['convergent', 'divergent', 'lateral', 'systems', 'critical', 'adaptive'],
-      required: false
+      required: false,
     },
     analyze: {
       type: 'boolean',
-      default: false
-    }
+      default: false,
+    },
   },
 
   daa_meta_learning: {
     sourceDomain: {
       type: 'string',
       minLength: 1,
-      required: false
+      required: false,
     },
     targetDomain: {
       type: 'string',
       minLength: 1,
-      required: false
+      required: false,
     },
     transferMode: {
       type: 'string',
       enum: ['adaptive', 'direct', 'gradual'],
-      default: 'adaptive'
+      default: 'adaptive',
     },
     agentIds: {
       type: 'array',
       items: {
         type: 'string',
-        minLength: 1
+        minLength: 1,
       },
-      required: false
-    }
+      required: false,
+    },
   },
 
   daa_performance_metrics: {
     category: {
       type: 'string',
       enum: ['all', 'system', 'performance', 'efficiency', 'neural'],
-      default: 'all'
+      default: 'all',
     },
     timeRange: {
       type: 'string',
       pattern: '^\\d+[hmd]$', // e.g., "1h", "24h", "7d"
-      required: false
-    }
+      required: false,
+    },
   },
 
   // Monitoring Tools
@@ -665,39 +665,39 @@ const MCPSchemas = {
     swarmId: {
       type: 'string',
       pattern: '^[a-fA-F0-9-]+$',
-      required: false
+      required: false,
     },
     duration: {
       type: 'number',
       integer: true,
       min: 1,
       max: 3600, // 1 hour max
-      default: 10
+      default: 10,
     },
     interval: {
       type: 'number',
       integer: true,
       min: 1,
       max: 60,
-      default: 1
+      default: 1,
     },
     includeAgents: {
       type: 'boolean',
-      default: true
+      default: true,
     },
     includeTasks: {
       type: 'boolean',
-      default: true
+      default: true,
     },
     includeMetrics: {
       type: 'boolean',
-      default: true
+      default: true,
     },
     realTime: {
       type: 'boolean',
-      default: false
-    }
-  }
+      default: false,
+    },
+  },
 };
 
 /**
@@ -714,7 +714,7 @@ class ValidationUtils {
         `No validation schema found for tool: ${toolName}`,
         'toolName',
         toolName,
-        'string'
+        'string',
       );
     }
 
@@ -744,7 +744,7 @@ class ValidationUtils {
     const allowedFields = Object.keys(schema);
     const providedFields = Object.keys(params);
     const unexpectedFields = providedFields.filter(field => !allowedFields.includes(field));
-    
+
     if (unexpectedFields.length > 0) {
       console.warn(`Unexpected parameters for ${toolName}: ${unexpectedFields.join(', ')}`);
       // Note: We don't throw here to maintain backward compatibility
@@ -764,7 +764,7 @@ class ValidationUtils {
 
     const doc = {
       tool: toolName,
-      parameters: {}
+      parameters: {},
     };
 
     for (const [fieldName, fieldSchema] of Object.entries(schema)) {
@@ -772,7 +772,7 @@ class ValidationUtils {
         type: fieldSchema.type,
         required: fieldSchema.required || false,
         default: fieldSchema.default,
-        description: this.generateFieldDescription(fieldName, fieldSchema)
+        description: this.generateFieldDescription(fieldName, fieldSchema),
       };
 
       if (fieldSchema.enum) {
@@ -781,13 +781,13 @@ class ValidationUtils {
       if (fieldSchema.min !== undefined || fieldSchema.max !== undefined) {
         doc.parameters[fieldName].range = {
           min: fieldSchema.min,
-          max: fieldSchema.max
+          max: fieldSchema.max,
         };
       }
       if (fieldSchema.minLength !== undefined || fieldSchema.maxLength !== undefined) {
         doc.parameters[fieldName].length = {
           min: fieldSchema.minLength,
-          max: fieldSchema.maxLength
+          max: fieldSchema.maxLength,
         };
       }
     }
@@ -800,7 +800,7 @@ class ValidationUtils {
    */
   static generateFieldDescription(fieldName, schema) {
     let desc = `${fieldName} (${schema.type})`;
-    
+
     if (schema.required) {
       desc += ' - Required';
     } else {
@@ -858,7 +858,7 @@ class ValidationUtils {
 export {
   MCPSchemas,
   BaseValidator,
-  ValidationUtils
+  ValidationUtils,
 };
 
 export default ValidationUtils;

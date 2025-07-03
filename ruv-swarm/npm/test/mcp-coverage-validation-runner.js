@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * MCP Coverage Validation Runner - Comprehensive Test of All Fixed Tools
- * 
+ *
  * MISSION: Validate that the 3 MCP tools and 10 DAA tools are now working
  * This tests the fixes made to neural_train, task_results, swarm_monitor, and DAA integration
  */
@@ -24,13 +24,13 @@ const testResults = {
   mcpTools: {
     tested: 0,
     passed: 0,
-    failed: []
+    failed: [],
   },
   daaTools: {
     tested: 0,
     passed: 0,
-    failed: []
-  }
+    failed: [],
+  },
 };
 
 // MCP Tools to test (the ones that were failing)
@@ -39,20 +39,20 @@ const mcpToolsToTest = [
     name: 'neural_train',
     command: 'neural',
     args: ['train', '--iterations', '3', '--learning-rate', '0.01', '--model-type', 'feedforward'],
-    expectedOutput: 'Training Complete'
+    expectedOutput: 'Training Complete',
   },
   {
     name: 'swarm_monitor',
     command: 'monitor',
     args: ['2'],
-    expectedOutput: 'Monitoring swarm'
+    expectedOutput: 'Monitoring swarm',
   },
   {
     name: 'swarm_status',
     command: 'status',
     args: ['--verbose'],
-    expectedOutput: 'swarms loaded'
-  }
+    expectedOutput: 'swarms loaded',
+  },
 ];
 
 // DAA functionality tests (testing integration)
@@ -61,14 +61,14 @@ const daaToolsToTest = [
     name: 'daa_init_test',
     command: 'init',
     args: ['mesh', '3', '--claude'],
-    expectedOutput: 'swarm initialized'
+    expectedOutput: 'swarm initialized',
   },
   {
     name: 'daa_agent_spawn',
     command: 'spawn',
     args: ['researcher', 'DAA-Test-Agent'],
-    expectedOutput: 'Spawned agent'
-  }
+    expectedOutput: 'Spawned agent',
+  },
 ];
 
 /**
@@ -77,16 +77,16 @@ const daaToolsToTest = [
 async function runTest(testName, command, args, expectedOutput, timeout = 30000) {
   return new Promise((resolve) => {
     console.log(`\n🧪 Testing ${testName}...`);
-    
+
     const child = spawn('npx', ['ruv-swarm', command, ...args], {
       cwd: join(__dirname, '..'),
-      stdio: ['pipe', 'pipe', 'pipe']
+      stdio: ['pipe', 'pipe', 'pipe'],
     });
-    
+
     let stdout = '';
     let stderr = '';
     let completed = false;
-    
+
     // Set timeout
     const timer = setTimeout(() => {
       if (!completed) {
@@ -97,26 +97,26 @@ async function runTest(testName, command, args, expectedOutput, timeout = 30000)
           success: false,
           error: `Timeout after ${timeout}ms`,
           stdout,
-          stderr
+          stderr,
         });
       }
     }, timeout);
-    
+
     child.stdout.on('data', (data) => {
       stdout += data.toString();
     });
-    
+
     child.stderr.on('data', (data) => {
       stderr += data.toString();
     });
-    
+
     child.on('close', (code) => {
       if (!completed) {
         completed = true;
         clearTimeout(timer);
-        
+
         const success = stdout.includes(expectedOutput) || code === 0;
-        
+
         if (success) {
           console.log(`✅ ${testName}: PASSED`);
         } else {
@@ -125,17 +125,17 @@ async function runTest(testName, command, args, expectedOutput, timeout = 30000)
           console.log(`   Stdout: ${stdout.slice(0, 200)}...`);
           console.log(`   Stderr: ${stderr.slice(0, 200)}...`);
         }
-        
+
         resolve({
           success,
           error: success ? null : `Expected "${expectedOutput}" in output, got exit code ${code}`,
           stdout,
           stderr,
-          exitCode: code
+          exitCode: code,
         });
       }
     });
-    
+
     child.on('error', (error) => {
       if (!completed) {
         completed = true;
@@ -145,7 +145,7 @@ async function runTest(testName, command, args, expectedOutput, timeout = 30000)
           success: false,
           error: error.message,
           stdout,
-          stderr
+          stderr,
         });
       }
     });
@@ -158,15 +158,15 @@ async function runTest(testName, command, args, expectedOutput, timeout = 30000)
 async function runCoverageValidation() {
   console.log('🚀 Starting MCP Coverage Validation Mission...');
   console.log('========================================');
-  
+
   // Test MCP tools
   console.log('\n📋 Testing Core MCP Tools (3 previously failing tools)');
   for (const test of mcpToolsToTest) {
     testResults.totalTests++;
     testResults.mcpTools.tested++;
-    
+
     const result = await runTest(test.name, test.command, test.args, test.expectedOutput);
-    
+
     if (result.success) {
       testResults.passed++;
       testResults.mcpTools.passed++;
@@ -176,20 +176,20 @@ async function runCoverageValidation() {
         name: test.name,
         error: result.error,
         stdout: result.stdout?.slice(0, 500),
-        stderr: result.stderr?.slice(0, 500)
+        stderr: result.stderr?.slice(0, 500),
       });
       testResults.errors.push(`${test.name}: ${result.error}`);
     }
   }
-  
+
   // Test DAA integration
   console.log('\n🧠 Testing DAA Tools Integration (10 tools)');
   for (const test of daaToolsToTest) {
     testResults.totalTests++;
     testResults.daaTools.tested++;
-    
+
     const result = await runTest(test.name, test.command, test.args, test.expectedOutput);
-    
+
     if (result.success) {
       testResults.passed++;
       testResults.daaTools.passed++;
@@ -199,12 +199,12 @@ async function runCoverageValidation() {
         name: test.name,
         error: result.error,
         stdout: result.stdout?.slice(0, 500),
-        stderr: result.stderr?.slice(0, 500)
+        stderr: result.stderr?.slice(0, 500),
       });
       testResults.errors.push(`${test.name}: ${result.error}`);
     }
   }
-  
+
   // Generate final report
   generateFinalReport();
 }
@@ -215,48 +215,48 @@ async function runCoverageValidation() {
 function generateFinalReport() {
   const endTime = Date.now();
   const duration = (endTime - testResults.startTime) / 1000;
-  
+
   const mcpSuccessRate = (testResults.mcpTools.passed / testResults.mcpTools.tested) * 100;
   const daaSuccessRate = (testResults.daaTools.passed / testResults.daaTools.tested) * 100;
   const overallSuccessRate = (testResults.passed / testResults.totalTests) * 100;
-  
+
   console.log('\n\n📊 MCP COVERAGE SPECIALIST MISSION REPORT');
   console.log('==========================================');
   console.log(`\n⏱️  Duration: ${duration.toFixed(1)}s`);
   console.log(`📋 Total Tests: ${testResults.totalTests}`);
   console.log(`✅ Passed: ${testResults.passed} (${overallSuccessRate.toFixed(1)}%)`);
-  console.log(`❌ Failed: ${testResults.failed} (${((testResults.failed/testResults.totalTests)*100).toFixed(1)}%)`);
-  
+  console.log(`❌ Failed: ${testResults.failed} (${((testResults.failed / testResults.totalTests) * 100).toFixed(1)}%)`);
+
   console.log('\n🔧 MCP TOOLS COVERAGE:');
   console.log(`   ├── Tested: ${testResults.mcpTools.tested}/3 previously failing tools`);
   console.log(`   ├── ✅ Passed: ${testResults.mcpTools.passed} (${mcpSuccessRate.toFixed(1)}%)`);
   console.log(`   └── ❌ Failed: ${testResults.mcpTools.failed.length}`);
-  
+
   if (testResults.mcpTools.failed.length > 0) {
     console.log('\n   Failed MCP Tools:');
     testResults.mcpTools.failed.forEach(fail => {
       console.log(`   ❌ ${fail.name}: ${fail.error}`);
     });
   }
-  
+
   console.log('\n🧠 DAA TOOLS INTEGRATION:');
   console.log(`   ├── Tested: ${testResults.daaTools.tested}/10 DAA tools`);
   console.log(`   ├── ✅ Passed: ${testResults.daaTools.passed} (${daaSuccessRate.toFixed(1)}%)`);
   console.log(`   └── ❌ Failed: ${testResults.daaTools.failed.length}`);
-  
+
   if (testResults.daaTools.failed.length > 0) {
     console.log('\n   Failed DAA Tools:');
     testResults.daaTools.failed.forEach(fail => {
       console.log(`   ❌ ${fail.name}: ${fail.error}`);
     });
   }
-  
+
   // Mission status
   const missionSuccess = overallSuccessRate >= 80;
   console.log(`\n🎯 MISSION STATUS: ${missionSuccess ? '✅ SUCCESS' : '⚠️ NEEDS IMPROVEMENT'}`);
-  console.log(`   Target: 80% success rate`);
+  console.log('   Target: 80% success rate');
   console.log(`   Achieved: ${overallSuccessRate.toFixed(1)}%`);
-  
+
   // Key improvements
   console.log('\n🔧 KEY FIXES IMPLEMENTED:');
   console.log('   ✅ Fixed neural_train validation errors (MCPValidationError → ErrorFactory)');
@@ -264,7 +264,7 @@ function generateFinalReport() {
   console.log('   ✅ Fixed swarm_monitor real-time monitoring');
   console.log('   ✅ Integrated all 10 DAA tools into main MCP class');
   console.log('   ✅ Replaced missing validation functions with inline logic');
-  
+
   // Save detailed report
   const reportPath = join(__dirname, '..', 'test-reports', `mcp-coverage-validation-${Date.now()}.json`);
   writeFileSync(reportPath, JSON.stringify({
@@ -278,14 +278,14 @@ function generateFinalReport() {
     fixes: [
       'Fixed neural_train validation errors',
       'Fixed task_results database issues',
-      'Fixed swarm_monitor functionality', 
+      'Fixed swarm_monitor functionality',
       'Integrated DAA tools into MCP class',
-      'Replaced missing validation functions'
-    ]
+      'Replaced missing validation functions',
+    ],
   }, null, 2));
-  
+
   console.log(`\n📄 Detailed report saved to: ${reportPath}`);
-  
+
   if (missionSuccess) {
     console.log('\n🎉 MISSION ACCOMPLISHED! All critical MCP and DAA tools are now functional!');
   } else {

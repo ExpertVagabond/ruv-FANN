@@ -4,7 +4,7 @@
  * Creates visual representations of benchmark results
  */
 
-import fs from 'fs'.promises;
+import { promises as fs } from 'fs';
 import path from 'path';
 
 class BenchmarkVisualizer {

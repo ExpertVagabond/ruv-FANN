@@ -30,18 +30,18 @@ if (typeof global.WebAssembly === 'undefined') {
       constructor(module, imports) {
         this.exports = {
           memory: new global.WebAssembly.Memory({ initial: 1 }),
-          ...(imports?.env || {})
+          ...(imports?.env || {}),
         };
       }
     },
     instantiate: jest.fn().mockResolvedValue({
       instance: new global.WebAssembly.Instance(),
-      module: new global.WebAssembly.Module()
+      module: new global.WebAssembly.Module(),
     }),
     instantiateStreaming: jest.fn().mockResolvedValue({
       instance: new global.WebAssembly.Instance(),
-      module: new global.WebAssembly.Module()
-    })
+      module: new global.WebAssembly.Module(),
+    }),
   };
 }
 
@@ -55,7 +55,7 @@ jest.mock('worker_threads', () => ({
   MessagePort: jest.fn(),
   moveMessagePortToContext: jest.fn(),
   receiveMessageOnPort: jest.fn(),
-  threadId: 0
+  threadId: 0,
 }), { virtual: true });
 
 // Mock fs/promises for Node.js compatibility
@@ -65,7 +65,7 @@ jest.mock('fs/promises', () => ({
   mkdir: jest.fn(),
   readdir: jest.fn(),
   stat: jest.fn(),
-  access: jest.fn()
+  access: jest.fn(),
 }), { virtual: true });
 
 // Mock better-sqlite3 for tests that don't need real database
@@ -75,18 +75,18 @@ jest.mock('better-sqlite3', () => {
       run: jest.fn(),
       get: jest.fn(),
       all: jest.fn().mockReturnValue([]),
-      iterate: jest.fn()
+      iterate: jest.fn(),
     }),
     exec: jest.fn(),
     close: jest.fn(),
     transaction: jest.fn().mockReturnValue(() => {}),
-    pragma: jest.fn()
+    pragma: jest.fn(),
   }));
 }, { virtual: true });
 
 // Mock UUID generation for consistent test results
 jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'mock-uuid-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9))
+  v4: jest.fn(() => `mock-uuid-${ Date.now() }-${ Math.random().toString(36).substr(2, 9)}`),
 }), { virtual: true });
 
 // Mock WebSocket for MCP tests
@@ -99,12 +99,12 @@ jest.mock('ws', () => ({
     CONNECTING: 0,
     OPEN: 1,
     CLOSING: 2,
-    CLOSED: 3
+    CLOSED: 3,
   })),
   WebSocketServer: jest.fn().mockImplementation(() => ({
     on: jest.fn(),
-    close: jest.fn()
-  }))
+    close: jest.fn(),
+  })),
 }), { virtual: true });
 
 // Performance polyfill for older Node.js versions
@@ -117,7 +117,7 @@ if (typeof global.performance === 'undefined') {
     getEntriesByName: () => [],
     getEntriesByType: () => [],
     clearMarks: () => {},
-    clearMeasures: () => {}
+    clearMeasures: () => {},
   };
 }
 
@@ -130,43 +130,43 @@ global.testUtils = {
    * Wait for a specific amount of time
    */
   wait: (ms) => new Promise(resolve => setTimeout(resolve, ms)),
-  
+
   /**
    * Create a mock agent configuration
    */
   createMockAgent: (overrides = {}) => ({
-    id: 'mock-agent-' + Date.now(),
+    id: `mock-agent-${ Date.now()}`,
     type: 'researcher',
     name: 'test-agent',
     capabilities: ['research', 'analysis'],
     status: 'idle',
-    ...overrides
+    ...overrides,
   }),
-  
+
   /**
    * Create a mock swarm configuration
    */
   createMockSwarm: (overrides = {}) => ({
-    id: 'mock-swarm-' + Date.now(),
+    id: `mock-swarm-${ Date.now()}`,
     name: 'test-swarm',
     topology: 'mesh',
     maxAgents: 10,
     strategy: 'balanced',
-    ...overrides
+    ...overrides,
   }),
-  
+
   /**
    * Create a mock task configuration
    */
   createMockTask: (overrides = {}) => ({
-    id: 'mock-task-' + Date.now(),
+    id: `mock-task-${ Date.now()}`,
     description: 'Test task',
     priority: 'medium',
     status: 'pending',
     dependencies: [],
-    ...overrides
+    ...overrides,
   }),
-  
+
   /**
    * Mock WASM module loader
    */
@@ -176,9 +176,9 @@ global.testUtils = {
       getVersion: jest.fn().mockReturnValue('0.2.0'),
       createAgent: jest.fn().mockReturnValue('mock-agent'),
       createSwarm: jest.fn().mockReturnValue('mock-swarm'),
-      getMemoryUsage: jest.fn().mockReturnValue({ heapUsed: 1024, heapTotal: 2048 })
-    }
-  })
+      getMemoryUsage: jest.fn().mockReturnValue({ heapUsed: 1024, heapTotal: 2048 }),
+    },
+  }),
 };
 
 // Environment detection
@@ -187,7 +187,7 @@ global.testEnv = {
   isGitHub: process.env.GITHUB_ACTIONS === 'true',
   nodeVersion: process.version,
   platform: process.platform,
-  arch: process.arch
+  arch: process.arch,
 };
 
 // Suppress deprecation warnings in tests
@@ -208,10 +208,10 @@ process.on('unhandledRejection', (reason, promise) => {
 afterEach(() => {
   // Clear all timers
   jest.clearAllTimers();
-  
+
   // Clear all mocks
   jest.clearAllMocks();
-  
+
   // Reset modules
   jest.resetModules();
 });

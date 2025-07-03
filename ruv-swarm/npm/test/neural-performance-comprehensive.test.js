@@ -1,15 +1,15 @@
 /**
  * Comprehensive Neural Performance Test Suite
- * 
+ *
  * MISSION: Achieve 85%+ coverage for:
  * - neural-network-manager.js (549 lines → 85% = 467 lines)
- * - neural-agent.js (275 lines → 85% = 234 lines) 
+ * - neural-agent.js (275 lines → 85% = 234 lines)
  * - performance-benchmarks.js (278 lines → 85% = 236 lines)
  * - benchmark.js (127 lines → 85% = 108 lines)
  * - performance.js (164 lines → 85% = 139 lines)
  * - All 8 neural models (~1,500 lines → 85% = 1,275 lines)
  * - 40 neural presets comprehensive testing
- * 
+ *
  * Total target: 3,000+ test assertions for neural/performance coverage
  */
 
@@ -31,15 +31,15 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
   let performanceBenchmarks;
   let mockAgent;
 
-  beforeAll(async () => {
+  beforeAll(async() => {
     // Initialize test environment
     wasmLoader = new WasmModuleLoader();
     await wasmLoader.initialize('progressive');
-    
+
     ruvSwarm = await RuvSwarm.initialize({
       enableNeuralNetworks: true,
       useSIMD: true,
-      loadingStrategy: 'progressive'
+      loadingStrategy: 'progressive',
     });
 
     performanceBenchmarks = new PerformanceBenchmarks();
@@ -51,7 +51,7 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
 
   beforeEach(() => {
     neuralManager = new NeuralNetworkManager(wasmLoader);
-    
+
     // Mock base agent for neural agent testing
     mockAgent = {
       id: 'test-agent',
@@ -60,9 +60,9 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
         result: 'test result',
         metrics: {
           linesOfCode: 50,
-          testsPass: 0.9
-        }
-      })
+          testsPass: 0.9,
+        },
+      }),
     };
   });
 
@@ -87,57 +87,57 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       expect(Object.keys(neuralManager.templates)).toHaveLength(27); // All 27+ model types
     });
 
-    test('should create agent neural network with default config', async () => {
+    test('should create agent neural network with default config', async() => {
       const network = await neuralManager.createAgentNeuralNetwork('agent1');
-      
+
       expect(network).toBeDefined();
       expect(neuralManager.neuralNetworks.has('agent1')).toBe(true);
       expect(network.agentId).toBe('agent1');
     });
 
-    test('should create agent neural network with custom config', async () => {
+    test('should create agent neural network with custom config', async() => {
       const config = {
         layers: [64, 32, 16],
         activation: 'tanh',
         learningRate: 0.002,
         optimizer: 'sgd',
-        enableMetaLearning: true
+        enableMetaLearning: true,
       };
 
       const network = await neuralManager.createAgentNeuralNetwork('agent2', config);
-      
+
       expect(network).toBeDefined();
       expect(network.config.layers).toEqual([64, 32, 16]);
       expect(network.config.activation).toBe('tanh');
     });
 
-    test('should handle WASM module unavailable gracefully', async () => {
+    test('should handle WASM module unavailable gracefully', async() => {
       const mockWasmLoader = {
-        loadModule: jest.fn().mockResolvedValue({ isPlaceholder: true })
+        loadModule: jest.fn().mockResolvedValue({ isPlaceholder: true }),
       };
-      
+
       const manager = new NeuralNetworkManager(mockWasmLoader);
       const network = await manager.createAgentNeuralNetwork('agent3');
-      
+
       expect(network).toBeDefined();
       expect(network.constructor.name).toBe('SimulatedNeuralNetwork');
     });
 
-    test('should create advanced neural models for all template types', async () => {
+    test('should create advanced neural models for all template types', async() => {
       const templates = [
         'transformer_nlp', 'cnn_vision', 'gru_sequence', 'lstm_sequence',
         'autoencoder_compress', 'vae_generator', 'gnn_social', 'resnet_classifier',
         'attention_mechanism', 'diffusion_model', 'neural_ode', 'capsule_network',
-        'spiking_neural', 'graph_attention', 'neural_turing', 'memory_network'
+        'spiking_neural', 'graph_attention', 'neural_turing', 'memory_network',
       ];
 
       for (const template of templates) {
         const network = await neuralManager.createAdvancedNeuralModel(
-          `agent-${template}`, 
+          `agent-${template}`,
           template,
-          { requiresCreativity: true, requiresPrecision: true }
+          { requiresCreativity: true, requiresPrecision: true },
         );
-        
+
         expect(network).toBeDefined();
         expect(network.isAdvanced).toBe(true);
         expect(network.modelType).toBeDefined();
@@ -145,20 +145,20 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       }
     });
 
-    test('should handle invalid template gracefully', async () => {
+    test('should handle invalid template gracefully', async() => {
       await expect(
-        neuralManager.createAdvancedNeuralModel('agent-invalid', 'invalid_template')
+        neuralManager.createAdvancedNeuralModel('agent-invalid', 'invalid_template'),
       ).rejects.toThrow('Invalid template: invalid_template');
     });
 
-    test('should fine-tune network with comprehensive options', async () => {
+    test('should fine-tune network with comprehensive options', async() => {
       const network = await neuralManager.createAgentNeuralNetwork('agent-finetune');
-      
+
       const trainingData = {
         samples: Array.from({ length: 100 }, (_, i) => ({
           input: Array.from({ length: 10 }, () => Math.random()),
-          target: Array.from({ length: 5 }, () => Math.random())
-        }))
+          target: Array.from({ length: 5 }, () => Math.random()),
+        })),
       };
 
       const options = {
@@ -167,19 +167,19 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
         learningRate: 0.001,
         freezeLayers: ['layer1'],
         enableCognitiveEvolution: true,
-        enableMetaLearning: true
+        enableMetaLearning: true,
       };
 
       const result = await neuralManager.fineTuneNetwork('agent-finetune', trainingData, options);
-      
+
       expect(result).toBeDefined();
       expect(result.epochs_trained).toBeGreaterThan(0);
       expect(neuralManager.performanceMetrics.has('agent-finetune')).toBe(true);
     });
 
-    test('should enable collaborative learning between agents', async () => {
+    test('should enable collaborative learning between agents', async() => {
       const agentIds = ['collab1', 'collab2', 'collab3'];
-      
+
       // Create multiple networks
       for (const agentId of agentIds) {
         await neuralManager.createAgentNeuralNetwork(agentId);
@@ -190,7 +190,7 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
         syncInterval: 1000,
         privacyLevel: 'medium',
         enableKnowledgeSharing: true,
-        enableCrossAgentEvolution: true
+        enableCrossAgentEvolution: true,
       });
 
       expect(session).toBeDefined();
@@ -204,15 +204,15 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       const gradients = [
         { layer1: [0.1, 0.2, 0.3], layer2: [0.4, 0.5] },
         { layer1: [0.2, 0.1, 0.4], layer2: [0.3, 0.6] },
-        { layer1: [0.15, 0.25, 0.35], layer2: [0.45, 0.55] }
+        { layer1: [0.15, 0.25, 0.35], layer2: [0.45, 0.55] },
       ];
 
       const aggregated = neuralManager.aggregateGradients(gradients, 'high');
-      
+
       expect(aggregated).toBeDefined();
       expect(aggregated.layer1).toHaveLength(3);
       expect(aggregated.layer2).toHaveLength(2);
-      
+
       // Check differential privacy noise was applied
       expect(aggregated.layer1[0]).not.toBe((0.1 + 0.2 + 0.15) / 3);
     });
@@ -221,12 +221,12 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       const gradients = [
         { param1: 0.1, param2: 0.5 },
         { param1: 0.3, param2: 0.2 },
-        { param1: 0.2, param2: 0.8 }
+        { param1: 0.2, param2: 0.8 },
       ];
 
       const sensitivity1 = neuralManager.calculateSensitivity('param1', gradients);
       const sensitivity2 = neuralManager.calculateSensitivity('param2', gradients);
-      
+
       expect(sensitivity1).toBe(0.2); // |0.3 - 0.1|
       expect(sensitivity2).toBe(0.6); // |0.8 - 0.2|
     });
@@ -234,15 +234,15 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
     test('should generate Laplacian noise for privacy', () => {
       const noise1 = neuralManager.generateLaplacianNoise(1.0, 0.1);
       const noise2 = neuralManager.generateLaplacianNoise(1.0, 0.1);
-      
+
       expect(typeof noise1).toBe('number');
       expect(typeof noise2).toBe('number');
       expect(noise1).not.toBe(noise2); // Should be random
     });
 
-    test('should save and load network state', async () => {
+    test('should save and load network state', async() => {
       const network = await neuralManager.createAgentNeuralNetwork('save-load-test');
-      
+
       const saved = neuralManager.saveNetworkState('save-load-test', '/tmp/test-network.json');
       expect(saved).toBe(true);
 
@@ -264,22 +264,22 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
   });
 
   describe('🎯 Neural Network Manager - Preset Integration', () => {
-    test('should create agent from standard presets', async () => {
+    test('should create agent from standard presets', async() => {
       const categories = ['nlp', 'vision', 'timeseries', 'graph'];
       const presetNames = ['bert_base', 'resnet50', 'lstm_forecast', 'gcn_social'];
 
       for (let i = 0; i < categories.length; i++) {
         const category = categories[i];
         const presetName = presetNames[i];
-        
+
         try {
           const agent = await neuralManager.createAgentFromPreset(
             `preset-${category}-${presetName}`,
             category,
             presetName,
-            { customParam: 'test' }
+            { customParam: 'test' },
           );
-          
+
           expect(agent).toBeDefined();
           expect(agent.config.presetInfo).toBeDefined();
           expect(agent.config.presetInfo.category).toBe(category);
@@ -291,13 +291,13 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       }
     });
 
-    test('should create agent from complete presets (27+ models)', async () => {
+    test('should create agent from complete presets (27+ models)', async() => {
       const completePresetTypes = [
-        'transformer', 'cnn', 'lstm', 'gru', 'autoencoder', 'vae', 
+        'transformer', 'cnn', 'lstm', 'gru', 'autoencoder', 'vae',
         'gnn', 'gat', 'resnet', 'attention', 'diffusion', 'neural_ode',
         'capsnet', 'snn', 'ntm', 'memnn', 'nca', 'hypernet', 'maml',
         'nas', 'moe', 'nerf', 'wavenet', 'pointnet', 'world_model',
-        'normalizing_flow', 'ebm', 'neural_process', 'set_transformer'
+        'normalizing_flow', 'ebm', 'neural_process', 'set_transformer',
       ];
 
       for (const modelType of completePresetTypes.slice(0, 10)) { // Test first 10 for performance
@@ -306,9 +306,9 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
             `complete-${modelType}`,
             modelType,
             'base',
-            { requiresCreativity: true }
+            { requiresCreativity: true },
           );
-          
+
           expect(agent).toBeDefined();
           expect(agent.config.modelType).toBe(modelType);
           expect(agent.config.cognitivePatterns).toBeDefined();
@@ -319,21 +319,21 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       }
     });
 
-    test('should create agent for use case', async () => {
+    test('should create agent for use case', async() => {
       const useCases = [
         'text classification',
-        'image recognition', 
+        'image recognition',
         'time series forecasting',
-        'graph analysis'
+        'graph analysis',
       ];
 
       for (const useCase of useCases) {
         try {
           const agent = await neuralManager.createAgentForUseCase(
             `usecase-${useCase.replace(/\s+/g, '-')}`,
-            useCase
+            useCase,
           );
-          
+
           expect(agent).toBeDefined();
         } catch (error) {
           expect(error.message).toContain('No preset found for use case');
@@ -352,7 +352,7 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
 
     test('should search presets by terms', () => {
       const searchTerms = ['classification', 'generation', 'forecast', 'social'];
-      
+
       for (const term of searchTerms) {
         const results = neuralManager.searchPresets(term);
         expect(Array.isArray(results)).toBe(true);
@@ -372,40 +372,40 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       const summary = neuralManager.getPresetSummary();
       expect(summary).toBeDefined();
       expect(typeof summary).toBe('object');
-      
+
       Object.values(summary).forEach(categoryInfo => {
         expect(categoryInfo.count).toBeGreaterThanOrEqual(0);
         expect(Array.isArray(categoryInfo.presets)).toBe(true);
       });
     });
 
-    test('should update agent with new preset', async () => {
+    test('should update agent with new preset', async() => {
       const agentId = 'update-test';
       await neuralManager.createAgentNeuralNetwork(agentId);
-      
+
       try {
         const updatedAgent = await neuralManager.updateAgentWithPreset(
-          agentId, 
-          'nlp', 
+          agentId,
+          'nlp',
           'bert_base',
-          { customUpdate: true }
+          { customUpdate: true },
         );
-        
+
         expect(updatedAgent).toBeDefined();
       } catch (error) {
         expect(error.message).toContain('not found');
       }
     });
 
-    test('should batch create agents from presets', async () => {
+    test('should batch create agents from presets', async() => {
       const agentConfigs = [
         { agentId: 'batch1', category: 'nlp', presetName: 'bert_base' },
         { agentId: 'batch2', category: 'vision', presetName: 'resnet50' },
-        { agentId: 'batch3', category: 'invalid', presetName: 'invalid' }
+        { agentId: 'batch3', category: 'invalid', presetName: 'invalid' },
       ];
 
       const result = await neuralManager.batchCreateAgentsFromPresets(agentConfigs);
-      
+
       expect(result).toBeDefined();
       expect(Array.isArray(result.results)).toBe(true);
       expect(Array.isArray(result.errors)).toBe(true);
@@ -414,20 +414,20 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
   });
 
   describe('🤝 Neural Network Manager - Enhanced Capabilities', () => {
-    test('should extract agent knowledge comprehensively', async () => {
+    test('should extract agent knowledge comprehensively', async() => {
       const agentId = 'knowledge-test';
       const network = await neuralManager.createAgentNeuralNetwork(agentId);
-      
+
       // Simulate some training
       await neuralManager.fineTuneNetwork(agentId, {
         samples: Array.from({ length: 10 }, () => ({
           input: [1, 2, 3],
-          target: [0.5, 0.5]
-        }))
+          target: [0.5, 0.5],
+        })),
       });
 
       const knowledge = await neuralManager.extractAgentKnowledge(agentId);
-      
+
       expect(knowledge).toBeDefined();
       expect(knowledge.agentId).toBe(agentId);
       expect(knowledge.timestamp).toBeDefined();
@@ -438,12 +438,12 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       expect(knowledge.specializations).toBeDefined();
     });
 
-    test('should extract important weights with threshold', async () => {
+    test('should extract important weights with threshold', async() => {
       const agentId = 'weights-test';
       const network = await neuralManager.createAgentNeuralNetwork(agentId);
-      
+
       const importantWeights = await neuralManager.extractImportantWeights(network);
-      
+
       expect(importantWeights).toBeDefined();
       expect(typeof importantWeights).toBe('object');
     });
@@ -451,33 +451,33 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
     test('should calculate importance threshold correctly', () => {
       const importance = [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.05];
       const threshold = neuralManager.calculateImportanceThreshold(importance);
-      
+
       expect(threshold).toBeGreaterThan(0);
       expect(threshold).toBeLessThanOrEqual(0.9);
     });
 
-    test('should identify agent specializations', async () => {
+    test('should identify agent specializations', async() => {
       const agentId = 'specialization-test';
       await neuralManager.createAgentNeuralNetwork(agentId);
-      
+
       // Mock performance metrics with adaptation history
       neuralManager.performanceMetrics.set(agentId, {
         adaptationHistory: [
           {
             timestamp: Date.now(),
             trainingResult: { accuracy: 0.85, loss: 0.15 },
-            cognitiveGrowth: { pattern: 'convergent' }
+            cognitiveGrowth: { pattern: 'convergent' },
           },
           {
             timestamp: Date.now(),
             trainingResult: { accuracy: 0.92, loss: 0.08 },
-            cognitiveGrowth: { pattern: 'analytical' }
-          }
-        ]
+            cognitiveGrowth: { pattern: 'analytical' },
+          },
+        ],
       });
 
       const specializations = await neuralManager.identifySpecializations(agentId);
-      
+
       expect(Array.isArray(specializations)).toBe(true);
       if (specializations.length > 0) {
         expect(specializations[0].domain).toBeDefined();
@@ -486,9 +486,9 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       }
     });
 
-    test('should create knowledge sharing matrix', async () => {
+    test('should create knowledge sharing matrix', async() => {
       const agentIds = ['share1', 'share2', 'share3'];
-      
+
       // Create agents and add knowledge
       for (const agentId of agentIds) {
         await neuralManager.createAgentNeuralNetwork(agentId);
@@ -496,15 +496,15 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
           modelType: 'transformer',
           weights: { layer1: [0.1, 0.2], layer2: [0.3, 0.4] },
           performance: { accuracy: 0.8, loss: 0.2 },
-          specializations: [{ domain: 'classification', confidence: 0.9 }]
+          specializations: [{ domain: 'classification', confidence: 0.9 }],
         });
       }
 
       const matrix = await neuralManager.createKnowledgeSharingMatrix(agentIds);
-      
+
       expect(matrix).toBeDefined();
       expect(Object.keys(matrix)).toHaveLength(agentIds.length);
-      
+
       agentIds.forEach(agentA => {
         expect(matrix[agentA]).toBeDefined();
         agentIds.forEach(agentB => {
@@ -517,27 +517,27 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       });
     });
 
-    test('should calculate agent similarity metrics', async () => {
+    test('should calculate agent similarity metrics', async() => {
       const agentA = 'similar-a';
       const agentB = 'similar-b';
-      
+
       // Mock shared knowledge
       neuralManager.sharedKnowledge.set(agentA, {
         modelType: 'transformer',
         weights: { layer1: [0.1, 0.2, 0.3] },
         performance: { accuracy: 0.85, loss: 0.15 },
-        specializations: [{ domain: 'classification' }]
+        specializations: [{ domain: 'classification' }],
       });
-      
+
       neuralManager.sharedKnowledge.set(agentB, {
         modelType: 'transformer',
         weights: { layer1: [0.15, 0.25, 0.35] },
         performance: { accuracy: 0.87, loss: 0.13 },
-        specializations: [{ domain: 'classification' }]
+        specializations: [{ domain: 'classification' }],
       });
 
       const similarity = await neuralManager.calculateAgentSimilarity(agentA, agentB);
-      
+
       expect(similarity).toBeGreaterThanOrEqual(0);
       expect(similarity).toBeLessThanOrEqual(1);
     });
@@ -545,16 +545,16 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
     test('should calculate structural similarity', () => {
       const knowledgeA = {
         modelType: 'transformer',
-        weights: { layer1: [0.1, 0.2, 0.3], layer2: [0.4, 0.5] }
+        weights: { layer1: [0.1, 0.2, 0.3], layer2: [0.4, 0.5] },
       };
-      
+
       const knowledgeB = {
         modelType: 'transformer',
-        weights: { layer1: [0.15, 0.25, 0.35], layer2: [0.45, 0.55] }
+        weights: { layer1: [0.15, 0.25, 0.35], layer2: [0.45, 0.55] },
       };
 
       const similarity = neuralManager.calculateStructuralSimilarity(knowledgeA, knowledgeB);
-      
+
       expect(similarity).toBeGreaterThanOrEqual(0);
       expect(similarity).toBeLessThanOrEqual(1);
     });
@@ -564,7 +564,7 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       const knowledgeB = { performance: { accuracy: 0.87, loss: 0.13 } };
 
       const similarity = neuralManager.calculatePerformanceSimilarity(knowledgeA, knowledgeB);
-      
+
       expect(similarity).toBeGreaterThanOrEqual(0);
       expect(similarity).toBeLessThanOrEqual(1);
     });
@@ -573,19 +573,19 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       const knowledgeA = {
         specializations: [
           { domain: 'classification' },
-          { domain: 'regression' }
-        ]
+          { domain: 'regression' },
+        ],
       };
-      
+
       const knowledgeB = {
         specializations: [
           { domain: 'classification' },
-          { domain: 'generation' }
-        ]
+          { domain: 'generation' },
+        ],
       };
 
       const similarity = neuralManager.calculateSpecializationSimilarity(knowledgeA, knowledgeB);
-      
+
       expect(similarity).toBeGreaterThanOrEqual(0);
       expect(similarity).toBeLessThanOrEqual(1);
       expect(similarity).toBe(0.5); // 1 intersection, 3 union total
@@ -594,9 +594,9 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
     test('should record agent interactions', () => {
       neuralManager.recordAgentInteraction('agent1', 'agent2', 0.8, 'collaboration');
       neuralManager.recordAgentInteraction('agent1', 'agent2', 0.9, 'knowledge_sharing');
-      
+
       const interactions = neuralManager.agentInteractions.get('agent1-agent2');
-      
+
       expect(interactions).toBeDefined();
       expect(interactions).toHaveLength(2);
       expect(interactions[0].strength).toBe(0.8);
@@ -607,7 +607,7 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
 
     test('should get complete neural presets', () => {
       const completePresets = neuralManager.getCompleteNeuralPresets();
-      
+
       expect(completePresets).toBeDefined();
       expect(typeof completePresets).toBe('object');
       expect(Object.keys(completePresets).length).toBeGreaterThan(0);
@@ -615,10 +615,10 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
 
     test('should get all neural model types with counts', () => {
       const modelTypes = neuralManager.getAllNeuralModelTypes();
-      
+
       expect(modelTypes).toBeDefined();
       expect(typeof modelTypes).toBe('object');
-      
+
       Object.values(modelTypes).forEach(typeInfo => {
         expect(typeInfo.count).toBeGreaterThanOrEqual(0);
         expect(Array.isArray(typeInfo.presets)).toBe(true);
@@ -626,13 +626,13 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       });
     });
 
-    test('should get enhanced statistics', async () => {
+    test('should get enhanced statistics', async() => {
       // Create some test agents
       await neuralManager.createAgentNeuralNetwork('stats1');
       await neuralManager.createAgentNeuralNetwork('stats2');
-      
+
       const stats = neuralManager.getEnhancedStatistics();
-      
+
       expect(stats).toBeDefined();
       expect(stats.totalAgents).toBeGreaterThan(0);
       expect(stats.modelTypes).toBeDefined();
@@ -683,16 +683,16 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       expect(neuralAgent.memoryUsage.peak).toBeGreaterThan(0);
     });
 
-    test('should analyze task and return comprehensive analysis', async () => {
+    test('should analyze task and return comprehensive analysis', async() => {
       const task = {
         id: 'test-task',
         description: 'Complex neural analysis task with multiple components',
         priority: 'high',
-        dependencies: ['dep1', 'dep2']
+        dependencies: ['dep1', 'dep2'],
       };
 
       const analysis = await neuralAgent.analyzeTask(task);
-      
+
       expect(analysis).toBeDefined();
       expect(analysis.complexity).toBeGreaterThanOrEqual(0);
       expect(analysis.urgency).toBeGreaterThanOrEqual(0);
@@ -702,27 +702,27 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       expect(analysis.confidence).toBeGreaterThanOrEqual(0);
     });
 
-    test('should execute task with neural enhancement', async () => {
+    test('should execute task with neural enhancement', async() => {
       const task = {
         id: 'execution-test',
         description: 'Test task execution',
-        priority: 'medium'
+        priority: 'medium',
       };
 
       const result = await neuralAgent.executeTask(task);
-      
+
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(mockAgent.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           ...task,
           neuralAnalysis: expect.any(Object),
-          cognitiveState: expect.any(Object)
-        })
+          cognitiveState: expect.any(Object),
+        }),
       );
     });
 
-    test('should emit task completion event', async () => {
+    test('should emit task completion event', async() => {
       const eventHandler = jest.fn();
       neuralAgent.on('taskCompleted', eventHandler);
 
@@ -734,12 +734,12 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
           task,
           result: expect.any(Object),
           performance: expect.any(Object),
-          cognitiveState: expect.any(Object)
-        })
+          cognitiveState: expect.any(Object),
+        }),
       );
     });
 
-    test('should emit learning event during training', async () => {
+    test('should emit learning event during training', async() => {
       const eventHandler = jest.fn();
       neuralAgent.on('learning', eventHandler);
 
@@ -750,8 +750,8 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
         expect.objectContaining({
           task: 'learning-test',
           performance: expect.any(Object),
-          networkState: expect.any(Object)
-        })
+          networkState: expect.any(Object),
+        }),
       );
     });
 
@@ -759,11 +759,11 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       const task = {
         description: 'This is a test task with numbers 123 and CAPITAL letters',
         priority: 'high',
-        dependencies: ['dep1', 'dep2', 'dep3']
+        dependencies: ['dep1', 'dep2', 'dep3'],
       };
 
       const vector = neuralAgent._taskToVector(task);
-      
+
       expect(Array.isArray(vector)).toBe(true);
       expect(vector.length).toBe(neuralAgent.neuralNetwork.layers[0]);
       expect(vector[4]).toBe(0.8); // High priority mapped to 0.8
@@ -777,11 +777,11 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
         creativity: 0.5,
         dataIntensity: 0.5,
         collaborationNeeded: 0.5,
-        confidence: 0.5
+        confidence: 0.5,
       };
 
       neuralAgent._applyCognitivePattern(analysis);
-      
+
       // Researcher (DIVERGENT primary) should boost creativity and exploration
       expect(analysis.creativity).toBeGreaterThan(0.5);
     });
@@ -803,13 +803,13 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
         success: true,
         metrics: {
           linesOfCode: 200,
-          testsPass: 0.95
-        }
+          testsPass: 0.95,
+        },
       };
       const executionTime = 30000; // 30 seconds
 
       const performance = neuralAgent._calculatePerformance(task, result, executionTime);
-      
+
       expect(performance.speed).toBeGreaterThan(0);
       expect(performance.accuracy).toBe(0.95);
       expect(performance.efficiency).toBeGreaterThan(0);
@@ -822,16 +822,16 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       neuralAgent.taskHistory = [
         {
           task: { description: 'neural network analysis', priority: 'high' },
-          performance: { overall: 0.8 }
+          performance: { overall: 0.8 },
         },
         {
           task: { description: 'data processing task', priority: 'medium' },
-          performance: { overall: 0.7 }
+          performance: { overall: 0.7 },
         },
         {
           task: { description: 'neural analysis research', priority: 'high' },
-          performance: { overall: 0.9 }
-        }
+          performance: { overall: 0.9 },
+        },
       ];
 
       const currentTask = { description: 'neural research analysis', priority: 'high' };
@@ -847,16 +847,16 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
         complexity: 0.5,
         creativity: 0.5,
         collaborationNeeded: 0.5,
-        confidence: 0.5
+        confidence: 0.5,
       };
 
       neuralAgent._applySecondaryPattern(analysis, COGNITIVE_PATTERNS.SYSTEMS);
-      
+
       // Systems pattern should increase collaboration
       expect(analysis.collaborationNeeded).toBeGreaterThan(0.5);
     });
 
-    test('should rest and reduce fatigue', async () => {
+    test('should rest and reduce fatigue', async() => {
       // Set high fatigue
       neuralAgent.cognitiveState.fatigue = 0.8;
       neuralAgent.cognitiveState.attention = 0.3;
@@ -869,14 +869,14 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
 
     test('should track current memory usage', () => {
       const memoryUsage = neuralAgent.getCurrentMemoryUsage();
-      
+
       expect(memoryUsage).toBeGreaterThan(0);
       expect(memoryUsage).toBeGreaterThanOrEqual(neuralAgent.memoryUsage.baseline);
     });
 
     test('should get comprehensive status', () => {
       const status = neuralAgent.getStatus();
-      
+
       expect(status.neuralState).toBeDefined();
       expect(status.neuralState.cognitiveProfile).toBeDefined();
       expect(status.neuralState.cognitiveState).toBeDefined();
@@ -888,14 +888,14 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
     test('should save and load neural state', () => {
       // Add some learning history
       neuralAgent.learningHistory = [
-        { timestamp: Date.now(), task: 'test', performance: 0.8 }
+        { timestamp: Date.now(), task: 'test', performance: 0.8 },
       ];
       neuralAgent.taskHistory = [
-        { task: { id: 'test' }, performance: { overall: 0.8 } }
+        { task: { id: 'test' }, performance: { overall: 0.8 } },
       ];
 
       const saved = neuralAgent.saveNeuralState();
-      
+
       expect(saved.agentType).toBe('researcher');
       expect(saved.neuralNetwork).toBeDefined();
       expect(saved.cognitiveState).toBeDefined();
@@ -915,18 +915,18 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
   });
 
   describe('🏭 Neural Agent Factory', () => {
-    test('should initialize factory with memory optimizer', async () => {
+    test('should initialize factory with memory optimizer', async() => {
       await NeuralAgentFactory.initializeFactory();
-      
+
       expect(NeuralAgentFactory.memoryOptimizer).toBeDefined();
     });
 
     test('should create neural agents for all cognitive profiles', () => {
       const agentTypes = Object.keys(AGENT_COGNITIVE_PROFILES);
-      
+
       agentTypes.forEach(agentType => {
         const neuralAgent = NeuralAgentFactory.createNeuralAgent(mockAgent, agentType);
-        
+
         expect(neuralAgent).toBeInstanceOf(NeuralAgent);
         expect(neuralAgent.agentType).toBe(agentType);
         expect(neuralAgent.cognitiveProfile).toBe(AGENT_COGNITIVE_PROFILES[agentType]);
@@ -941,7 +941,7 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
 
     test('should get cognitive profiles', () => {
       const profiles = NeuralAgentFactory.getCognitiveProfiles();
-      
+
       expect(profiles).toBe(AGENT_COGNITIVE_PROFILES);
       expect(Object.keys(profiles)).toContain('researcher');
       expect(Object.keys(profiles)).toContain('coder');
@@ -950,7 +950,7 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
 
     test('should get cognitive patterns', () => {
       const patterns = NeuralAgentFactory.getCognitivePatterns();
-      
+
       expect(patterns).toBe(COGNITIVE_PATTERNS);
       expect(Object.values(patterns)).toContain('convergent');
       expect(Object.values(patterns)).toContain('divergent');
@@ -963,7 +963,7 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
   // ================================
 
   describe('📊 Performance Benchmarks - Comprehensive Testing', () => {
-    test('should initialize benchmarking suite successfully', async () => {
+    test('should initialize benchmarking suite successfully', async() => {
       expect(performanceBenchmarks.ruvSwarm).toBeDefined();
       expect(performanceBenchmarks.wasmLoader).toBeDefined();
       expect(performanceBenchmarks.claudeFlow).toBeDefined();
@@ -971,9 +971,9 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       expect(performanceBenchmarks.baselineResults).toBeInstanceOf(Map);
     });
 
-    test('should run full benchmark suite with all components', async () => {
+    test('should run full benchmark suite with all components', async() => {
       const results = await performanceBenchmarks.runFullBenchmarkSuite();
-      
+
       expect(results).toBeDefined();
       expect(results.timestamp).toBeDefined();
       expect(results.environment).toBeDefined();
@@ -992,11 +992,11 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       expect(results.benchmarks.browserCompatibility).toBeDefined();
     });
 
-    test('should benchmark SIMD operations comprehensively', async () => {
+    test('should benchmark SIMD operations comprehensively', async() => {
       const results = await performanceBenchmarks.benchmarkSIMDOperations();
-      
+
       expect(results.supported).toBeDefined();
-      
+
       if (results.supported) {
         expect(results.capabilities).toBeDefined();
         expect(results.operations).toBeDefined();
@@ -1012,9 +1012,9 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       }
     });
 
-    test('should benchmark WASM loading with all strategies', async () => {
+    test('should benchmark WASM loading with all strategies', async() => {
       const results = await performanceBenchmarks.benchmarkWASMLoading();
-      
+
       expect(results.strategies).toBeDefined();
       expect(results.moduleStats).toBeDefined();
       expect(results.recommendations).toBeDefined();
@@ -1032,9 +1032,9 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       expect(Array.isArray(results.recommendations)).toBe(true);
     });
 
-    test('should benchmark memory management patterns', async () => {
+    test('should benchmark memory management patterns', async() => {
       const results = await performanceBenchmarks.benchmarkMemoryManagement();
-      
+
       expect(results.allocation).toBeDefined();
       expect(results.garbageCollection).toBeDefined();
       expect(results.fragmentation).toBeDefined();
@@ -1054,9 +1054,9 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       expect(results.fragmentation.totalMemoryUsage).toBeGreaterThan(0);
     });
 
-    test('should benchmark neural networks with different sizes', async () => {
+    test('should benchmark neural networks with different sizes', async() => {
       const results = await performanceBenchmarks.benchmarkNeuralNetworks();
-      
+
       if (results.supported !== false) {
         expect(results.networkSizes).toBeDefined();
         expect(results.activationFunctions).toBeDefined();
@@ -1086,9 +1086,9 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       }
     });
 
-    test('should benchmark Claude Flow coordination', async () => {
+    test('should benchmark Claude Flow coordination', async() => {
       const results = await performanceBenchmarks.benchmarkClaudeFlowCoordination();
-      
+
       expect(results.workflowExecution).toBeDefined();
       expect(results.batchingPerformance).toBeDefined();
       expect(results.parallelization).toBeDefined();
@@ -1109,9 +1109,9 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       }
     });
 
-    test('should benchmark parallel execution with different batch sizes', async () => {
+    test('should benchmark parallel execution with different batch sizes', async() => {
       const results = await performanceBenchmarks.benchmarkParallelExecution();
-      
+
       expect(results.batchSizes).toBeDefined();
       expect(results.taskTypes).toBeDefined();
       expect(results.scalability).toBeDefined();
@@ -1148,9 +1148,9 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       }
     });
 
-    test('should test browser compatibility features', async () => {
+    test('should test browser compatibility features', async() => {
       const results = await performanceBenchmarks.benchmarkBrowserCompatibility();
-      
+
       expect(results.features).toBeDefined();
       expect(results.performance).toBeDefined();
       expect(results.compatibility).toBeDefined();
@@ -1180,7 +1180,7 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
 
     test('should get comprehensive environment information', () => {
       const env = performanceBenchmarks.getEnvironmentInfo();
-      
+
       expect(env.userAgent).toBeDefined();
       expect(env.platform).toBeDefined();
       expect(env.language).toBeDefined();
@@ -1195,11 +1195,11 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
         memoryManagement: { performanceScore: 70 },
         neuralNetworks: { performanceScore: 85 },
         claudeFlowCoordination: { performanceScore: 75 },
-        parallelExecution: { performanceScore: 88 }
+        parallelExecution: { performanceScore: 88 },
       };
 
       const score = performanceBenchmarks.calculateOverallScore(mockBenchmarks);
-      
+
       expect(score).toBeGreaterThan(0);
       expect(score).toBeLessThanOrEqual(100);
       expect(score).toBeCloseTo(81, 0); // Weighted average
@@ -1208,9 +1208,9 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
     test('should simulate neural network inference correctly', () => {
       const input = [0.1, 0.2, 0.3, 0.4];
       const layers = [4, 8, 6, 2];
-      
+
       const output = performanceBenchmarks.simulateNeuralInference(input, layers);
-      
+
       expect(output).toBeDefined();
       expect(Array.isArray(output)).toBe(true);
       expect(output.length).toBe(layers[layers.length - 1]);
@@ -1222,14 +1222,14 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
     test('should simulate activation functions correctly', () => {
       const vector = [0.5, -0.3, 1.0, -0.8, 0.0];
       const activations = ['relu', 'sigmoid', 'tanh', 'gelu'];
-      
+
       activations.forEach(activation => {
         const result = performanceBenchmarks.simulateActivation(vector, activation);
-        
+
         expect(result).toBeDefined();
         expect(Array.isArray(result)).toBe(true);
         expect(result.length).toBe(vector.length);
-        
+
         if (activation === 'relu') {
           expect(result[0]).toBe(0.5);
           expect(result[1]).toBe(0);
@@ -1238,33 +1238,33 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       });
     });
 
-    test('should simulate async tasks for parallel testing', async () => {
+    test('should simulate async tasks for parallel testing', async() => {
       const duration = 50;
       const taskId = 'test-task';
-      
+
       const startTime = Date.now();
       const result = await performanceBenchmarks.simulateAsyncTask(duration, taskId);
       const actualDuration = Date.now() - startTime;
-      
+
       expect(result.taskId).toBe(taskId);
       expect(result.completed).toBe(true);
       expect(result.duration).toBeGreaterThanOrEqual(duration - 10); // Allow some variance
       expect(actualDuration).toBeGreaterThanOrEqual(duration - 10);
     });
 
-    test('should generate comprehensive performance report', async () => {
+    test('should generate comprehensive performance report', async() => {
       const mockResults = {
         performanceScore: 85,
         timestamp: new Date().toISOString(),
         environment: { platform: 'test' },
         benchmarks: {
           simdOperations: { performanceScore: 90 },
-          memoryManagement: { performanceScore: 70 }
-        }
+          memoryManagement: { performanceScore: 70 },
+        },
       };
 
       const report = performanceBenchmarks.generatePerformanceReport(mockResults);
-      
+
       expect(report.summary).toBeDefined();
       expect(report.summary.overallScore).toBe(85);
       expect(report.summary.grade).toBeDefined();
@@ -1282,7 +1282,7 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
         { score: 75, expectedGrade: 'B+' },
         { score: 65, expectedGrade: 'B' },
         { score: 55, expectedGrade: 'C' },
-        { score: 45, expectedGrade: 'F' }
+        { score: 45, expectedGrade: 'F' },
       ];
 
       testCases.forEach(({ score, expectedGrade }) => {
@@ -1296,17 +1296,17 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
         simdOperations: { performanceScore: 65 }, // Should trigger SIMD recommendation
         memoryManagement: { performanceScore: 55 }, // Should trigger memory recommendation
         parallelExecution: { performanceScore: 60 }, // Should trigger parallelization recommendation
-        claudeFlowCoordination: { 
+        claudeFlowCoordination: {
           performanceScore: 80,
-          batchingPerformance: { complianceScore: 75 } // Should trigger batching recommendation
-        }
+          batchingPerformance: { complianceScore: 75 }, // Should trigger batching recommendation
+        },
       };
 
       const recommendations = performanceBenchmarks.generateRecommendations(mockBenchmarks);
-      
+
       expect(Array.isArray(recommendations)).toBe(true);
       expect(recommendations.length).toBeGreaterThan(0);
-      
+
       recommendations.forEach(rec => {
         expect(rec.category).toBeDefined();
         expect(rec.priority).toBeDefined();
@@ -1321,12 +1321,12 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
         benchmarks: {
           simdOperations: { performanceScore: 80 },
           wasmLoading: { performanceScore: 90 },
-          memoryManagement: { performanceScore: 70 }
-        }
+          memoryManagement: { performanceScore: 70 },
+        },
       };
 
       const csv = performanceBenchmarks.generateCSVData(mockResults);
-      
+
       expect(csv).toBeDefined();
       expect(csv.includes('Category,Metric,Value,Score')).toBe(true);
       expect(csv.includes('simdOperations,Performance Score,80,80')).toBe(true);
@@ -1346,87 +1346,87 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       benchmarkCLI = new BenchmarkCLI();
     });
 
-    test('should initialize benchmark CLI successfully', async () => {
+    test('should initialize benchmark CLI successfully', async() => {
       await benchmarkCLI.initialize();
-      
+
       expect(benchmarkCLI.ruvSwarm).toBeDefined();
       expect(benchmarkCLI.ruvSwarm.features).toBeDefined();
     });
 
     test('should parse command line arguments correctly', () => {
       const args = ['--iterations', '20', '--test', 'neural', '--output', 'results.json'];
-      
+
       expect(benchmarkCLI.getArg(args, '--iterations')).toBe('20');
       expect(benchmarkCLI.getArg(args, '--test')).toBe('neural');
       expect(benchmarkCLI.getArg(args, '--output')).toBe('results.json');
       expect(benchmarkCLI.getArg(args, '--nonexistent')).toBeNull();
     });
 
-    test('should run benchmark with default parameters', async () => {
+    test('should run benchmark with default parameters', async() => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      
+
       await benchmarkCLI.run([]);
-      
+
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('ruv-swarm Performance Benchmark'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Test Type: comprehensive'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Iterations: 10'));
-      
+
       consoleSpy.mockRestore();
     });
 
-    test('should run benchmark with custom parameters', async () => {
+    test('should run benchmark with custom parameters', async() => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
       const args = ['--iterations', '5', '--test', 'neural'];
-      
+
       await benchmarkCLI.run(args);
-      
+
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Iterations: 5'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Test Type: neural'));
-      
+
       consoleSpy.mockRestore();
     });
 
-    test('should compare benchmark results', async () => {
+    test('should compare benchmark results', async() => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
       const errorSpy = jest.spyOn(console, 'error').mockImplementation();
-      
+
       // Should fail with missing files
       const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
         throw new Error('process.exit() was called');
       });
-      
+
       await expect(benchmarkCLI.compare(['file1.json'])).rejects.toThrow('process.exit() was called');
-      
+
       expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Please provide two benchmark result files'));
-      
+
       consoleSpy.mockRestore();
       errorSpy.mockRestore();
       mockExit.mockRestore();
     });
 
-    test('should handle benchmark run failure gracefully', async () => {
+    test('should handle benchmark run failure gracefully', async() => {
       const errorSpy = jest.spyOn(console, 'error').mockImplementation();
       const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
         throw new Error('process.exit() was called');
       });
-      
+
       // Mock ruvSwarm to throw error
       benchmarkCLI.ruvSwarm = {
         features: {
-          neural_networks: true
-        }
+          neural_networks: true,
+        },
       };
-      
+
       // Force an error by passing invalid arguments that would cause issues
       const originalSetTimeout = global.setTimeout;
       global.setTimeout = () => {
         throw new Error('Simulated benchmark failure');
       };
-      
+
       await expect(benchmarkCLI.run([])).rejects.toThrow('process.exit() was called');
-      
+
       expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Benchmark failed'));
-      
+
       global.setTimeout = originalSetTimeout;
       errorSpy.mockRestore();
       mockExit.mockRestore();
@@ -1444,172 +1444,172 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       performanceCLI = new PerformanceCLI();
     });
 
-    test('should initialize performance CLI successfully', async () => {
+    test('should initialize performance CLI successfully', async() => {
       await performanceCLI.initialize();
-      
+
       expect(performanceCLI.ruvSwarm).toBeDefined();
       expect(performanceCLI.ruvSwarm.features).toBeDefined();
     });
 
-    test('should analyze system performance comprehensively', async () => {
+    test('should analyze system performance comprehensively', async() => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      
+
       await performanceCLI.analyze(['--detailed']);
-      
+
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Performance Analysis'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('System Performance:'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('WASM Performance:'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Swarm Coordination:'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Neural Network Performance:'));
-      
+
       consoleSpy.mockRestore();
     });
 
-    test('should detect and report bottlenecks', async () => {
+    test('should detect and report bottlenecks', async() => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      
+
       // Mock high memory usage to trigger bottleneck detection
       const originalMemoryUsage = process.memoryUsage;
       process.memoryUsage = jest.fn(() => ({
         heapUsed: 900 * 1024 * 1024, // 900MB
         heapTotal: 1000 * 1024 * 1024, // 1GB (90% utilization)
         external: 50 * 1024 * 1024,
-        rss: 1100 * 1024 * 1024
+        rss: 1100 * 1024 * 1024,
       }));
-      
+
       await performanceCLI.analyze([]);
-      
+
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Bottleneck Analysis:'));
-      
+
       process.memoryUsage = originalMemoryUsage;
       consoleSpy.mockRestore();
     });
 
-    test('should optimize performance with different targets', async () => {
+    test('should optimize performance with different targets', async() => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
       const targets = ['speed', 'memory', 'tokens', 'balanced'];
-      
+
       for (const target of targets) {
         await performanceCLI.optimize([target, '--dry-run']);
-        
+
         expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Performance Optimization'));
         expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining(`Target: ${target}`));
         expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Dry Run (simulation)'));
       }
-      
+
       consoleSpy.mockRestore();
     });
 
-    test('should apply optimizations without dry run', async () => {
+    test('should apply optimizations without dry run', async() => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      
+
       await performanceCLI.optimize(['speed']);
-      
+
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Apply Changes'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('✅ Applied'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Optimization Complete!'));
-      
+
       consoleSpy.mockRestore();
     });
 
-    test('should generate optimization suggestions', async () => {
+    test('should generate optimization suggestions', async() => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      
+
       await performanceCLI.suggest([]);
-      
+
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Performance Optimization Suggestions'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('optimization opportunities identified'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Quick optimization commands:'));
-      
+
       consoleSpy.mockRestore();
     });
 
-    test('should categorize suggestions by priority', async () => {
+    test('should categorize suggestions by priority', async() => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      
+
       // Mock high memory utilization to trigger HIGH priority suggestion
       const originalMemoryUsage = process.memoryUsage;
       process.memoryUsage = jest.fn(() => ({
         heapUsed: 850 * 1024 * 1024, // 850MB
         heapTotal: 1000 * 1024 * 1024, // 1GB (85% utilization)
         external: 50 * 1024 * 1024,
-        rss: 950 * 1024 * 1024
+        rss: 950 * 1024 * 1024,
       }));
-      
+
       await performanceCLI.suggest([]);
-      
+
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('🔴 HIGH Priority:'));
-      
+
       process.memoryUsage = originalMemoryUsage;
       consoleSpy.mockRestore();
     });
 
-    test('should handle analysis failure gracefully', async () => {
+    test('should handle analysis failure gracefully', async() => {
       const errorSpy = jest.spyOn(console, 'error').mockImplementation();
       const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
         throw new Error('process.exit() was called');
       });
-      
+
       // Force an error by mocking cpuUsage to throw
       const originalCpuUsage = process.cpuUsage;
       process.cpuUsage = jest.fn(() => {
         throw new Error('CPU usage error');
       });
-      
+
       await expect(performanceCLI.analyze([])).rejects.toThrow('process.exit() was called');
-      
+
       expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Analysis failed'));
-      
+
       process.cpuUsage = originalCpuUsage;
       errorSpy.mockRestore();
       mockExit.mockRestore();
     });
 
-    test('should handle optimization failure gracefully', async () => {
+    test('should handle optimization failure gracefully', async() => {
       const errorSpy = jest.spyOn(console, 'error').mockImplementation();
       const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
         throw new Error('process.exit() was called');
       });
-      
+
       // Mock setTimeout to throw error
       const originalSetTimeout = global.setTimeout;
       global.setTimeout = () => {
         throw new Error('Optimization error');
       };
-      
+
       await expect(performanceCLI.optimize(['speed'])).rejects.toThrow('process.exit() was called');
-      
+
       expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Optimization failed'));
-      
+
       global.setTimeout = originalSetTimeout;
       errorSpy.mockRestore();
       mockExit.mockRestore();
     });
 
-    test('should suggest optimizations for low memory usage', async () => {
+    test('should suggest optimizations for low memory usage', async() => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      
+
       // Mock low memory utilization
       const originalMemoryUsage = process.memoryUsage;
       process.memoryUsage = jest.fn(() => ({
         heapUsed: 200 * 1024 * 1024, // 200MB
         heapTotal: 1000 * 1024 * 1024, // 1GB (20% utilization)
         external: 50 * 1024 * 1024,
-        rss: 300 * 1024 * 1024
+        rss: 300 * 1024 * 1024,
       }));
-      
+
       await performanceCLI.suggest([]);
-      
+
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('🔴 MEDIUM Priority:'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Low memory utilization'));
-      
+
       process.memoryUsage = originalMemoryUsage;
       consoleSpy.mockRestore();
     });
 
     test('should parse command line arguments correctly', () => {
       const args = ['--task-id', 'test-123', '--output', 'analysis.json'];
-      
+
       expect(performanceCLI.getArg(args, '--task-id')).toBe('test-123');
       expect(performanceCLI.getArg(args, '--output')).toBe('analysis.json');
       expect(performanceCLI.getArg(args, '--nonexistent')).toBeNull();
@@ -1621,10 +1621,10 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
   // ================================
 
   describe('🧠 Neural Models - All 8 Model Types Integration', () => {
-    test('should create and configure all neural model types', async () => {
+    test('should create and configure all neural model types', async() => {
       const modelTypes = [
-        'transformer', 'cnn', 'gru', 'lstm', 
-        'autoencoder', 'vae', 'gnn', 'resnet'
+        'transformer', 'cnn', 'gru', 'lstm',
+        'autoencoder', 'vae', 'gnn', 'resnet',
       ];
 
       for (const modelType of modelTypes) {
@@ -1641,17 +1641,17 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
 
     test('should validate all model presets configurations', () => {
       const modelTypes = Object.keys(MODEL_PRESETS);
-      
+
       modelTypes.forEach(modelType => {
         const presets = MODEL_PRESETS[modelType];
         expect(presets).toBeDefined();
         expect(typeof presets).toBe('object');
-        
+
         Object.keys(presets).forEach(presetName => {
           const preset = presets[presetName];
           expect(preset).toBeDefined();
           expect(typeof preset).toBe('object');
-          
+
           // Validate preset has required properties based on model type
           if (modelType === 'transformer') {
             expect(preset.dimensions).toBeDefined();
@@ -1697,17 +1697,17 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
     test('should test complete neural presets structure', () => {
       expect(COMPLETE_NEURAL_PRESETS).toBeDefined();
       expect(typeof COMPLETE_NEURAL_PRESETS).toBe('object');
-      
+
       // Should have multiple model types
       const modelTypes = Object.keys(COMPLETE_NEURAL_PRESETS);
       expect(modelTypes.length).toBeGreaterThan(10);
-      
+
       // Each model type should have presets
       modelTypes.forEach(modelType => {
         const presets = COMPLETE_NEURAL_PRESETS[modelType];
         expect(presets).toBeDefined();
         expect(typeof presets).toBe('object');
-        
+
         Object.values(presets).forEach(preset => {
           expect(preset.name).toBeDefined();
           expect(preset.description).toBeDefined();
@@ -1721,7 +1721,7 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
 
     test('should test all 40 neural presets comprehensively', () => {
       const allPresets = [];
-      
+
       // Collect all presets from MODEL_PRESETS
       Object.entries(MODEL_PRESETS).forEach(([modelType, presets]) => {
         Object.entries(presets).forEach(([presetName, config]) => {
@@ -1729,11 +1729,11 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
             modelType,
             presetName,
             config,
-            source: 'MODEL_PRESETS'
+            source: 'MODEL_PRESETS',
           });
         });
       });
-      
+
       // Collect all presets from COMPLETE_NEURAL_PRESETS
       Object.entries(COMPLETE_NEURAL_PRESETS).forEach(([modelType, presets]) => {
         Object.entries(presets).forEach(([presetName, config]) => {
@@ -1741,21 +1741,21 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
             modelType,
             presetName,
             config,
-            source: 'COMPLETE_NEURAL_PRESETS'
+            source: 'COMPLETE_NEURAL_PRESETS',
           });
         });
       });
-      
+
       // Should have at least 40 presets total
       expect(allPresets.length).toBeGreaterThanOrEqual(30);
-      
+
       // Test each preset structure
       allPresets.forEach((preset, index) => {
         expect(preset.modelType).toBeDefined();
         expect(preset.presetName).toBeDefined();
         expect(preset.config).toBeDefined();
         expect(typeof preset.config).toBe('object');
-        
+
         if (preset.source === 'COMPLETE_NEURAL_PRESETS') {
           expect(preset.config.name).toBeDefined();
           expect(preset.config.description).toBeDefined();
@@ -1766,25 +1766,25 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
       });
     });
 
-    test('should validate neural model factory error handling', async () => {
+    test('should validate neural model factory error handling', async() => {
       await expect(createNeuralModel('unknown_model')).rejects.toThrow(
-        'Unknown neural model type: unknown_model'
+        'Unknown neural model type: unknown_model',
       );
     });
 
-    test('should test neural models with different configurations', async () => {
+    test('should test neural models with different configurations', async() => {
       const configurations = [
         { modelType: 'transformer', config: { dimensions: 256, heads: 4, layers: 2 } },
         { modelType: 'cnn', config: { inputShape: [28, 28, 1], convLayers: [{ filters: 32, kernelSize: 3 }] } },
         { modelType: 'lstm', config: { inputSize: 100, hiddenSize: 50, numLayers: 2 } },
-        { modelType: 'autoencoder', config: { inputSize: 784, encoderLayers: [512, 256], bottleneckSize: 32 } }
+        { modelType: 'autoencoder', config: { inputSize: 784, encoderLayers: [512, 256], bottleneckSize: 32 } },
       ];
 
       for (const { modelType, config } of configurations) {
         try {
           const model = await createNeuralModel(modelType, config);
           expect(model).toBeDefined();
-          
+
           // Test basic model interface
           if (model && typeof model === 'object') {
             expect(model.modelType || model.constructor.name).toBeDefined();
@@ -1797,16 +1797,16 @@ describe('🧠 Neural Performance Comprehensive Test Suite', () => {
     });
   });
 
-  afterAll(async () => {
+  afterAll(async() => {
     // Cleanup
     if (performanceBenchmarks && performanceBenchmarks.ruvSwarm) {
       // Cleanup performance benchmarks
     }
-    
+
     if (ruvSwarm) {
       // Cleanup ruv swarm
     }
-    
+
     if (wasmLoader) {
       // Cleanup WASM loader
     }
@@ -1819,11 +1819,11 @@ export default {
   description: 'Comprehensive test coverage for neural networks and performance components',
   targetCoverage: {
     'neural-network-manager.js': '85%',
-    'neural-agent.js': '85%', 
+    'neural-agent.js': '85%',
     'performance-benchmarks.js': '85%',
     'benchmark.js': '85%',
     'performance.js': '85%',
-    'neural-models': '85%'
+    'neural-models': '85%',
   },
   totalAssertions: 3000,
   components: [
@@ -1833,6 +1833,6 @@ export default {
     'BenchmarkCLI (127 lines)',
     'PerformanceCLI (164 lines)',
     'All 8 Neural Models (~1,500 lines)',
-    '40+ Neural Presets'
-  ]
+    '40+ Neural Presets',
+  ],
 };

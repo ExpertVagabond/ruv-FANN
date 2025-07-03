@@ -314,6 +314,11 @@ class RuvSwarm {
       bigint: typeof BigInt !== 'undefined',
     };
   }
+
+  // Instance method that delegates to static method for API convenience
+  detectSIMDSupport() {
+    return RuvSwarm.detectSIMDSupport();
+  }
 }
 
 // Enhanced Swarm wrapper class

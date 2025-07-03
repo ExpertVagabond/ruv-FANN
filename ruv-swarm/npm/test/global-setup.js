@@ -19,7 +19,7 @@ export default async function globalSetup() {
     'test-outputs',
     'test-reports',
     'coverage',
-    'test-data'
+    'test-data',
   ];
 
   for (const dir of testDirs) {
@@ -31,7 +31,7 @@ export default async function globalSetup() {
   console.log('🔍 Checking WASM files...');
   const wasmFiles = [
     '../wasm/ruv_swarm_wasm_bg.wasm',
-    '../wasm/ruv_swarm_wasm.js'
+    '../wasm/ruv_swarm_wasm.js',
   ];
 
   for (const file of wasmFiles) {
@@ -52,16 +52,16 @@ export default async function globalSetup() {
     'vitest',
     'playwright',
     'better-sqlite3',
-    'ws'
+    'ws',
   ];
 
   const packageJson = JSON.parse(
-    await fs.readFile(path.join(__dirname, '../package.json'), 'utf-8')
+    await fs.readFile(path.join(__dirname, '../package.json'), 'utf-8'),
   );
 
   const allDeps = {
     ...packageJson.dependencies,
-    ...packageJson.devDependencies
+    ...packageJson.devDependencies,
   };
 
   for (const dep of requiredDeps) {
@@ -77,7 +77,7 @@ export default async function globalSetup() {
   const mcpProcess = spawn('npm', ['run', 'mcp:server'], {
     cwd: path.join(__dirname, '..'),
     detached: true,
-    stdio: 'ignore'
+    stdio: 'ignore',
   });
 
   mcpProcess.unref();
@@ -85,7 +85,7 @@ export default async function globalSetup() {
   // Store process ID for cleanup
   await fs.writeFile(
     path.join(__dirname, '.mcp-server.pid'),
-    mcpProcess.pid.toString()
+    mcpProcess.pid.toString(),
   );
 
   // Wait for MCP server to start
@@ -94,7 +94,7 @@ export default async function globalSetup() {
   // Initialize test database
   console.log('\n💾 Initializing test database...');
   const dbPath = path.join(__dirname, '../test-data/test.db');
-  
+
   // Clean up existing test database
   try {
     await fs.unlink(dbPath);
@@ -110,26 +110,26 @@ export default async function globalSetup() {
     environment: {
       node: process.version,
       platform: process.platform,
-      arch: process.arch
-    }
+      arch: process.arch,
+    },
   };
 
   await fs.writeFile(
     path.join(__dirname, '../coverage/coverage-run.json'),
-    JSON.stringify(coverageData, null, 2)
+    JSON.stringify(coverageData, null, 2),
   );
 
   console.log('\n✅ Global setup complete!\n');
 
   // Return cleanup function
-  return async () => {
+  return async() => {
     console.log('\n🧹 Cleaning up test environment...');
 
     // Stop MCP server
     try {
       const pid = await fs.readFile(
         path.join(__dirname, '.mcp-server.pid'),
-        'utf-8'
+        'utf-8',
       );
       process.kill(parseInt(pid), 'SIGTERM');
       await fs.unlink(path.join(__dirname, '.mcp-server.pid'));

@@ -117,7 +117,7 @@ class WasmModuleLoader {
   async #instantiateRaw(name, info) {
     const wasmPath = path.join(this.baseDir, info.path);
     const cacheKey = `${name}-${info.path}`;
-    
+
     // Check cache first
     const cached = this.wasmCache.get(cacheKey);
     if (cached && (Date.now() - cached.timestamp < this.cacheTimeout)) {
@@ -142,13 +142,13 @@ class WasmModuleLoader {
     const imports = this.#importsFor(name);
     const { instance, module } = await WebAssembly.instantiate(buffer, imports);
     const result = { instance, module, exports: instance.exports, memory: instance.exports.memory };
-    
+
     // Cache the compiled module
     this.wasmCache.set(cacheKey, {
       module: result,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
-    
+
     return result;
   }
 
@@ -157,7 +157,7 @@ class WasmModuleLoader {
     try {
       // Try multiple path resolution strategies
       const pathCandidates = this.#getWasmPathCandidates();
-      
+
       for (const pathCandidate of pathCandidates) {
         try {
           const result = await this.#tryLoadFromPath(pathCandidate);
@@ -170,20 +170,20 @@ class WasmModuleLoader {
           continue;
         }
       }
-      
+
       throw new Error('All WASM loading strategies failed');
     } catch (error) {
       console.error('Failed to load core module via bindings loader:', error);
       console.warn('⚠️ Falling back to placeholder WASM functionality');
-      
+
       // Log specific import errors for debugging
       if (error.message && error.message.includes('import')) {
         console.error('WASM import error details:', {
           message: error.message,
-          stack: error.stack?.split('\n').slice(0, 5).join('\n')
+          stack: error.stack?.split('\n').slice(0, 5).join('\n'),
         });
       }
-      
+
       return this.#placeholder('core');
     }
   }
@@ -258,7 +258,7 @@ class WasmModuleLoader {
           const potentialPaths = [
             path.join(cwd, 'node_modules', 'ruv-swarm', 'wasm'),
             path.join(cwd, '..', 'wasm'),
-            path.join(cwd, 'wasm')
+            path.join(cwd, 'wasm'),
           ];
           return potentialPaths.find(p => {
             try {
@@ -269,7 +269,7 @@ class WasmModuleLoader {
             }
           });
         },
-        
+
         // Module resolution approach
         () => {
           try {
@@ -280,11 +280,11 @@ class WasmModuleLoader {
             return null;
           }
         },
-        
+
         // Environment variable approach
-        () => process.env.RUV_SWARM_WASM_PATH
+        () => process.env.RUV_SWARM_WASM_PATH,
       ];
-      
+
       for (const approach of approaches) {
         try {
           const result = approach();
@@ -295,7 +295,7 @@ class WasmModuleLoader {
           continue;
         }
       }
-      
+
       return null;
     } catch {
       return null;
@@ -309,21 +309,27 @@ class WasmModuleLoader {
         wasmDir: path.join(this.baseDir, '..', 'wasm'),
         loaderPath: path.join(this.baseDir, '..', 'wasm', 'wasm-bindings-loader.mjs'),
         wasmBinary: path.join(this.baseDir, '..', 'wasm', 'ruv_swarm_wasm_bg.wasm'),
-        jsBindings: path.join(this.baseDir, '..', 'wasm', 'ruv_swarm_wasm.js')
+        jsBindings: path.join(this.baseDir, '..', 'wasm', 'ruv_swarm_wasm.js'),
       },
       {
         description: 'NPM package installation (adjacent to src/)',
         wasmDir: path.join(this.baseDir, '..', '..', 'wasm'),
         loaderPath: path.join(this.baseDir, '..', '..', 'wasm', 'wasm-bindings-loader.mjs'),
         wasmBinary: path.join(this.baseDir, '..', '..', 'wasm', 'ruv_swarm_wasm_bg.wasm'),
-        jsBindings: path.join(this.baseDir, '..', '..', 'wasm', 'ruv_swarm_wasm.js')
+        jsBindings: path.join(this.baseDir, '..', '..', 'wasm', 'ruv_swarm_wasm.js'),
       },
       {
         description: 'Global npm installation',
         wasmDir: this.#resolvePackageWasmDir(),
-        get loaderPath() { return this.wasmDir ? path.join(this.wasmDir, 'wasm-bindings-loader.mjs') : null; },
-        get wasmBinary() { return this.wasmDir ? path.join(this.wasmDir, 'ruv_swarm_wasm_bg.wasm') : null; },
-        get jsBindings() { return this.wasmDir ? path.join(this.wasmDir, 'ruv_swarm_wasm.js') : null; }
+        get loaderPath() {
+          return this.wasmDir ? path.join(this.wasmDir, 'wasm-bindings-loader.mjs') : null;
+        },
+        get wasmBinary() {
+          return this.wasmDir ? path.join(this.wasmDir, 'ruv_swarm_wasm_bg.wasm') : null;
+        },
+        get jsBindings() {
+          return this.wasmDir ? path.join(this.wasmDir, 'ruv_swarm_wasm.js') : null;
+        },
       },
       {
         description: 'Bundled WASM (inline)',
@@ -331,18 +337,16 @@ class WasmModuleLoader {
         loaderPath: null,
         wasmBinary: null,
         jsBindings: null,
-        inline: true
-      }
+        inline: true,
+      },
     ].filter(candidate => {
-      if (candidate.inline) return true;
+      if (candidate.inline) {
+        return true;
+      }
       try {
         // Check if the wasm directory exists using sync fs access
-        try {
-          accessSync(candidate.wasmDir);
-          return true;
-        } catch {
-          return false;
-        }
+        accessSync(candidate.wasmDir);
+        return true;
       } catch {
         return false;
       }
@@ -354,28 +358,28 @@ class WasmModuleLoader {
       // Use inline/bundled WASM approach
       return this.#loadInlineWasm();
     }
-    
+
     // Check if required files exist
     await fs.access(pathCandidate.wasmBinary);
-    
+
     // Try to load the wasm-bindings-loader if it exists
     if (pathCandidate.loaderPath) {
       try {
         await fs.access(pathCandidate.loaderPath);
-        
+
         const loaderURL = pathToFileURL(pathCandidate.loaderPath).href;
         const loaderModule = await import(loaderURL);
         const bindingsLoader = loaderModule.default;
         const initialized = await bindingsLoader.initialize();
-        
+
         // Check if it's using placeholder
         if (initialized.isPlaceholder) {
           console.debug('Bindings loader returned placeholder');
           throw new Error('Bindings loader using placeholder');
         }
-        
+
         this.loadedBindings = initialized;
-        
+
         // Return a properly structured module object
         return {
           instance: { exports: initialized },
@@ -388,14 +392,14 @@ class WasmModuleLoader {
             }
             return 256 * 65536;
           }),
-          isPlaceholder: false
+          isPlaceholder: false,
         };
       } catch (loaderError) {
         console.debug('Loader error:', loaderError.message);
         console.debug('Falling back to direct WASM loading');
       }
     }
-    
+
     // Fallback to direct WASM loading
     return this.#loadDirectWasm(pathCandidate.wasmBinary);
   }
@@ -409,15 +413,15 @@ class WasmModuleLoader {
   async #loadDirectWasm(wasmPath) {
     // For wasm-bindgen generated WASM, we need to use the JS bindings
     const jsBindingsPath = wasmPath.replace('_bg.wasm', '.js');
-    
+
     try {
       // Check if the JS bindings file exists
       await fs.access(jsBindingsPath);
-      
+
       // Import the wasm-bindgen generated module
       const bindingsURL = pathToFileURL(jsBindingsPath).href;
       const wasmModule = await import(bindingsURL);
-      
+
       // Initialize the wasm module (wasm-bindgen handles the instantiation)
       if (typeof wasmModule.default === 'function') {
         // Call default export with the path to the WASM file
@@ -432,15 +436,15 @@ class WasmModuleLoader {
         const wasmBuffer = await fs.readFile(wasmPath);
         wasmModule.initSync(wasmBuffer);
       }
-      
+
       // Store the loaded module
       this.loadedWasm = wasmModule;
-      
+
       // Return a structure that matches our expected format
       return {
         instance: { exports: wasmModule },
         module: wasmModule,
-        exports: wasmModule
+        exports: wasmModule,
       };
     } catch (error) {
       console.error('Failed to load wasm-bindgen module:', error);
@@ -458,63 +462,63 @@ class WasmModuleLoader {
     if (this.loadedBindings) {
       return this.loadedBindings;
     }
-    
+
     // If we have the actual wasm-bindgen module loaded, use it directly
     if (this.loadedWasm && !this.loadedWasm.instance) {
       // This is a wasm-bindgen module, return it directly
       return this.loadedWasm;
     }
-    
+
     // Create a minimal API that matches what the bindings would provide
     const api = {
       memory: new WebAssembly.Memory({ initial: 256, maximum: 4096 }),
-      
+
       // Neural network functions
       create_neural_network: (layers, neurons_per_layer) => {
         console.log(`Creating neural network with ${layers} layers and ${neurons_per_layer} neurons per layer`);
         return 1;
       },
-      
+
       train_network: (network_id, data, epochs) => {
         console.log(`Training network ${network_id} for ${epochs} epochs`);
         return true;
       },
-      
+
       forward_pass: (network_id, input) => {
         console.log(`Forward pass on network ${network_id}`);
         return new Float32Array([0.5, 0.5, 0.5]);
       },
-      
+
       // Forecasting functions
       create_forecasting_model: (type) => {
         console.log(`Creating forecasting model of type ${type}`);
         return 1;
       },
-      
+
       forecast: (model_id, data, horizon) => {
         console.log(`Forecasting with model ${model_id} for horizon ${horizon}`);
         return new Float32Array([0.1, 0.2, 0.3]);
       },
-      
+
       // Swarm functions
       create_swarm: (topology, max_agents) => {
         console.log(`Creating swarm with ${topology} topology and ${max_agents} max agents`);
         return 1;
       },
-      
+
       spawn_agent: (swarm_id, agent_type) => {
         console.log(`Spawning ${agent_type} agent in swarm ${swarm_id}`);
         return 1;
       },
-      
+
       // Memory management
       getTotalMemoryUsage: () => {
         return 256 * 65536; // 256 pages * 64KB
       },
-      
-      isPlaceholder: true
+
+      isPlaceholder: true,
     };
-    
+
     // If we have actual WASM loaded, proxy to it
     if (this.loadedWasm && this.loadedWasm.exports) {
       const target = this.loadedWasm.exports;
@@ -524,10 +528,10 @@ class WasmModuleLoader {
             return target[prop];
           }
           return obj[prop];
-        }
+        },
       });
     }
-    
+
     return api;
   }
 
@@ -550,39 +554,39 @@ class WasmModuleLoader {
 
     return totalBytes;
   }
-  
+
   clearCache() {
     const cacheSize = this.wasmCache.size;
     this.wasmCache.clear();
     console.log(`🧹 Cleared WASM cache (${cacheSize} modules)`);
   }
-  
+
   optimizeMemory() {
     // Clear expired cache entries
     const now = Date.now();
     let expired = 0;
-    
+
     for (const [key, cached] of this.wasmCache.entries()) {
       if (now - cached.timestamp > this.cacheTimeout) {
         this.wasmCache.delete(key);
         expired++;
       }
     }
-    
+
     if (expired > 0) {
       console.log(`🧹 Removed ${expired} expired WASM cache entries`);
     }
-    
+
     // Force garbage collection if available
     if (global.gc) {
       global.gc();
       console.log('🧹 Triggered garbage collection');
     }
-    
+
     return {
       cacheSize: this.wasmCache.size,
       memoryUsage: this.getTotalMemoryUsage(),
-      expiredEntries: expired
+      expiredEntries: expired,
     };
   }
 }

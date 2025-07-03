@@ -2,9 +2,9 @@
  * Performance benchmarks for ruv-swarm
  */
 
-import { RuvSwarm  } from '../../src/index-enhanced';
-import { NeuralNetwork  } from '../../src/neural-agent';
-import { SwarmPersistence  } from '../../src/persistence';
+import { RuvSwarm } from '../../src/index-enhanced';
+import { NeuralNetwork } from '../../src/neural-agent';
+import { SwarmPersistence } from '../../src/persistence';
 import assert from 'assert';
 import path from 'path';
 import fs from 'fs';
@@ -539,9 +539,7 @@ describe('Performance Benchmarks', () => {
 });
 
 // Run benchmarks
-// Direct execution block
-{
-  console.log('Running Performance Benchmarks...');
-  console.log('This may take a few minutes...\n');
-  require('../../node_modules/.bin/jest');
-}
+// Direct execution
+console.log('Running Performance Benchmarks...');
+console.log('This may take a few minutes...\n');
+require('../../node_modules/.bin/jest');

@@ -23,7 +23,7 @@ class RuvSwarmError extends Error {
       code: this.code,
       details: this.details,
       timestamp: this.timestamp,
-      stack: this.stack
+      stack: this.stack,
     };
   }
 
@@ -34,7 +34,7 @@ class RuvSwarmError extends Error {
     return [
       'Check the error details for specific information',
       'Verify your input parameters',
-      'Consult the MCP tools documentation'
+      'Consult the MCP tools documentation',
     ];
   }
 }
@@ -48,9 +48,9 @@ class ValidationError extends RuvSwarmError {
       field,
       value: typeof value === 'object' ? JSON.stringify(value) : value,
       expectedType,
-      actualType: typeof value
+      actualType: typeof value,
     };
-    
+
     super(message, 'VALIDATION_ERROR', details);
     this.field = field;
     this.value = value;
@@ -60,7 +60,7 @@ class ValidationError extends RuvSwarmError {
   getSuggestions() {
     const suggestions = [
       `Check the '${this.field}' parameter`,
-      `Expected type: ${this.expectedType}, got: ${this.details.actualType}`
+      `Expected type: ${this.expectedType}, got: ${this.details.actualType}`,
     ];
 
     if (this.expectedType === 'number') {
@@ -282,7 +282,7 @@ class ConfigurationError extends RuvSwarmError {
       'Review configuration documentation',
       'Verify configuration file format',
       'Ensure all required configuration keys are present',
-      'Check configuration value types and ranges'
+      'Check configuration value types and ranges',
     ];
   }
 }
@@ -409,7 +409,7 @@ class ConcurrencyError extends RuvSwarmError {
       'Retry the operation with exponential backoff',
       'Check for race conditions in the code',
       'Consider using queues for serializing operations',
-      'Review concurrent access patterns'
+      'Review concurrent access patterns',
     ];
   }
 }
@@ -423,30 +423,30 @@ class ErrorFactory {
    */
   static createError(type, message, details = {}) {
     switch (type) {
-      case 'validation':
-        return new ValidationError(message, details.field, details.value, details.expectedType);
-      case 'swarm':
-        return new SwarmError(message, details.swarmId, details.operation);
-      case 'agent':
-        return new AgentError(message, details.agentId, details.agentType, details.operation);
-      case 'task':
-        return new TaskError(message, details.taskId, details.taskType, details.operation);
-      case 'neural':
-        return new NeuralError(message, details.networkId, details.operation, details.modelType);
-      case 'wasm':
-        return new WasmError(message, details.module, details.operation);
-      case 'configuration':
-        return new ConfigurationError(message, details.configKey, details.configValue);
-      case 'network':
-        return new NetworkError(message, details.endpoint, details.statusCode);
-      case 'persistence':
-        return new PersistenceError(message, details.operation, details.table);
-      case 'resource':
-        return new ResourceError(message, details.resourceType, details.currentUsage, details.limit);
-      case 'concurrency':
-        return new ConcurrencyError(message, details.operation, details.conflictType);
-      default:
-        return new RuvSwarmError(message, 'GENERAL_ERROR', details);
+    case 'validation':
+      return new ValidationError(message, details.field, details.value, details.expectedType);
+    case 'swarm':
+      return new SwarmError(message, details.swarmId, details.operation);
+    case 'agent':
+      return new AgentError(message, details.agentId, details.agentType, details.operation);
+    case 'task':
+      return new TaskError(message, details.taskId, details.taskType, details.operation);
+    case 'neural':
+      return new NeuralError(message, details.networkId, details.operation, details.modelType);
+    case 'wasm':
+      return new WasmError(message, details.module, details.operation);
+    case 'configuration':
+      return new ConfigurationError(message, details.configKey, details.configValue);
+    case 'network':
+      return new NetworkError(message, details.endpoint, details.statusCode);
+    case 'persistence':
+      return new PersistenceError(message, details.operation, details.table);
+    case 'resource':
+      return new ResourceError(message, details.resourceType, details.currentUsage, details.limit);
+    case 'concurrency':
+      return new ConcurrencyError(message, details.operation, details.conflictType);
+    default:
+      return new RuvSwarmError(message, 'GENERAL_ERROR', details);
     }
   }
 
@@ -460,10 +460,10 @@ class ErrorFactory {
       originalError: {
         name: originalError.name,
         message: originalError.message,
-        stack: originalError.stack
-      }
+        stack: originalError.stack,
+      },
     };
-    
+
     return this.createError(type, message, details);
   }
 }
@@ -499,7 +499,7 @@ class ErrorContext {
     if (error instanceof RuvSwarmError) {
       error.details = {
         ...error.details,
-        context: this.toObject()
+        context: this.toObject(),
       };
     }
     return error;
@@ -521,7 +521,7 @@ export {
   ResourceError,
   ConcurrencyError,
   ErrorFactory,
-  ErrorContext
+  ErrorContext,
 };
 
 // Export default error factory
