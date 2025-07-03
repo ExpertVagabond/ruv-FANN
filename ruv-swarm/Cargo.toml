@@ -8,7 +8,7 @@ members = [
     "crates/ruv-swarm-ml",
     "crates/ruv-swarm-mcp",
     "crates/ruv-swarm-wasm",
-    "crates/ruv-swarm-wasm-unified", # Unified WASM module for all features
+    # "crates/ruv-swarm-wasm-unified", # Unified WASM module - excluded due to edition 2024 issues
     "crates/ruv-swarm-daa",          # DAA integration for autonomous agents
     "crates/swe-bench-adapter",      # SWE-Bench adapter for evaluation
     "crates/ruv-swarm-cli",
@@ -17,6 +17,7 @@ members = [
 ]
 
 resolver = "2"
+exclude = ["crates/ruv-swarm-wasm-unified"]  # Exclude unified crate with edition 2024 issues
 
 [workspace.package]
 version = "1.0.7"
@@ -30,7 +31,7 @@ description = "High-performance neural network swarm orchestration framework wit
 readme = "README.md"
 keywords = ["neural-network", "wasm", "swarm", "ai", "mcp"]
 categories = ["algorithms", "science", "wasm", "web-programming"]
-rust-version = "1.73"
+rust-version = "1.85"
 
 [workspace.dependencies]
 # Async runtime (WASM-compatible subset)
@@ -107,4 +108,5 @@ overflow-checks = false  # Disable overflow checks in release mode
 [profile.bench]
 inherits = "release"
 debug = true
+
 
