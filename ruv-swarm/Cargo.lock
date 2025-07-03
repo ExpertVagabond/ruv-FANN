@@ -4363,6 +4363,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "ruv-swarm-wasm-unified"
+version = "1.0.5"
+dependencies = [
+ "console_error_panic_hook",
+ "js-sys",
+ "rayon",
+ "ruv-swarm-core",
+ "ruv-swarm-ml",
+ "ruv-swarm-wasm",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "wasm-bindgen",
+ "web-sys",
+ "wee_alloc",
+]
+
+[[package]]
 name = "ryu"
 version = "1.0.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5958,6 +5976,8 @@ dependencies = [
  "cfg-if 1.0.1",
  "once_cell",
  "rustversion",
+ "serde",
+ "serde_json",
  "wasm-bindgen-macro",
 ]
 
