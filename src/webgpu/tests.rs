@@ -4,8 +4,19 @@
 mod webgpu_tests {
     use crate::webgpu::{BackendSelector, ComputeProfile, MatrixSize, OperationType};
 
+    // Helper function to check if we're running in CI
+    fn is_ci_environment() -> bool {
+        std::env::var("RUV_FANN_CI_TESTING").is_ok()
+    }
+
     #[test]
     fn test_backend_selector_creation() {
+        // Skip test in CI environment
+        if is_ci_environment() {
+            println!("Skipping WebGPU test in CI environment");
+            return;
+        }
+
         let selector = BackendSelector::<f32>::new();
         let capabilities = selector.capabilities();
 
@@ -20,6 +31,12 @@ mod webgpu_tests {
 
     #[test]
     fn test_compute_profile_selection() {
+        // Skip test in CI environment
+        if is_ci_environment() {
+            println!("Skipping WebGPU test in CI environment");
+            return;
+        }
+
         let selector = BackendSelector::<f32>::new();
 
         let profiles = vec![

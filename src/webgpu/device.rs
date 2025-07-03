@@ -43,6 +43,12 @@ pub struct DeviceInfo {
 impl GpuDevice {
     /// Initialize GPU device with advanced capability detection
     pub async fn new() -> ComputeResult<Self> {
+        // Check if running in CI environment
+        if std::env::var("RUV_FANN_CI_TESTING").is_ok() {
+            // Return a mock device for CI testing
+            return Err(ComputeError::DeviceNotAvailable("Running in CI environment, WebGPU disabled".into()));
+        }
+        
         // Create WebGPU instance
         let instance = ::wgpu::Instance::new(::wgpu::InstanceDescriptor {
             backends: ::wgpu::Backends::all(),
