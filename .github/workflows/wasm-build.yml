@@ -27,7 +27,7 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Setup Rust
-      uses: dtolnay/rust-toolchain@1.75.0
+      uses: dtolnay/rust-toolchain@1.73.0
       with:
         targets: wasm32-unknown-unknown
         components: rustfmt, clippy
@@ -52,11 +52,21 @@ jobs:
     
     - name: Install wasm-pack
       run: |
+        # Install latest wasm-pack version for better compatibility
         curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        wasm-pack --version
     
     - name: Install wasm-opt
       run: |
         npm install -g wasm-opt
+    
+    - name: Verify Cargo.lock compatibility
+      working-directory: ./ruv-swarm
+      run: |
+        echo "Checking Cargo.lock version..."
+        head -n 5 Cargo.lock
+        # Ensure we can read the workspace metadata
+        cargo metadata --no-deps --format-version 1 > /dev/null
     
     - name: Build WASM module
       working-directory: ./ruv-swarm/crates/ruv-swarm-wasm-unified

@@ -30,7 +30,7 @@ description = "High-performance neural network swarm orchestration framework wit
 readme = "README.md"
 keywords = ["neural-network", "wasm", "swarm", "ai", "mcp"]
 categories = ["algorithms", "science", "wasm", "web-programming"]
-rust-version = "1.75"
+rust-version = "1.73"
 
 [workspace.dependencies]
 # Async runtime (WASM-compatible subset)
