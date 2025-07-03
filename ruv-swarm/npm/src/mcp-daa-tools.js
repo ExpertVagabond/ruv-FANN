@@ -138,17 +138,19 @@ export class DAA_MCPTools {
       await this.ensureInitialized();
 
       const {
+        agent_id,
         agentId,
         feedback,
         performanceScore = 0.5,
         suggestions = [],
       } = params;
 
-      if (!agentId) {
+      const id = agent_id || agentId;
+      if (!id) {
         throw new Error('Agent ID is required');
       }
 
-      const adaptationResult = await daaService.adaptAgent(agentId, {
+      const adaptationResult = await daaService.adaptAgent(id, {
         feedback,
         performanceScore,
         suggestions,
@@ -156,7 +158,7 @@ export class DAA_MCPTools {
       });
 
       const result = {
-        agent_id: agentId,
+        agent_id: id,
         adaptation_complete: true,
         previous_pattern: adaptationResult.previousPattern,
         new_pattern: adaptationResult.newPattern,
@@ -232,22 +234,24 @@ export class DAA_MCPTools {
       await this.ensureInitialized();
 
       const {
+        workflow_id,
         workflowId,
         agentIds = [],
         parallelExecution = true,
       } = params;
 
-      if (!workflowId) {
+      const id = workflow_id || workflowId;
+      if (!id) {
         throw new Error('Workflow ID is required');
       }
 
-      const executionResult = await daaService.executeWorkflow(workflowId, {
+      const executionResult = await daaService.executeWorkflow(id, {
         agentIds,
         parallel: parallelExecution,
       });
 
       const result = {
-        workflow_id: workflowId,
+        workflow_id: id,
         execution_complete: executionResult.complete,
         steps_completed: executionResult.stepsCompleted,
         total_steps: executionResult.totalSteps,
@@ -279,19 +283,24 @@ export class DAA_MCPTools {
       await this.ensureInitialized();
 
       const {
+        source_agent,
         sourceAgentId,
-        targetAgentIds = [],
+        target_agents,
+        targetAgentIds,
         knowledgeDomain,
         knowledgeContent,
       } = params;
 
-      if (!sourceAgentId || targetAgentIds.length === 0) {
+      const sourceId = source_agent || sourceAgentId;
+      const targetIds = target_agents || targetAgentIds || [];
+      
+      if (!sourceId || targetIds.length === 0) {
         throw new Error('Source and target agent IDs are required');
       }
 
       const sharingResults = await daaService.shareKnowledge(
-        sourceAgentId,
-        targetAgentIds,
+        sourceId,
+        targetIds,
         {
           domain: knowledgeDomain,
           content: knowledgeContent,
@@ -300,8 +309,8 @@ export class DAA_MCPTools {
       );
 
       const result = {
-        source_agent: sourceAgentId,
-        target_agents: targetAgentIds,
+        source_agent: sourceId,
+        target_agents: targetIds,
         knowledge_domain: knowledgeDomain,
         sharing_complete: true,
         agents_updated: sharingResults.updatedAgents,
@@ -379,18 +388,22 @@ export class DAA_MCPTools {
       await this.ensureInitialized();
 
       const {
+        agent_id,
         agentId,
         pattern,
-        analyze = false,
+        action,
+        analyze = false
       } = params;
+      
+      const id = agent_id || agentId;
+      const shouldAnalyze = action === 'analyze' || analyze;
 
-      if (analyze) {
+      if (shouldAnalyze) {
         // Analyze current cognitive patterns
         const analysis = await daaService.analyzeCognitivePatterns(agentId);
-
         const result = {
           analysis_type: 'cognitive_pattern',
-          agent_id: agentId || 'all',
+          agent_id: id || 'all',
           current_patterns: analysis.patterns,
           pattern_effectiveness: analysis.effectiveness,
           recommendations: analysis.recommendations,
@@ -574,7 +587,8 @@ export class DAA_MCPTools {
         inputSchema: {
           type: 'object',
           properties: {
-            agentId: { type: 'string', description: 'Agent ID to adapt' },
+            agent_id: { type: 'string', description: 'Agent ID to adapt' },
+            agentId: { type: 'string', description: 'Agent ID to adapt (legacy)' },
             feedback: { type: 'string', description: 'Feedback message' },
             performanceScore: { type: 'number', description: 'Performance score (0-1)' },
             suggestions: { type: 'array', items: { type: 'string' }, description: 'Improvement suggestions' },
@@ -603,7 +617,8 @@ export class DAA_MCPTools {
         inputSchema: {
           type: 'object',
           properties: {
-            workflowId: { type: 'string', description: 'Workflow ID to execute' },
+            workflow_id: { type: 'string', description: 'Workflow ID to execute' },
+            workflowId: { type: 'string', description: 'Workflow ID to execute (legacy)' },
             agentIds: { type: 'array', items: { type: 'string' }, description: 'Agent IDs to use' },
             parallelExecution: { type: 'boolean', description: 'Enable parallel execution' },
           },
@@ -616,8 +631,10 @@ export class DAA_MCPTools {
         inputSchema: {
           type: 'object',
           properties: {
-            sourceAgentId: { type: 'string', description: 'Source agent ID' },
-            targetAgentIds: { type: 'array', items: { type: 'string' }, description: 'Target agent IDs' },
+            source_agent: { type: 'string', description: 'Source agent ID' },
+            sourceAgentId: { type: 'string', description: 'Source agent ID (legacy)' },
+            target_agents: { type: 'array', items: { type: 'string' }, description: 'Target agent IDs' },
+            targetAgentIds: { type: 'array', items: { type: 'string' }, description: 'Target agent IDs (legacy)' },
             knowledgeDomain: { type: 'string', description: 'Knowledge domain' },
             knowledgeContent: { type: 'object', description: 'Knowledge to share' },
           },
@@ -641,7 +658,9 @@ export class DAA_MCPTools {
         inputSchema: {
           type: 'object',
           properties: {
-            agentId: { type: 'string', description: 'Agent ID' },
+            agent_id: { type: 'string', description: 'Agent ID' },
+            agentId: { type: 'string', description: 'Agent ID (legacy)' },
+            action: { type: 'string', enum: ['analyze', 'change'], description: 'Action to perform' },
             pattern: { type: 'string', enum: ['convergent', 'divergent', 'lateral', 'systems', 'critical', 'adaptive'], description: 'New pattern to set' },
             analyze: { type: 'boolean', description: 'Analyze patterns instead of changing' },
           },
