@@ -1257,6 +1257,7 @@ async function handleMcpRequest(request, mcpTools) {
                             text: typeof result === 'string' ? result : JSON.stringify(result, null, 2)
                         }]
                     };
+                } else {
                     response.error = {
                         code: -32601,
                         message: 'Method not found',
