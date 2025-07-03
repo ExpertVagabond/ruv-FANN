@@ -8,12 +8,12 @@ members = [
     "crates/ruv-swarm-ml",
     "crates/ruv-swarm-mcp",
     "crates/ruv-swarm-wasm",
+    "crates/ruv-swarm-wasm-unified", # Unified WASM module for all features
     "crates/ruv-swarm-daa",          # DAA integration for autonomous agents
     "crates/swe-bench-adapter",      # SWE-Bench adapter for evaluation
     "crates/ruv-swarm-cli",
     "ml-training",
     "benchmarking",                   # Comprehensive benchmarking framework
-    # "crates/ruv-swarm-wasm-unified", # Temporarily disabled due to path resolution issues
 ]
 
 resolver = "2"
