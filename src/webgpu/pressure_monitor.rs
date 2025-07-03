@@ -606,7 +606,7 @@ impl MemoryPressureMonitor {
                     if config.anomaly_detection_enabled {
                         if let Some(anomaly) = Self::detect_anomalies(&anomaly_detector, &reading) {
                             monitoring_stats.lock().unwrap().anomalies_detected += 1;
-                            log::warn!("Memory anomaly detected: {:?}", anomaly);
+                            log::warn!("Memory anomaly detected: {anomaly:?}");
                         }
                     }
 
@@ -906,13 +906,12 @@ impl MemoryPressureMonitor {
                 }
                 ResponseAction::AlertOperator { severity } => {
                     log::warn!(
-                        "DAA alert: Memory pressure requires operator attention (severity: {:?})",
-                        severity
+                        "DAA alert: Memory pressure requires operator attention (severity: {severity:?})"
                     );
                 }
                 _ => {
                     // Other actions would be implemented based on specific requirements
-                    log::info!("DAA executed response action: {:?}", action);
+                    log::info!("DAA executed response action: {action:?}");
                 }
             }
         }

@@ -1,11 +1,12 @@
 //! Tests for WebGPU compute backend
 
 #[cfg(test)]
-mod tests {
+mod webgpu_tests {
+    use crate::webgpu::{BackendSelector, ComputeProfile, MatrixSize, OperationType};
 
     #[test]
     fn test_backend_selector_creation() {
-        let selector = crate::webgpu::BackendSelector::<f32>::new();
+        let selector = BackendSelector::<f32>::new();
         let capabilities = selector.capabilities();
 
         // Should have at least one backend (CPU fallback)
@@ -19,18 +20,18 @@ mod tests {
 
     #[test]
     fn test_compute_profile_selection() {
-        let selector = crate::webgpu::BackendSelector::<f32>::new();
+        let selector = BackendSelector::<f32>::new();
 
         let profiles = vec![
-            crate::webgpu::ComputeProfile {
-                matrix_size: crate::webgpu::MatrixSize::Small,
+            ComputeProfile {
+                matrix_size: MatrixSize::Small,
                 batch_size: 1,
-                operation_type: crate::webgpu::OperationType::ForwardPass,
+                operation_type: OperationType::ForwardPass,
             },
-            crate::webgpu::ComputeProfile {
-                matrix_size: crate::webgpu::MatrixSize::Large,
+            ComputeProfile {
+                matrix_size: MatrixSize::Large,
                 batch_size: 32,
-                operation_type: crate::webgpu::OperationType::Inference,
+                operation_type: OperationType::Inference,
             },
         ];
 
