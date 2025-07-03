@@ -11,7 +11,7 @@ categories = ["development-tools", "science", "algorithms"]
 
 [dependencies]
 # Core dependencies
-ruv-swarm-core = { path = "../ruv-swarm-core", version = "1.0.5" }
+ruv-swarm-core = { path = "../ruv-swarm-core", version = "1.0.6" }
 ruv-swarm-agents = { path = "../ruv-swarm-agents", version = "1.0.5" }
 ruv-swarm-persistence = { path = "../ruv-swarm-persistence", version = "1.0.5" }
 

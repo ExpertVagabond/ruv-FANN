@@ -16,7 +16,7 @@ path = "src/main.rs"
 
 [dependencies]
 # Local dependencies
-ruv-swarm-core = { path = "../ruv-swarm-core", version = "1.0.5" }
+ruv-swarm-core = { path = "../ruv-swarm-core", version = "1.0.6" }
 ruv-swarm-agents = { path = "../ruv-swarm-agents", version = "1.0.5" }
 
 # CLI and argument parsing
