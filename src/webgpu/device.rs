@@ -46,7 +46,7 @@ impl GpuDevice {
         // Check if running in CI environment
         if std::env::var("RUV_FANN_CI_TESTING").is_ok() {
             // Return a mock device for CI testing
-            return Err(ComputeError::DeviceNotAvailable("Running in CI environment, WebGPU disabled".into()));
+            return Err(ComputeError::GpuUnavailable);
         }
         
         // Create WebGPU instance
