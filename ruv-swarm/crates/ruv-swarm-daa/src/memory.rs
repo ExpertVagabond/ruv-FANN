@@ -120,6 +120,12 @@ pub enum MemoryPolicyType {
     PruneUnusedConnections,
 }
 
+impl Default for MemoryManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MemoryManager {
     pub fn new() -> Self {
         Self {
@@ -128,20 +134,24 @@ impl MemoryManager {
             memory_policies: Self::default_policies(),
         }
     }
-    
+
     fn default_policies() -> Vec<MemoryPolicy> {
-        vec![
-            MemoryPolicy {
-                policy_type: MemoryPolicyType::ForgetOldMemories,
-                parameters: {
-                    let mut params = HashMap::new();
-                    params.insert("max_age_days".to_string(), 30.0);
-                    params.insert("min_importance".to_string(), 0.1);
-                    params
-                },
-                applicable_agents: vec!["*".to_string()], // All agents
+        vec![MemoryPolicy {
+            policy_type: MemoryPolicyType::ForgetOldMemories,
+            parameters: {
+                let mut params = HashMap::new();
+                params.insert("max_age_days".to_string(), 30.0);
+                params.insert("min_importance".to_string(), 0.1);
+                params
             },
-        ]
+            applicable_agents: vec!["*".to_string()], // All agents
+        }]
+    }
+}
+
+impl Default for SharedMemorySpace {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

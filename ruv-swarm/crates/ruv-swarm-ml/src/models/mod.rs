@@ -6,8 +6,8 @@
 use alloc::{
     boxed::Box,
     string::{String, ToString},
-    vec::Vec,
     vec,
+    vec::Vec,
 };
 use core::fmt;
 
@@ -22,18 +22,18 @@ pub enum ModelType {
     DLinear,
     NLinear,
     MLPMultivariate,
-    
+
     // Recurrent Models
     RNN,
     LSTM,
     GRU,
-    
+
     // Advanced Models
     NBEATS,
     NBEATSx,
     NHITS,
     TiDE,
-    
+
     // Transformer Models
     TFT,
     Informer,
@@ -41,7 +41,7 @@ pub enum ModelType {
     FedFormer,
     PatchTST,
     ITransformer,
-    
+
     // Specialized Models
     DeepAR,
     DeepNPTS,
@@ -84,29 +84,29 @@ pub enum ModelCategory {
 /// Expected training time category
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum TrainingTime {
-    Fast,       // < 1 minute
-    Medium,     // 1-10 minutes
-    Slow,       // 10-60 minutes
-    VerySlow,   // > 60 minutes
+    Fast,     // < 1 minute
+    Medium,   // 1-10 minutes
+    Slow,     // 10-60 minutes
+    VerySlow, // > 60 minutes
 }
 
 /// Trait for forecast models
 pub trait ForecastModel {
     /// Get the model type
     fn model_type(&self) -> ModelType;
-    
+
     /// Get model complexity score (number of parameters)
     fn complexity_score(&self) -> f32;
-    
+
     /// Fit the model to training data
     fn fit(&mut self, data: &TimeSeriesData) -> Result<(), String>;
-    
+
     /// Generate predictions
     fn predict(&self, horizon: usize) -> Result<Vec<f32>, String>;
-    
+
     /// Get model parameters for serialization
     fn get_parameters(&self) -> ModelParameters;
-    
+
     /// Load model parameters
     fn load_parameters(&mut self, params: ModelParameters) -> Result<(), String>;
 }
@@ -174,7 +174,6 @@ impl ModelFactory {
                 typical_training_time: TrainingTime::Fast,
                 interpretability_score: 0.8,
             },
-            
             // Recurrent Models
             ModelInfo {
                 name: "Long Short-Term Memory".to_string(),
@@ -200,7 +199,6 @@ impl ModelFactory {
                 typical_training_time: TrainingTime::Medium,
                 interpretability_score: 0.2,
             },
-            
             // Advanced Models
             ModelInfo {
                 name: "Neural Basis Expansion Analysis".to_string(),
@@ -226,7 +224,6 @@ impl ModelFactory {
                 typical_training_time: TrainingTime::Medium,
                 interpretability_score: 0.7,
             },
-            
             // Transformer Models
             ModelInfo {
                 name: "Temporal Fusion Transformer".to_string(),
@@ -252,7 +249,6 @@ impl ModelFactory {
                 typical_training_time: TrainingTime::Slow,
                 interpretability_score: 0.4,
             },
-            
             // Specialized Models
             ModelInfo {
                 name: "Deep AutoRegressive".to_string(),
@@ -280,14 +276,14 @@ impl ModelFactory {
             },
         ]
     }
-    
+
     /// Get model information by type
     pub fn get_model_info(model_type: ModelType) -> Option<ModelInfo> {
         Self::get_available_models()
             .into_iter()
             .find(|info| info.model_type == model_type)
     }
-    
+
     /// Get model requirements
     pub fn get_model_requirements(model_type: ModelType) -> ModelRequirements {
         match model_type {
@@ -307,10 +303,7 @@ impl ModelFactory {
                 supports_missing_values: false,
             },
             ModelType::NBEATS => ModelRequirements {
-                required_params: vec![
-                    "horizon".to_string(),
-                    "input_size".to_string(),
-                ],
+                required_params: vec!["horizon".to_string(), "input_size".to_string()],
                 optional_params: vec![
                     "stacks".to_string(),
                     "layers".to_string(),
@@ -321,10 +314,7 @@ impl ModelFactory {
                 supports_missing_values: false,
             },
             ModelType::TFT => ModelRequirements {
-                required_params: vec![
-                    "horizon".to_string(),
-                    "hidden_size".to_string(),
-                ],
+                required_params: vec!["horizon".to_string(), "hidden_size".to_string()],
                 optional_params: vec![
                     "num_attention_heads".to_string(),
                     "dropout".to_string(),
@@ -335,9 +325,7 @@ impl ModelFactory {
                 supports_missing_values: true,
             },
             ModelType::DeepAR => ModelRequirements {
-                required_params: vec![
-                    "horizon".to_string(),
-                ],
+                required_params: vec!["horizon".to_string()],
                 optional_params: vec![
                     "cell_type".to_string(),
                     "hidden_size".to_string(),
@@ -413,23 +401,23 @@ mod tests {
     fn test_model_factory() {
         let models = ModelFactory::get_available_models();
         assert!(!models.is_empty());
-        
+
         // Check that we have models from each category
-        let categories: Vec<ModelCategory> = models.iter()
-            .map(|m| m.category)
-            .collect();
-        
+        let categories: Vec<ModelCategory> = models.iter().map(|m| m.category).collect();
+
         assert!(categories.contains(&ModelCategory::Basic));
         assert!(categories.contains(&ModelCategory::Recurrent));
         assert!(categories.contains(&ModelCategory::Advanced));
         assert!(categories.contains(&ModelCategory::Transformer));
         assert!(categories.contains(&ModelCategory::Specialized));
     }
-    
+
     #[test]
     fn test_model_requirements() {
         let lstm_reqs = ModelFactory::get_model_requirements(ModelType::LSTM);
-        assert!(lstm_reqs.required_params.contains(&"hidden_size".to_string()));
+        assert!(lstm_reqs
+            .required_params
+            .contains(&"hidden_size".to_string()));
         assert!(lstm_reqs.required_params.contains(&"horizon".to_string()));
         assert_eq!(lstm_reqs.min_samples, 100);
     }

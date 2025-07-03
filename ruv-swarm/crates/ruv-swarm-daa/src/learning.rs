@@ -134,6 +134,12 @@ pub struct SharedExperience {
     pub shared_at: chrono::DateTime<chrono::Utc>,
 }
 
+impl Default for LearningEngine {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl LearningEngine {
     /// Create a new learning engine
     pub fn new() -> Self {
@@ -144,7 +150,48 @@ impl LearningEngine {
             meta_learning_state: MetaLearningState::new(),
         }
     }
-    
+
+    /// Initialize meta-learning capabilities (coordinator compatibility)
+    pub async fn initialize_meta_learning(&mut self) -> DAAResult<()> {
+        self.meta_learning_state.learning_to_learn_progress = 0.1;
+        tracing::info!("Initialized meta-learning capabilities");
+        Ok(())
+    }
+
+    /// Adapt from coordination events (coordinator compatibility)
+    pub async fn adapt_from_events(
+        &mut self,
+        events: &[crate::CoordinationEvent],
+    ) -> DAAResult<()> {
+        for event in events {
+            // Extract learning signals from coordination events
+            if let Some(participants) = events.first().map(|e| &e.participants) {
+                for participant in participants {
+                    // Update learning models based on coordination outcomes
+                    if !self.learning_models.contains_key(participant) {
+                        self.learning_models.insert(
+                            participant.clone(),
+                            DomainLearningModel::new("coordination".to_string()),
+                        );
+                    }
+                }
+            }
+        }
+
+        tracing::info!("Adapted learning from {} coordination events", events.len());
+        Ok(())
+    }
+
+    /// Get patterns count (coordinator compatibility)
+    pub async fn get_patterns_count(&self) -> DAAResult<usize> {
+        let total_patterns: usize = self
+            .learning_models
+            .values()
+            .map(|model| model.learning_patterns.len())
+            .sum();
+        Ok(total_patterns)
+    }
+
     /// Add learning experience for an agent
     pub async fn add_learning_experience(
         &mut self,
@@ -160,40 +207,50 @@ impl LearningEngine {
                 DomainLearningModel::new(domain.to_string()),
             );
         }
-        
+
         // Extract learning patterns from experience before getting mutable reference
         let patterns = self.extract_learning_patterns(experience).await?;
-        
+
         // Calculate proficiency updates based on experience
         let task_type = experience.task.description.clone();
         let performance = if experience.result.success { 1.0 } else { 0.0 };
         let learning_rate = 0.1;
-        
+
         // Now get mutable reference to model and update it
         let model = self.learning_models.get_mut(&model_key).unwrap();
         model.learning_patterns.extend(patterns);
-        
+
         // Update proficiency scores inline to avoid borrowing issues
-        let current_score = model.proficiency_scores.get(&task_type).copied().unwrap_or(0.5);
+        let current_score = model
+            .proficiency_scores
+            .get(&task_type)
+            .copied()
+            .unwrap_or(0.5);
         let new_score = current_score + learning_rate * (performance - current_score);
         model.proficiency_scores.insert(task_type, new_score);
-        
+
         // Add to global knowledge base
         let mut global_kb = self.global_knowledge.write().await;
-        global_kb.add_shared_experience(SharedExperience {
-            experience: experience.clone(),
-            sharing_agent: agent_id.to_string(),
-            receiving_agents: Vec::new(),
-            effectiveness_scores: HashMap::new(),
-            shared_at: chrono::Utc::now(),
-        }).await?;
-        
+        global_kb
+            .add_shared_experience(SharedExperience {
+                experience: experience.clone(),
+                sharing_agent: agent_id.to_string(),
+                receiving_agents: Vec::new(),
+                effectiveness_scores: HashMap::new(),
+                shared_at: chrono::Utc::now(),
+            })
+            .await?;
+
         model.last_updated = chrono::Utc::now();
-        
-        tracing::info!("Added learning experience for agent {} in domain {}", agent_id, domain);
+
+        tracing::info!(
+            "Added learning experience for agent {} in domain {}",
+            agent_id,
+            domain
+        );
         Ok(())
     }
-    
+
     /// Get learning recommendations for an agent
     pub async fn get_learning_recommendations(
         &self,
@@ -202,13 +259,15 @@ impl LearningEngine {
         target_task: &Task,
     ) -> DAAResult<Vec<LearningRecommendation>> {
         let mut recommendations = Vec::new();
-        
+
         // Analyze current proficiency
         let model_key = format!("{}:{}", agent_id, current_domain);
-        let current_proficiency = self.learning_models.get(&model_key)
+        let current_proficiency = self
+            .learning_models
+            .get(&model_key)
             .map(|model| self.calculate_task_proficiency(model, target_task))
             .unwrap_or(0.0);
-        
+
         // If proficiency is low, recommend specific learning strategies
         if current_proficiency < 0.7 {
             recommendations.push(LearningRecommendation {
@@ -219,12 +278,12 @@ impl LearningEngine {
                 estimated_time_hours: 2.0,
             });
         }
-        
+
         // Check for transfer learning opportunities
-        let transfer_opportunities = self.find_transfer_opportunities(
-            agent_id, current_domain, target_task
-        ).await?;
-        
+        let transfer_opportunities = self
+            .find_transfer_opportunities(agent_id, current_domain, target_task)
+            .await?;
+
         for opportunity in transfer_opportunities {
             recommendations.push(LearningRecommendation {
                 recommendation_type: RecommendationType::TransferLearning,
@@ -234,7 +293,7 @@ impl LearningEngine {
                 estimated_time_hours: 0.5,
             });
         }
-        
+
         // Meta-learning recommendations
         if self.meta_learning_state.learning_to_learn_progress < 0.8 {
             recommendations.push(LearningRecommendation {
@@ -245,10 +304,10 @@ impl LearningEngine {
                 estimated_time_hours: 1.0,
             });
         }
-        
+
         Ok(recommendations)
     }
-    
+
     /// Apply adaptation strategy based on performance
     pub async fn apply_adaptation_strategy(
         &mut self,
@@ -257,30 +316,37 @@ impl LearningEngine {
         performance_metrics: &HashMap<String, f64>,
     ) -> DAAResult<AdaptationResult> {
         // Analyze performance and select best strategy
-        let best_strategy = self.select_adaptation_strategy(domain, performance_metrics).await?;
-        
+        let best_strategy = self
+            .select_adaptation_strategy(domain, performance_metrics)
+            .await?;
+
         // Apply the strategy
         let adaptation_result = match best_strategy.strategy_type {
             AdaptationStrategyType::AdaptiveLearningRate => {
-                self.apply_learning_rate_adaptation(agent_id, domain, performance_metrics).await?
+                self.apply_learning_rate_adaptation(agent_id, domain, performance_metrics)
+                    .await?
             }
             AdaptationStrategyType::CognitivePatternSwitch => {
-                self.apply_cognitive_pattern_switch(agent_id, domain, performance_metrics).await?
+                self.apply_cognitive_pattern_switch(agent_id, domain, performance_metrics)
+                    .await?
             }
             AdaptationStrategyType::KnowledgeTransfer => {
-                self.apply_knowledge_transfer(agent_id, domain, performance_metrics).await?
+                self.apply_knowledge_transfer(agent_id, domain, performance_metrics)
+                    .await?
             }
             AdaptationStrategyType::EnsembleLearning => {
-                self.apply_ensemble_learning(agent_id, domain, performance_metrics).await?
+                self.apply_ensemble_learning(agent_id, domain, performance_metrics)
+                    .await?
             }
             AdaptationStrategyType::ActiveLearning => {
-                self.apply_active_learning(agent_id, domain, performance_metrics).await?
+                self.apply_active_learning(agent_id, domain, performance_metrics)
+                    .await?
             }
         };
-        
+
         // Clone strategy name before mutable borrow
         let strategy_name = best_strategy.name.clone();
-        
+
         // Record adaptation event
         let model_key = format!("{}:{}", agent_id, domain);
         if let Some(model) = self.learning_models.get_mut(&model_key) {
@@ -293,10 +359,10 @@ impl LearningEngine {
                 success_score: adaptation_result.improvement_score,
             });
         }
-        
+
         Ok(adaptation_result)
     }
-    
+
     /// Get cross-agent knowledge sharing opportunities
     pub async fn get_knowledge_sharing_opportunities(
         &self,
@@ -305,37 +371,39 @@ impl LearningEngine {
     ) -> DAAResult<Vec<KnowledgeSharingOpportunity>> {
         let mut opportunities = Vec::new();
         let _global_kb = self.global_knowledge.read().await;
-        
+
         // Find agents with high proficiency in the domain
         for (model_key, model) in &self.learning_models {
             if model.domain == domain && !model_key.starts_with(requesting_agent) {
                 let agent_id = model_key.split(':').next().unwrap_or("");
-                let avg_proficiency: f64 = model.proficiency_scores.values().sum::<f64>() 
+                let avg_proficiency: f64 = model.proficiency_scores.values().sum::<f64>()
                     / model.proficiency_scores.len() as f64;
-                
+
                 if avg_proficiency > 0.8 {
                     opportunities.push(KnowledgeSharingOpportunity {
                         source_agent: agent_id.to_string(),
                         domain: domain.to_string(),
                         knowledge_quality: avg_proficiency,
-                        compatibility_score: self.calculate_agent_compatibility(
-                            requesting_agent, agent_id
-                        ).await.unwrap_or(0.5),
+                        compatibility_score: self
+                            .calculate_agent_compatibility(requesting_agent, agent_id)
+                            .await
+                            .unwrap_or(0.5),
                         estimated_benefit: avg_proficiency * 0.3,
                     });
                 }
             }
         }
-        
+
         // Sort by potential benefit (handle NaN values safely)
         opportunities.sort_by(|a, b| {
-            b.estimated_benefit.partial_cmp(&a.estimated_benefit)
+            b.estimated_benefit
+                .partial_cmp(&a.estimated_benefit)
                 .unwrap_or(std::cmp::Ordering::Equal)
         });
-        
+
         Ok(opportunities)
     }
-    
+
     /// Initialize default adaptation strategies
     fn initialize_adaptation_strategies() -> Vec<AdaptationStrategy> {
         vec![
@@ -378,23 +446,31 @@ impl LearningEngine {
             },
         ]
     }
-    
+
     /// Extract learning patterns from experience
-    async fn extract_learning_patterns(&self, experience: &Experience) -> DAAResult<Vec<LearningPattern>> {
+    async fn extract_learning_patterns(
+        &self,
+        experience: &Experience,
+    ) -> DAAResult<Vec<LearningPattern>> {
         let mut patterns = Vec::new();
-        
+
         // Analyze task success patterns
         if experience.result.success {
             patterns.push(LearningPattern {
                 id: uuid::Uuid::new_v4().to_string(),
                 pattern_type: LearningPatternType::Incremental,
-                effectiveness: experience.result.performance_metrics.get("accuracy").copied().unwrap_or(0.8),
+                effectiveness: experience
+                    .result
+                    .performance_metrics
+                    .get("accuracy")
+                    .copied()
+                    .unwrap_or(0.8),
                 applicability_domains: vec![experience.task.description.clone()],
                 usage_count: 1,
                 discovered_at: chrono::Utc::now(),
             });
         }
-        
+
         // Analyze execution time patterns
         if experience.result.execution_time_ms < 1000 {
             patterns.push(LearningPattern {
@@ -406,10 +482,10 @@ impl LearningEngine {
                 discovered_at: chrono::Utc::now(),
             });
         }
-        
+
         Ok(patterns)
     }
-    
+
     /// Update proficiency scores based on experience
     async fn update_proficiency_scores(
         &self,
@@ -418,24 +494,30 @@ impl LearningEngine {
     ) -> DAAResult<()> {
         let task_type = experience.task.description.clone();
         let performance = if experience.result.success { 1.0 } else { 0.0 };
-        
+
         // Update or create proficiency score
-        let current_score = model.proficiency_scores.get(&task_type).copied().unwrap_or(0.5);
+        let current_score = model
+            .proficiency_scores
+            .get(&task_type)
+            .copied()
+            .unwrap_or(0.5);
         let learning_rate = 0.1;
         let new_score = current_score + learning_rate * (performance - current_score);
-        
+
         model.proficiency_scores.insert(task_type, new_score);
-        
+
         Ok(())
     }
-    
+
     /// Calculate task-specific proficiency
     fn calculate_task_proficiency(&self, model: &DomainLearningModel, task: &Task) -> f64 {
-        model.proficiency_scores.get(&task.description)
+        model
+            .proficiency_scores
+            .get(&task.description)
             .copied()
             .unwrap_or(0.0)
     }
-    
+
     /// Find transfer learning opportunities
     async fn find_transfer_opportunities(
         &self,
@@ -444,13 +526,13 @@ impl LearningEngine {
         _task: &Task,
     ) -> DAAResult<Vec<TransferOpportunity>> {
         let mut opportunities = Vec::new();
-        
+
         // Find domains with high proficiency
         for (model_key, model) in &self.learning_models {
             if model_key.starts_with(agent_id) && model.domain != current_domain {
-                let avg_proficiency: f64 = model.proficiency_scores.values().sum::<f64>() 
+                let avg_proficiency: f64 = model.proficiency_scores.values().sum::<f64>()
                     / model.proficiency_scores.len() as f64;
-                
+
                 if avg_proficiency > 0.7 {
                     opportunities.push(TransferOpportunity {
                         source_domain: model.domain.clone(),
@@ -461,10 +543,10 @@ impl LearningEngine {
                 }
             }
         }
-        
+
         Ok(opportunities)
     }
-    
+
     /// Select best adaptation strategy
     async fn select_adaptation_strategy(
         &self,
@@ -472,21 +554,24 @@ impl LearningEngine {
         _performance_metrics: &HashMap<String, f64>,
     ) -> DAAResult<&AdaptationStrategy> {
         // Simple selection based on domain effectiveness
-        let best_strategy = self.adaptation_strategies
+        let best_strategy = self
+            .adaptation_strategies
             .iter()
             .max_by(|a, b| {
                 let a_score = a.effectiveness_scores.get(domain).copied().unwrap_or(0.5);
                 let b_score = b.effectiveness_scores.get(domain).copied().unwrap_or(0.5);
                 // Handle potential NaN values in scores
-                a_score.partial_cmp(&b_score).unwrap_or(std::cmp::Ordering::Equal)
+                a_score
+                    .partial_cmp(&b_score)
+                    .unwrap_or(std::cmp::Ordering::Equal)
             })
             .ok_or_else(|| DAAError::LearningError {
                 message: "No adaptation strategies available".to_string(),
             })?;
-        
+
         Ok(best_strategy)
     }
-    
+
     /// Apply learning rate adaptation
     async fn apply_learning_rate_adaptation(
         &self,
@@ -496,12 +581,12 @@ impl LearningEngine {
     ) -> DAAResult<AdaptationResult> {
         let mut updated_metrics = performance_metrics.clone();
         let improvement = 0.1;
-        
+
         // Simulate learning rate adjustment effect
         if let Some(accuracy) = updated_metrics.get_mut("accuracy") {
             *accuracy += improvement;
         }
-        
+
         Ok(AdaptationResult {
             strategy_applied: "Adaptive Learning Rate".to_string(),
             updated_metrics,
@@ -509,7 +594,7 @@ impl LearningEngine {
             success: true,
         })
     }
-    
+
     /// Apply cognitive pattern switch
     async fn apply_cognitive_pattern_switch(
         &self,
@@ -519,12 +604,12 @@ impl LearningEngine {
     ) -> DAAResult<AdaptationResult> {
         let mut updated_metrics = performance_metrics.clone();
         let improvement = 0.15;
-        
+
         // Simulate cognitive pattern switch effect
         if let Some(efficiency) = updated_metrics.get_mut("efficiency") {
             *efficiency += improvement;
         }
-        
+
         Ok(AdaptationResult {
             strategy_applied: "Cognitive Pattern Switch".to_string(),
             updated_metrics,
@@ -532,7 +617,7 @@ impl LearningEngine {
             success: true,
         })
     }
-    
+
     /// Apply knowledge transfer
     async fn apply_knowledge_transfer(
         &self,
@@ -542,12 +627,12 @@ impl LearningEngine {
     ) -> DAAResult<AdaptationResult> {
         let mut updated_metrics = performance_metrics.clone();
         let improvement = 0.2;
-        
+
         // Simulate knowledge transfer effect
         if let Some(learning_speed) = updated_metrics.get_mut("learning_speed") {
             *learning_speed += improvement;
         }
-        
+
         Ok(AdaptationResult {
             strategy_applied: "Knowledge Transfer".to_string(),
             updated_metrics,
@@ -555,7 +640,7 @@ impl LearningEngine {
             success: true,
         })
     }
-    
+
     /// Apply ensemble learning
     async fn apply_ensemble_learning(
         &self,
@@ -565,12 +650,12 @@ impl LearningEngine {
     ) -> DAAResult<AdaptationResult> {
         let mut updated_metrics = performance_metrics.clone();
         let improvement = 0.12;
-        
+
         // Simulate ensemble learning effect
         if let Some(robustness) = updated_metrics.get_mut("robustness") {
             *robustness += improvement;
         }
-        
+
         Ok(AdaptationResult {
             strategy_applied: "Ensemble Learning".to_string(),
             updated_metrics,
@@ -578,7 +663,7 @@ impl LearningEngine {
             success: true,
         })
     }
-    
+
     /// Apply active learning
     async fn apply_active_learning(
         &self,
@@ -588,12 +673,12 @@ impl LearningEngine {
     ) -> DAAResult<AdaptationResult> {
         let mut updated_metrics = performance_metrics.clone();
         let improvement = 0.18;
-        
+
         // Simulate active learning effect
         if let Some(sample_efficiency) = updated_metrics.get_mut("sample_efficiency") {
             *sample_efficiency += improvement;
         }
-        
+
         Ok(AdaptationResult {
             strategy_applied: "Active Learning".to_string(),
             updated_metrics,
@@ -601,7 +686,7 @@ impl LearningEngine {
             success: true,
         })
     }
-    
+
     /// Calculate compatibility between agents
     async fn calculate_agent_compatibility(&self, _agent1: &str, _agent2: &str) -> DAAResult<f64> {
         // Simplified compatibility calculation
@@ -674,6 +759,12 @@ impl DomainLearningModel {
     }
 }
 
+impl Default for GlobalKnowledgeBase {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl GlobalKnowledgeBase {
     pub fn new() -> Self {
         Self {
@@ -683,16 +774,22 @@ impl GlobalKnowledgeBase {
             shared_experiences: Vec::new(),
         }
     }
-    
+
     pub async fn add_shared_experience(&mut self, experience: SharedExperience) -> DAAResult<()> {
         self.shared_experiences.push(experience);
-        
+
         // Limit size to prevent memory issues
         if self.shared_experiences.len() > 10000 {
             self.shared_experiences.remove(0);
         }
-        
+
         Ok(())
+    }
+}
+
+impl Default for MetaLearningState {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

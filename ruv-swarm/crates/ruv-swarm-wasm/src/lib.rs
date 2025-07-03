@@ -1,14 +1,16 @@
 use wasm_bindgen::prelude::*;
 
-mod utils;
+mod memory_pool;
 mod simd_ops;
 mod simd_tests;
-mod memory_pool;
+mod utils;
 
-pub use utils::{set_panic_hook, RuntimeFeatures};
-pub use simd_ops::{SimdVectorOps, SimdMatrixOps, SimdBenchmark, detect_simd_capabilities};
-pub use simd_tests::{run_simd_verification_suite, simd_performance_report, validate_simd_implementation};
 pub use memory_pool::MemoryPool;
+pub use simd_ops::{detect_simd_capabilities, SimdBenchmark, SimdMatrixOps, SimdVectorOps};
+pub use simd_tests::{
+    run_simd_verification_suite, simd_performance_report, validate_simd_implementation,
+};
+pub use utils::{set_panic_hook, RuntimeFeatures};
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -58,7 +60,7 @@ impl WasmNeuralNetwork {
     pub fn new(layers: &[usize], activation: ActivationFunction) -> Self {
         let total_weights = layers.windows(2).map(|w| w[0] * w[1]).sum();
         let total_biases = layers[1..].iter().sum();
-        
+
         Self {
             layers: layers.to_vec(),
             weights: vec![0.0; total_weights],
@@ -93,33 +95,30 @@ impl WasmNeuralNetwork {
     #[wasm_bindgen]
     pub fn run(&self, inputs: &[f64]) -> Vec<f64> {
         let mut current_outputs = inputs.to_vec();
-        
+
         for layer_idx in 1..self.layers.len() {
             let prev_size = self.layers[layer_idx - 1];
             let curr_size = self.layers[layer_idx];
-            
+
             // Extract weights for this layer as a matrix
             let mut layer_weights = vec![0.0; prev_size * curr_size];
             for curr_neuron in 0..curr_size {
                 for prev_neuron in 0..prev_size {
                     let weight_idx = self.get_weight_index(layer_idx - 1, prev_neuron, curr_neuron);
-                    layer_weights[curr_neuron * prev_size + prev_neuron] = self.weights[weight_idx] as f64;
+                    layer_weights[curr_neuron * prev_size + prev_neuron] =
+                        self.weights[weight_idx] as f64;
                 }
             }
-            
+
             // Convert to f32 for SIMD operations
             let current_f32: Vec<f32> = current_outputs.iter().map(|&x| x as f32).collect();
             let weights_f32: Vec<f32> = layer_weights.iter().map(|&x| x as f32).collect();
-            
+
             // Use SIMD-optimized matrix-vector multiplication if available
             let simd_ops = crate::simd_ops::SimdMatrixOps::new();
-            let simd_result = simd_ops.matrix_vector_multiply(
-                &weights_f32, 
-                &current_f32, 
-                curr_size, 
-                prev_size
-            );
-            
+            let simd_result =
+                simd_ops.matrix_vector_multiply(&weights_f32, &current_f32, curr_size, prev_size);
+
             // Add biases and apply activation
             let mut new_outputs = vec![0.0; curr_size];
             for curr_neuron in 0..curr_size {
@@ -127,10 +126,10 @@ impl WasmNeuralNetwork {
                 let sum = simd_result[curr_neuron] as f64 + self.biases[bias_idx];
                 new_outputs[curr_neuron] = self.apply_activation(sum);
             }
-            
+
             current_outputs = new_outputs;
         }
-        
+
         current_outputs
     }
 
@@ -157,7 +156,13 @@ impl WasmNeuralNetwork {
             ActivationFunction::SymmetricSigmoid => 2.0 / (1.0 + (-x).exp()) - 1.0,
             ActivationFunction::Tanh => x.tanh(),
             ActivationFunction::ReLU => x.max(0.0),
-            ActivationFunction::LeakyReLU => if x > 0.0 { x } else { 0.01 * x },
+            ActivationFunction::LeakyReLU => {
+                if x > 0.0 {
+                    x
+                } else {
+                    0.01 * x
+                }
+            }
             ActivationFunction::Swish => x * (1.0 / (1.0 + (-x).exp())),
             ActivationFunction::Gaussian => (-x * x).exp(),
             ActivationFunction::Elliot => x / (1.0 + x.abs()),
@@ -166,10 +171,34 @@ impl WasmNeuralNetwork {
             ActivationFunction::Cosine => x.cos(),
             ActivationFunction::SinSymmetric => 2.0 * x.sin() - 1.0,
             ActivationFunction::CosSymmetric => 2.0 * x.cos() - 1.0,
-            ActivationFunction::ThresholdSymmetric => if x > 0.0 { 1.0 } else { -1.0 },
-            ActivationFunction::Threshold => if x > 0.0 { 1.0 } else { 0.0 },
-            ActivationFunction::StepSymmetric => if x > 0.0 { 1.0 } else { -1.0 },
-            ActivationFunction::Step => if x > 0.0 { 1.0 } else { 0.0 },
+            ActivationFunction::ThresholdSymmetric => {
+                if x > 0.0 {
+                    1.0
+                } else {
+                    -1.0
+                }
+            }
+            ActivationFunction::Threshold => {
+                if x > 0.0 {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+            ActivationFunction::StepSymmetric => {
+                if x > 0.0 {
+                    1.0
+                } else {
+                    -1.0
+                }
+            }
+            ActivationFunction::Step => {
+                if x > 0.0 {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
         }
     }
 }
@@ -286,13 +315,13 @@ impl WasmSwarmOrchestrator {
         // Parse JSON config (simplified for demo)
         let agent_id = format!("agent-{}", self.agents.len() + 1);
         let mut agent = WasmAgent::new(&agent_id, "researcher");
-        
+
         // Add some default capabilities based on type
         agent.add_capability("research");
         agent.add_capability("analysis");
-        
+
         self.agents.push(agent);
-        
+
         // Return JSON result
         serde_json::json!({
             "agent_id": agent_id,
@@ -301,18 +330,19 @@ impl WasmSwarmOrchestrator {
             "capabilities": ["research", "analysis"],
             "cognitive_pattern": "adaptive",
             "neural_network_id": format!("nn-{}", self.agents.len())
-        }).to_string()
+        })
+        .to_string()
     }
 
     #[wasm_bindgen]
     pub fn orchestrate(&mut self, config: &str) -> WasmTaskResult {
         self.task_counter += 1;
         let task_id = format!("task-{}", self.task_counter);
-        
+
         // Parse config (simplified JSON parsing)
         let description = "Sample task"; // Would parse from config
         let priority = "medium"; // Would parse from config
-        
+
         // Select available agents (simple strategy for now)
         let mut assigned_agents = Vec::new();
         for agent in &mut self.agents {
@@ -321,7 +351,7 @@ impl WasmSwarmOrchestrator {
                 assigned_agents.push(agent.id());
             }
         }
-        
+
         WasmTaskResult {
             task_id,
             description: description.to_string(),
@@ -351,7 +381,7 @@ impl WasmSwarmOrchestrator {
     pub fn get_status(&self, detailed: bool) -> String {
         let idle_count = self.agents.iter().filter(|a| a.status == "idle").count();
         let busy_count = self.agents.iter().filter(|a| a.status == "busy").count();
-        
+
         if detailed {
             serde_json::json!({
                 "agents": {
@@ -367,7 +397,8 @@ impl WasmSwarmOrchestrator {
                         "status": a.status()
                     })
                 }).collect::<Vec<_>>()
-            }).to_string()
+            })
+            .to_string()
         } else {
             serde_json::json!({
                 "agents": {
@@ -376,7 +407,8 @@ impl WasmSwarmOrchestrator {
                     "busy": busy_count
                 },
                 "topology": self.topology
-            }).to_string()
+            })
+            .to_string()
         }
     }
 }
@@ -413,7 +445,7 @@ impl WasmForecastingModel {
                 let mean = input.iter().sum::<f64>() / input.len() as f64;
                 vec![mean]
             }
-            _ => vec![input[input.len() - 1]]
+            _ => vec![input[input.len() - 1]],
         }
     }
 
@@ -425,7 +457,10 @@ impl WasmForecastingModel {
 
 // Export functions for use from JavaScript
 #[wasm_bindgen]
-pub fn create_neural_network(layers: &[usize], activation: ActivationFunction) -> WasmNeuralNetwork {
+pub fn create_neural_network(
+    layers: &[usize],
+    activation: ActivationFunction,
+) -> WasmNeuralNetwork {
     WasmNeuralNetwork::new(layers, activation)
 }
 
@@ -454,7 +489,8 @@ pub fn get_features() -> String {
         "cognitive_diversity": true,
         "simd_support": simd_support,
         "simd_capabilities": detect_simd_capabilities()
-    }).to_string()
+    })
+    .to_string()
 }
 
 /// Runtime SIMD support detection - fixed to properly detect SIMD compilation
@@ -468,22 +504,32 @@ fn detect_simd_support() -> bool {
             // Always return true when compiled with simd feature - the operations are available
             true
         }
-        
+
         // If no simd feature, try runtime test
         #[cfg(not(feature = "simd"))]
         {
-            false  // Without simd feature, SIMD operations are not available
+            false // Without simd feature, SIMD operations are not available
         }
     }
-    
+
     // For non-WASM platforms, use target features
     #[cfg(not(target_arch = "wasm32"))]
     {
-        #[cfg(any(target_feature = "sse", target_feature = "avx", target_feature = "avx2", target_feature = "neon"))]
+        #[cfg(any(
+            target_feature = "sse",
+            target_feature = "avx",
+            target_feature = "avx2",
+            target_feature = "neon"
+        ))]
         {
             true
         }
-        #[cfg(not(any(target_feature = "sse", target_feature = "avx", target_feature = "avx2", target_feature = "neon")))]
+        #[cfg(not(any(
+            target_feature = "sse",
+            target_feature = "avx",
+            target_feature = "avx2",
+            target_feature = "neon"
+        )))]
         {
             false
         }
@@ -495,19 +541,19 @@ fn test_simd_runtime() -> bool {
     // Try to use the SIMD operations and catch any panics
     let test_vec_a = vec![1.0f32, 2.0, 3.0, 4.0];
     let test_vec_b = vec![2.0f32, 3.0, 4.0, 5.0];
-    
+
     // Use std::panic::catch_unwind to safely test SIMD operations
     let result = std::panic::catch_unwind(|| {
         let ops = crate::simd_ops::SimdVectorOps::new();
         ops.dot_product(&test_vec_a, &test_vec_b)
     });
-    
+
     match result {
         Ok(value) => {
             // Check if the result is approximately correct (should be 40.0)
             (value - 40.0).abs() < 0.1
         }
-        Err(_) => false
+        Err(_) => false,
     }
 }
 
@@ -531,19 +577,19 @@ impl PerformanceMonitor {
             simd_enabled: detect_simd_support(),
         }
     }
-    
+
     pub fn record_load_time(&mut self, time: f64) {
         self.load_time = time;
     }
-    
+
     pub fn record_spawn_time(&mut self, time: f64) {
         self.spawn_times.push(time);
     }
-    
+
     pub fn update_memory_usage(&mut self, bytes: usize) {
         self.memory_usage = bytes;
     }
-    
+
     pub fn get_average_spawn_time(&self) -> f64 {
         if self.spawn_times.is_empty() {
             0.0
@@ -551,17 +597,17 @@ impl PerformanceMonitor {
             self.spawn_times.iter().sum::<f64>() / self.spawn_times.len() as f64
         }
     }
-    
+
     pub fn get_memory_usage_mb(&self) -> f64 {
         (self.memory_usage as f64) / (1024.0 * 1024.0)
     }
-    
+
     pub fn meets_performance_targets(&self) -> bool {
-        self.load_time < 500.0 && 
-        self.get_average_spawn_time() < 100.0 &&
-        self.get_memory_usage_mb() < 50.0
+        self.load_time < 500.0
+            && self.get_average_spawn_time() < 100.0
+            && self.get_memory_usage_mb() < 50.0
     }
-    
+
     pub fn get_report(&self) -> String {
         format!(
             "Performance Report:\n\
@@ -573,9 +619,17 @@ impl PerformanceMonitor {
             self.load_time,
             if self.load_time < 500.0 { "✓" } else { "✗" },
             self.get_average_spawn_time(),
-            if self.get_average_spawn_time() < 100.0 { "✓" } else { "✗" },
+            if self.get_average_spawn_time() < 100.0 {
+                "✓"
+            } else {
+                "✗"
+            },
             self.get_memory_usage_mb(),
-            if self.get_memory_usage_mb() < 50.0 { "✓" } else { "✗" },
+            if self.get_memory_usage_mb() < 50.0 {
+                "✓"
+            } else {
+                "✗"
+            },
             self.simd_enabled,
             self.meets_performance_targets()
         )
@@ -609,58 +663,58 @@ impl OptimizedAgentSpawner {
             active_agents: Vec::new(),
         }
     }
-    
+
     pub fn spawn_agent(&mut self, agent_type: &str, complexity: &str) -> Result<String, JsValue> {
         let start = js_sys::Date::now();
-        
+
         // Allocate memory from pool
-        let memory = self.memory_pool
+        let memory = self
+            .memory_pool
             .allocate_for_agent(complexity)
             .ok_or_else(|| JsValue::from_str("Memory allocation failed"))?;
-        
+
         let memory_size = memory.len();
         let agent_id = format!("agent-{}-{}", agent_type, js_sys::Math::random());
-        
+
         let agent = OptimizedAgent {
             id: agent_id.clone(),
             agent_type: agent_type.to_string(),
             memory_size,
             memory,
         };
-        
+
         self.active_agents.push(agent);
-        
+
         // Record metrics
         let spawn_time = js_sys::Date::now() - start;
         self.performance_monitor.record_spawn_time(spawn_time);
-        self.performance_monitor.update_memory_usage(
-            self.memory_pool.total_memory_usage_mb() as usize * 1024 * 1024
-        );
-        
+        self.performance_monitor
+            .update_memory_usage(self.memory_pool.total_memory_usage_mb() as usize * 1024 * 1024);
+
         Ok(agent_id)
     }
-    
+
     pub fn release_agent(&mut self, agent_id: &str) -> Result<(), JsValue> {
         if let Some(pos) = self.active_agents.iter().position(|a| a.id == agent_id) {
             let agent = self.active_agents.remove(pos);
             self.memory_pool.deallocate_agent_memory(agent.memory);
             self.performance_monitor.update_memory_usage(
-                self.memory_pool.total_memory_usage_mb() as usize * 1024 * 1024
+                self.memory_pool.total_memory_usage_mb() as usize * 1024 * 1024,
             );
             Ok(())
         } else {
             Err(JsValue::from_str("Agent not found"))
         }
     }
-    
+
     pub fn get_performance_report(&self) -> String {
         self.performance_monitor.get_report()
     }
-    
+
     pub fn get_active_agent_count(&self) -> usize {
         self.active_agents.len()
     }
-    
+
     pub fn is_within_memory_target(&self) -> bool {
         self.memory_pool.is_within_memory_target()
     }

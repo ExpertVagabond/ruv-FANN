@@ -4276,7 +4276,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-swarm-persistence"
-version = "1.0.5"
+version = "1.0.7"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -4305,7 +4305,7 @@ dependencies = [
 
 [[package]]
 name = "ruv-swarm-transport"
-version = "1.0.5"
+version = "1.0.7"
 dependencies = [
  "anyhow",
  "async-trait",

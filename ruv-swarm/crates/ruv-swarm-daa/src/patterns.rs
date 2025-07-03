@@ -31,6 +31,12 @@ pub struct PatternEvolution {
     pub success_rate: f64,
 }
 
+impl Default for PatternManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PatternManager {
     pub fn new() -> Self {
         Self {
@@ -39,7 +45,7 @@ impl PatternManager {
             evolution_history: Vec::new(),
         }
     }
-    
+
     fn initialize_patterns() -> Vec<CognitivePatternDefinition> {
         vec![
             CognitivePatternDefinition {

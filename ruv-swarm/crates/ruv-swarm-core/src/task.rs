@@ -1,7 +1,11 @@
 //! Task definitions and task distribution logic
 
 #[cfg(not(feature = "std"))]
-use alloc::{boxed::Box, string::{String, ToString}, vec::Vec};
+use alloc::{
+    boxed::Box,
+    string::{String, ToString},
+    vec::Vec,
+};
 
 use core::fmt;
 
@@ -24,10 +28,12 @@ impl fmt::Display for TaskId {
 
 /// Task priority levels
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Default)]
 pub enum TaskPriority {
     /// Low priority task - executed when no higher priority tasks are available
     Low = 0,
     /// Normal priority task - default priority level for most tasks
+    #[default]
     Normal = 1,
     /// High priority task - prioritized over normal and low priority tasks
     High = 2,
@@ -35,11 +41,6 @@ pub enum TaskPriority {
     Critical = 3,
 }
 
-impl Default for TaskPriority {
-    fn default() -> Self {
-        TaskPriority::Normal
-    }
-}
 
 /// Task status
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -95,37 +96,37 @@ impl Task {
             max_retries: 3,
         }
     }
-    
+
     /// Set task priority
     pub fn with_priority(mut self, priority: TaskPriority) -> Self {
         self.priority = priority;
         self
     }
-    
+
     /// Set task payload
     pub fn with_payload(mut self, payload: TaskPayload) -> Self {
         self.payload = payload;
         self
     }
-    
+
     /// Add required capability
     pub fn require_capability(mut self, capability: impl Into<String>) -> Self {
         self.required_capabilities.push(capability.into());
         self
     }
-    
+
     /// Set timeout
     pub fn with_timeout(mut self, timeout_ms: u64) -> Self {
         self.timeout_ms = Some(timeout_ms);
         self
     }
-    
+
     /// Check if task can be retried
     #[inline]
     pub fn can_retry(&self) -> bool {
         self.retry_count < self.max_retries
     }
-    
+
     /// Increment retry count
     #[inline]
     pub fn increment_retry(&mut self) {
@@ -186,7 +187,7 @@ impl TaskResult {
             execution_time_ms: 0,
         }
     }
-    
+
     /// Create a failed task result
     pub fn failure(error: impl Into<String>) -> Self {
         TaskResult {
@@ -197,13 +198,13 @@ impl TaskResult {
             execution_time_ms: 0,
         }
     }
-    
+
     /// Set task ID
     pub fn with_task_id(mut self, task_id: TaskId) -> Self {
         self.task_id = task_id;
         self
     }
-    
+
     /// Set execution time
     pub fn with_execution_time(mut self, time_ms: u64) -> Self {
         self.execution_time_ms = time_ms;
@@ -244,10 +245,12 @@ impl From<Vec<u8>> for TaskOutput {
 
 /// Task distribution strategy
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Default)]
 pub enum DistributionStrategy {
     /// Round-robin distribution
     RoundRobin,
     /// Least loaded agent first
+    #[default]
     LeastLoaded,
     /// Random distribution
     Random,
@@ -257,8 +260,3 @@ pub enum DistributionStrategy {
     CapabilityBased,
 }
 
-impl Default for DistributionStrategy {
-    fn default() -> Self {
-        DistributionStrategy::LeastLoaded
-    }
-}

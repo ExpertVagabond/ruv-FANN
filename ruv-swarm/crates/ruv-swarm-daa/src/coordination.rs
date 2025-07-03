@@ -39,6 +39,12 @@ pub enum CoordinationEventType {
     PerformanceEvaluation,
 }
 
+impl Default for CoordinationMemory {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CoordinationMemory {
     pub fn new() -> Self {
         Self {
@@ -46,5 +52,23 @@ impl CoordinationMemory {
             agent_locations: HashMap::new(),
             coordination_history: Vec::new(),
         }
+    }
+
+    pub async fn store_event(&mut self, event: CoordinationEvent) -> Result<(), DAAError> {
+        self.coordination_history.push(event);
+        Ok(())
+    }
+
+    pub async fn get_recent_events(
+        &self,
+        limit: usize,
+    ) -> Result<Vec<CoordinationEvent>, DAAError> {
+        let len = self.coordination_history.len();
+        let start = len.saturating_sub(limit);
+        Ok(self.coordination_history[start..].to_vec())
+    }
+
+    pub async fn get_event_count(&self) -> Result<usize, DAAError> {
+        Ok(self.coordination_history.len())
     }
 }

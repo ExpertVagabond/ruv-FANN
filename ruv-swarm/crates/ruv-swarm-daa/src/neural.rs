@@ -76,6 +76,12 @@ pub struct PerformanceMetric {
     pub context: HashMap<String, serde_json::Value>,
 }
 
+impl Default for NeuralManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl NeuralManager {
     pub fn new() -> Self {
         Self {

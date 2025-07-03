@@ -11,10 +11,10 @@ extern crate alloc;
 #[cfg(target_arch = "wasm32")]
 use alloc::{
     boxed::Box,
-    string::{String, ToString},
-    vec::Vec,
     format,
+    string::{String, ToString},
     vec,
+    vec::Vec,
 };
 
 #[cfg(target_arch = "wasm32")]
@@ -39,31 +39,15 @@ pub mod wasm_bindings;
 
 // Re-export main types
 pub use agent_forecasting::{
-    AgentForecastingManager,
-    AgentForecastContext,
+    AgentForecastContext, AgentForecastingManager, ForecastDomain, ForecastRequirements,
     ModelSpecialization,
-    ForecastDomain,
-    ForecastRequirements,
 };
 
-pub use ensemble::{
-    EnsembleForecaster,
-    EnsembleConfig,
-    EnsembleStrategy,
-    OptimizationMetric,
-};
+pub use ensemble::{EnsembleConfig, EnsembleForecaster, EnsembleStrategy, OptimizationMetric};
 
-pub use models::{
-    ModelFactory,
-    ModelType,
-    ForecastModel,
-};
+pub use models::{ForecastModel, ModelFactory, ModelType};
 
-pub use time_series::{
-    TimeSeriesData,
-    TimeSeriesProcessor,
-    TransformationType,
-};
+pub use time_series::{TimeSeriesData, TimeSeriesProcessor, TransformationType};
 
 #[cfg(target_arch = "wasm32")]
 pub use wasm_bindings::*;
