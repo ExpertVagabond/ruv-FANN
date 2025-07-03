@@ -195,7 +195,8 @@ impl GpuDevice {
             .filter(|&&size| size <= max_size)
             .min_by_key(|&&size| {
                 // Prefer sizes that minimize padding and align with problem size
-                problem_size.div_ceil(size as usize) * size as usize - problem_size
+                // Using (a + b - 1) / b for ceiling division instead of unstable div_ceil
+                ((problem_size + size as usize - 1) / size as usize) * size as usize - problem_size
             })
             .copied()
             .unwrap_or(64) // Safe fallback
