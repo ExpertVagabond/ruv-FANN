@@ -70,7 +70,11 @@ jobs:
       run: cargo build --verbose --all-features
     
     - name: Run tests
-      run: cargo test --verbose --all-features
+      run: |
+        # Pin clap_lex to a version compatible with Rust 1.71.1
+        cargo update -p clap_lex --precise 0.5.0
+        
+        cargo test --all-features
       env:
         # Disable WebGPU tests in CI environment to avoid dlopen errors
         RUV_FANN_CI_TESTING: "1"
@@ -116,8 +120,11 @@ jobs:
       run: cargo install cargo-tarpaulin
     
     - name: Generate code coverage
-      # Increase tarpaulin timeout to 300 seconds (5 minutes)
-      run: cargo tarpaulin --verbose --all-features --workspace --timeout 300 --out xml
+      run: |
+        # Pin clap_lex to a version compatible with Rust 1.71.1
+        cargo update -p clap_lex --precise 0.5.0
+        
+        cargo tarpaulin --verbose --all-features --workspace --timeout 300 --out xml
     
     # Add retry mechanism for Codecov upload to handle rate limits
     - name: Upload coverage to Codecov
@@ -189,7 +196,11 @@ jobs:
     
     # Criterion is a library dependency, not a binary to install
     - name: Run benchmarks
-      run: cargo bench --all-features
+      run: |
+        # Pin clap_lex to a version compatible with Rust 1.71.1
+        cargo update -p clap_lex --precise 0.5.0
+        
+        cargo bench --all-features
     
     - name: Store benchmark results
       uses: benchmark-action/github-action-benchmark@v1
@@ -229,6 +240,9 @@ jobs:
     
     - name: Run Miri
       run: |
+        # Pin clap_lex to a version compatible with Rust 1.71.1
+        cargo update -p clap_lex --precise 0.5.0
+        
         cargo miri setup
         # Set CI testing flag to skip WebGPU tests
         export RUV_FANN_CI_TESTING=1
@@ -313,8 +327,12 @@ jobs:
     - name: Install cross
       run: cargo install cross --git https://github.com/cross-rs/cross
     
-    - name: Cross compile
-      run: cross build --target ${{ matrix.target }} --all-features
+    - name: Cross-compile
+      run: |
+        # Pin clap_lex to a version compatible with Rust 1.71.1
+        cargo update -p clap_lex --precise 0.5.0
+        
+        cross build --target ${{ matrix.target }} --all-features
 
   docs:
     name: Documentation
@@ -339,8 +357,12 @@ jobs:
           target
         key: ${{ runner.os }}-docs-${{ hashFiles('**/Cargo.lock') }}
     
-    - name: Check documentation
-      run: cargo doc --all-features --no-deps --document-private-items
+    - name: Build documentation
+      run: |
+        # Pin clap_lex to a version compatible with Rust 1.71.1
+        cargo update -p clap_lex --precise 0.5.0
+        
+        cargo doc --all-features --no-deps --document-private-items
       env:
         RUSTDOCFLAGS: -D warnings
     
@@ -407,7 +429,11 @@ jobs:
         key: ${{ runner.os }}-msrv-${{ hashFiles('**/Cargo.lock') }}
     
     - name: Check MSRV
-      run: cargo check --all-features
+      run: |
+        # Pin clap_lex to a version compatible with Rust 1.71.1
+        cargo update -p clap_lex --precise 0.5.0
+        
+        cargo check --all-features
 
   release-check:
     name: Release Readiness
@@ -443,7 +469,15 @@ jobs:
         fi
     
     - name: Check package
-      run: cargo package --all-features
+      run: |
+        # Pin clap_lex to a version compatible with Rust 1.71.1
+        cargo update -p clap_lex --precise 0.5.0
+        
+        cargo package --all-features
     
     - name: Check publish readiness
-      run: cargo publish --dry-run --all-features
+      run: |
+        # Pin clap_lex to a version compatible with Rust 1.71.1
+        cargo update -p clap_lex --precise 0.5.0
+        
+        cargo publish --dry-run --all-features
