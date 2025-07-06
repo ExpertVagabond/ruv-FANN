@@ -42,8 +42,7 @@ jobs:
         # Specify a minimum version that supports Cargo.lock version 4
         # Cargo.lock version 4 was introduced in Rust 1.70.0
         components: rustfmt, clippy
-        # Ensure minimum version is at least 1.70.0
-        min-version: 1.81.0
+        # MSRV is specified in the matrix as 1.81.0
     
     - name: Cache dependencies
       uses: actions/cache@v3
