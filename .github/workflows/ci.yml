@@ -94,18 +94,25 @@ jobs:
       if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable' && env.RUV_FANN_SKIP_NPM != '1'
       run: npm install --no-audit --no-fund
       
-    - name: Run JavaScript and TypeScript linting (informational only)
+    - name: Fix specific JavaScript linting issues
+      if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable' && env.RUV_FANN_SKIP_NPM != '1'
+      run: |
+        # Run our custom script to fix specific linting issues
+        chmod +x .github/workflows/fix-specific-linting.sh
+        ./.github/workflows/fix-specific-linting.sh
+        
+    - name: Run JavaScript and TypeScript linting
       if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable' && env.RUV_FANN_SKIP_NPM != '1'
       run: |
         cd ruv-swarm/npm
         
         # Run ESLint's auto-fix to fix what can be fixed automatically
         echo "Running ESLint auto-fix..."
-        npm run lint:fix || true
+        npm run lint:fix
         
-        # Run ESLint checks but don't fail the build (|| true ensures success)
-        echo "\n\nRunning ESLint checks (warnings will be shown but won't fail the build)..."
-        npm run lint:check || true
+        # Run ESLint checks
+        echo "\n\nRunning ESLint checks..."
+        npm run lint:check
         
         cd ../..
         
