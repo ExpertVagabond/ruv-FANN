@@ -12,6 +12,8 @@ class ClaudeIntegrationOrchestrator {
     this.options = {
       autoSetup: options.autoSetup || false,
       forceSetup: options.forceSetup || false,
+      mergeSetup: options.mergeSetup || false,
+      interactive: options.interactive !== false, // Default to true
       workingDir: options.workingDir || process.cwd(),
       packageName: options.packageName || 'ruv-swarm',
       ...options,
@@ -42,7 +44,11 @@ class ClaudeIntegrationOrchestrator {
 
       // Step 1: Generate documentation
       console.log('\n📚 Step 1: Documentation Generation');
-      results.modules.docs = await this.docs.generateAll();
+      results.modules.docs = await this.docs.generateAll({
+        force: this.options.forceSetup,
+        merge: this.options.mergeSetup,
+        interactive: this.options.interactive
+      });
 
       // Step 2: Setup remote capabilities
       console.log('\n🌐 Step 2: Remote Execution Setup');

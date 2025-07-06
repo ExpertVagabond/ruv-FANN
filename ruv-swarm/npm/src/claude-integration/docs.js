@@ -14,9 +14,38 @@ class ClaudeDocsGenerator {
   }
 
   /**
-     * Generate main claude.md configuration file
+     * Generate main claude.md configuration file with protection
      */
-  async generateClaudeMd() {
+  async generateClaudeMd(options = {}) {
+    const { force = false, merge = false, interactive = true } = options;
+    
+    // Check if CLAUDE.md already exists
+    const filePath = path.join(this.workingDir, 'CLAUDE.md');
+    const fileExists = await this.fileExists(filePath);
+    
+    if (fileExists && !force && !merge) {
+      if (interactive) {
+        // Interactive prompt for action
+        const action = await this.promptUserAction(filePath);
+        if (action === 'cancel') {
+          throw new Error('CLAUDE.md generation cancelled by user');
+        } else if (action === 'overwrite') {
+          await this.createBackup(filePath);
+        } else if (action === 'merge') {
+          return await this.mergeClaudeMd(filePath);
+        }
+      } else {
+        // Non-interactive mode - fail safely
+        throw new Error('CLAUDE.md already exists. Use --force to overwrite or --merge to combine.');
+      }
+    } else if (fileExists && force) {
+      // Create backup before overwriting
+      await this.createBackup(filePath);
+      console.log('⚠️  Backing up existing CLAUDE.md before overwriting');
+    } else if (fileExists && merge) {
+      // Merge with existing content
+      return await this.mergeClaudeMd(filePath);
+    }
     const content = `# Claude Code Configuration for ruv-swarm
 
 ## 🎯 IMPORTANT: Separation of Responsibilities
@@ -578,9 +607,13 @@ Agent Activity:
 Remember: **ruv-swarm coordinates, Claude Code creates!** Start with \`mcp__ruv-swarm__swarm_init\` to enhance your development workflow.
 `;
 
-    const filePath = path.join(this.workingDir, 'CLAUDE.md');
+    // Write the new content
     await fs.writeFile(filePath, content);
-    return { file: 'CLAUDE.md', success: true };
+    
+    // Clean up old backups (keep only last 5)
+    await this.cleanupOldBackups(filePath);
+    
+    return { file: 'CLAUDE.md', success: true, action: 'created' };
   }
 
   /**
@@ -1064,14 +1097,238 @@ ${config.details}
   }
 
   /**
+     * Check if file exists
+     */
+  async fileExists(filePath) {
+    try {
+      await fs.access(filePath);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+     * Create backup of existing file
+     */
+  async createBackup(filePath) {
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+    const backupPath = `${filePath}.backup.${timestamp}`;
+    
+    try {
+      await fs.copyFile(filePath, backupPath);
+      console.log(`📄 Backup created: ${path.basename(backupPath)}`);
+      return backupPath;
+    } catch (error) {
+      console.error('⚠️  Failed to create backup:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+     * Clean up old backup files (keep last 5)
+     */
+  async cleanupOldBackups(filePath) {
+    const dir = path.dirname(filePath);
+    const baseName = path.basename(filePath);
+    
+    try {
+      const files = await fs.readdir(dir);
+      const backupFiles = files
+        .filter(file => file.startsWith(`${baseName}.backup.`))
+        .sort()
+        .reverse(); // Most recent first
+      
+      // Keep only the 5 most recent backups
+      const filesToDelete = backupFiles.slice(5);
+      
+      for (const file of filesToDelete) {
+        try {
+          await fs.unlink(path.join(dir, file));
+        } catch {
+          // Ignore errors deleting old backups
+        }
+      }
+    } catch {
+      // Ignore errors in cleanup
+    }
+  }
+
+  /**
+     * Prompt user for action when CLAUDE.md exists
+     */
+  async promptUserAction(filePath) {
+    // In a CLI environment, we need to use a different approach
+    // For now, we'll use process.stdin/stdout directly
+    const readline = await import('readline');
+    
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+    
+    return new Promise((resolve) => {
+      console.log(`\n📁 CLAUDE.md already exists at: ${filePath}`);
+      console.log('Choose an action:');
+      console.log('  [o] Overwrite (creates backup)');
+      console.log('  [m] Merge with existing content');
+      console.log('  [c] Cancel operation');
+      
+      rl.question('\nYour choice (o/m/c): ', (answer) => {
+        rl.close();
+        
+        switch (answer.toLowerCase()) {
+          case 'o':
+          case 'overwrite':
+            resolve('overwrite');
+            break;
+          case 'm':
+          case 'merge':
+            resolve('merge');
+            break;
+          case 'c':
+          case 'cancel':
+          default:
+            resolve('cancel');
+        }
+      });
+    });
+  }
+
+  /**
+     * Merge ruv-swarm content with existing CLAUDE.md
+     */
+  async mergeClaudeMd(filePath) {
+    try {
+      const existingContent = await fs.readFile(filePath, 'utf8');
+      
+      console.log('📝 Merging ruv-swarm configuration with existing CLAUDE.md');
+      
+      // Create backup first
+      await this.createBackup(filePath);
+      
+      // Generate new ruv-swarm content
+      const ruvSwarmContent = this.getRuvSwarmContent();
+      
+      // Intelligent merging
+      const mergedContent = this.intelligentMerge(existingContent, ruvSwarmContent);
+      
+      // Write merged content
+      await fs.writeFile(filePath, mergedContent);
+      
+      console.log('✅ Successfully merged ruv-swarm configuration with existing CLAUDE.md');
+      
+      return { file: 'CLAUDE.md', success: true, action: 'merged' };
+    } catch (error) {
+      console.error('❌ Failed to merge CLAUDE.md:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+     * Get the ruv-swarm specific content
+     */
+  getRuvSwarmContent() {
+    // Extract just the ruv-swarm specific sections from the full content
+    // This would be the content starting from "# Claude Code Configuration for ruv-swarm"
+    return `# Claude Code Configuration for ruv-swarm
+
+## 🎯 IMPORTANT: Separation of Responsibilities
+
+### Claude Code Handles:
+- ✅ **ALL file operations** (Read, Write, Edit, MultiEdit)
+- ✅ **ALL code generation** and development tasks
+- ✅ **ALL bash commands** and system operations
+- ✅ **ALL actual implementation** work
+- ✅ **Project navigation** and code analysis
+
+### ruv-swarm MCP Tools Handle:
+- 🧠 **Coordination only** - Orchestrating Claude Code's actions
+- 💾 **Memory management** - Persistent state across sessions
+- 🤖 **Neural features** - Cognitive patterns and learning
+- 📊 **Performance tracking** - Monitoring and metrics
+- 🐝 **Swarm orchestration** - Multi-agent coordination
+
+### ⚠️ Key Principle:
+**MCP tools DO NOT create content or write code.** They coordinate and enhance Claude Code's native capabilities. Think of them as an orchestration layer that helps Claude Code work more efficiently.
+
+## 🚀 CRITICAL: Parallel Execution & Batch Operations
+
+### 🚨 MANDATORY RULE #1: BATCH EVERYTHING
+
+**When using swarms, you MUST use BatchTool for ALL operations:**
+
+1. **NEVER** send multiple messages for related operations
+2. **ALWAYS** combine multiple tool calls in ONE message
+3. **PARALLEL** execution is MANDATORY, not optional
+
+### ⚡ THE GOLDEN RULE OF SWARMS
+
+\`\`\`
+If you need to do X operations, they should be in 1 message, not X messages
+\`\`\`
+
+[... rest of ruv-swarm configuration content ...]
+
+---
+
+Remember: **ruv-swarm coordinates, Claude Code creates!** Start with \`mcp__ruv-swarm__swarm_init\` to enhance your development workflow.`;
+  }
+
+  /**
+     * Intelligently merge existing content with ruv-swarm content
+     */
+  intelligentMerge(existingContent, ruvSwarmContent) {
+    const lines = existingContent.split('\n');
+    
+    // Look for existing ruv-swarm section
+    const ruvSwarmSectionIndex = lines.findIndex(line => 
+      line.includes('ruv-swarm') || 
+      line.includes('Claude Code Configuration for ruv-swarm') ||
+      line.includes('SWARM ORCHESTRATION')
+    );
+    
+    if (ruvSwarmSectionIndex !== -1) {
+      // Replace existing ruv-swarm section
+      const sectionEnd = this.findSectionEnd(lines, ruvSwarmSectionIndex);
+      lines.splice(ruvSwarmSectionIndex, sectionEnd - ruvSwarmSectionIndex, ruvSwarmContent);
+    } else {
+      // Add ruv-swarm section at end
+      if (lines[lines.length - 1].trim() !== '') {
+        lines.push(''); // Add blank line before new section
+      }
+      lines.push('---', '', ruvSwarmContent);
+    }
+    
+    return lines.join('\n');
+  }
+
+  /**
+     * Find the end of a markdown section
+     */
+  findSectionEnd(lines, startIndex) {
+    // Look for next top-level heading or end of file
+    for (let i = startIndex + 1; i < lines.length; i++) {
+      if (lines[i].startsWith('# ') && !lines[i].includes('ruv-swarm')) {
+        return i;
+      }
+      // Also check for horizontal rules that might separate sections
+      if (lines[i].trim() === '---' && i > startIndex + 10) {
+        return i;
+      }
+    }
+    return lines.length;
+  }
+
+  /**
      * Generate all documentation files
      */
-  async generateAll() {
+  async generateAll(options = {}) {
     console.log('📚 Generating Claude Code documentation...');
 
     try {
       const results = {
-        claudeMd: await this.generateClaudeMd(),
+        claudeMd: await this.generateClaudeMd(options),
         commands: await this.generateCommandDocs(),
         advancedCommands: await this.advancedGenerator.generateAdvancedCommands(),
         settings: await this.generateSettingsJson(),
