@@ -28,7 +28,7 @@ jobs:
         rust: [stable, beta, nightly]
         include:
           - os: ubuntu-latest
-            rust: 1.71.1  # Test against MSRV (Minimum Supported Rust Version)
+            rust: 1.81.0  # Test against MSRV (Minimum Supported Rust Version)
           - os: ubuntu-latest
             rust: stable
     
@@ -43,7 +43,7 @@ jobs:
         # Cargo.lock version 4 was introduced in Rust 1.70.0
         components: rustfmt, clippy
         # Ensure minimum version is at least 1.70.0
-        min-version: 1.70.0
+        min-version: 1.81.0
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -71,7 +71,7 @@ jobs:
     
     - name: Run tests
       run: |
-        # Pin clap to a version compatible with Rust 1.71.1
+        # Pin clap to a version compatible with Rust 1.81.0
         cargo update -p clap --precise 4.3.19
         
         cargo test --all-features
@@ -104,8 +104,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.71.1 to support dependencies like bumpalo 3.19.0
-        min-version: 1.71.1
+        # Ensure minimum version is at least 1.81.0 to support dependencies like half 2.6.0
+        min-version: 1.81.0
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -121,7 +121,7 @@ jobs:
     
     - name: Generate code coverage
       run: |
-        # Pin clap to a version compatible with Rust 1.71.1
+        # Pin clap to a version compatible with Rust 1.81.0
         cargo update -p clap --precise 4.3.19
         
         cargo tarpaulin --verbose --all-features --workspace --timeout 300 --out xml
@@ -182,8 +182,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.71.1 to support dependencies like bumpalo 3.19.0
-        min-version: 1.71.1
+        # Ensure minimum version is at least 1.81.0 to support dependencies like half 2.6.0
+        min-version: 1.81.0
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -197,7 +197,7 @@ jobs:
     # Criterion is a library dependency, not a binary to install
     - name: Run benchmarks
       run: |
-        # Pin clap to a version compatible with Rust 1.71.1
+        # Pin clap to a version compatible with Rust 1.81.0
         cargo update -p clap --precise 4.3.19
         
         cargo bench --all-features
@@ -226,7 +226,7 @@ jobs:
       uses: dtolnay/rust-toolchain@nightly
       with:
         # Ensure nightly is recent enough to support Cargo.lock version 4
-        min-version: 1.70.0
+        min-version: 1.81.0
         components: miri
     
     - name: Cache dependencies
@@ -240,7 +240,7 @@ jobs:
     
     - name: Run Miri
       run: |
-        # Pin clap to a version compatible with Rust 1.71.1
+        # Pin clap to a version compatible with Rust 1.81.0
         cargo update -p clap --precise 4.3.19
         
         cargo miri setup
@@ -282,8 +282,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.71.1 to support dependencies like bumpalo 3.19.0
-        min-version: 1.71.1
+        # Ensure minimum version is at least 1.81.0 to support dependencies like half 2.6.0
+        min-version: 1.81.0
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -320,8 +320,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.71.1 to support dependencies like bumpalo 3.19.0
-        min-version: 1.71.1
+        # Ensure minimum version is at least 1.81.0 to support dependencies like half 2.6.0
+        min-version: 1.81.0
         targets: ${{ matrix.target }}
     
     - name: Install cross
@@ -329,7 +329,7 @@ jobs:
     
     - name: Cross-compile
       run: |
-        # Pin clap to a version compatible with Rust 1.71.1
+        # Pin clap to a version compatible with Rust 1.81.0
         cargo update -p clap --precise 4.3.19
         
         cross build --target ${{ matrix.target }} --all-features
@@ -345,8 +345,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.71.1 to support dependencies like bumpalo 3.19.0
-        min-version: 1.71.1
+        # Ensure minimum version is at least 1.81.0 to support dependencies like half 2.6.0
+        min-version: 1.81.0
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -359,7 +359,7 @@ jobs:
     
     - name: Build documentation
       run: |
-        # Pin clap to a version compatible with Rust 1.71.1
+        # Pin clap to a version compatible with Rust 1.81.0
         cargo update -p clap --precise 4.3.19
         
         cargo doc --all-features --no-deps --document-private-items
@@ -384,8 +384,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.71.1 to support dependencies like bumpalo 3.19.0
-        min-version: 1.71.1
+        # Ensure minimum version is at least 1.81.0 to support dependencies like half 2.6.0
+        min-version: 1.81.0
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -430,7 +430,7 @@ jobs:
     
     - name: Check MSRV
       run: |
-        # Pin clap to a version compatible with Rust 1.71.1
+        # Pin clap to a version compatible with Rust 1.81.0
         cargo update -p clap --precise 4.3.19
         
         cargo check --all-features
@@ -448,8 +448,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.71.1 to support dependencies like bumpalo 3.19.0
-        min-version: 1.71.1
+        # Ensure minimum version is at least 1.81.0 to support dependencies like half 2.6.0
+        min-version: 1.81.0
     
     - name: Check if version bumped
       id: version-check
@@ -470,14 +470,14 @@ jobs:
     
     - name: Check package
       run: |
-        # Pin clap to a version compatible with Rust 1.71.1
+        # Pin clap to a version compatible with Rust 1.81.0
         cargo update -p clap --precise 4.3.19
         
         cargo package --all-features
     
     - name: Check publish readiness
       run: |
-        # Pin clap to a version compatible with Rust 1.71.1
+        # Pin clap to a version compatible with Rust 1.81.0
         cargo update -p clap --precise 4.3.19
         
         cargo publish --dry-run --all-features
