@@ -2,10 +2,9 @@
  * SQLite Persistence Layer for ruv-swarm MCP
  */
 
-import sqlite3 from 'sqlite3';
+import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
-import { promisify } from 'util';
 
 class SwarmPersistence {
   constructor(dbPath = path.join(new URL('.', import.meta.url).pathname, '..', 'data', 'ruv-swarm.db')) {
@@ -15,22 +14,16 @@ class SwarmPersistence {
       fs.mkdirSync(dataDir, { recursive: true });
     }
 
-    this.db = new sqlite3.Database(dbPath);
-    this.dbAsync = {
-      run: promisify(this.db.run.bind(this.db)),
-      get: promisify(this.db.get.bind(this.db)),
-      all: promisify(this.db.all.bind(this.db)),
-      exec: promisify(this.db.exec.bind(this.db))
-    };
+    this.db = new Database(dbPath);
     this.initDatabase();
   }
 
-  async initDatabase() {
+  initDatabase() {
     // Enable foreign keys
-    await this.dbAsync.exec('PRAGMA foreign_keys = ON');
+    this.db.exec('PRAGMA foreign_keys = ON');
 
     // Create tables
-    await this.dbAsync.exec(`
+    this.db.exec(`
       CREATE TABLE IF NOT EXISTS swarms (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
