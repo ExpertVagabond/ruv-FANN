@@ -92,7 +92,7 @@ jobs:
       
     - name: Install Node.js dependencies
       if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable' && env.RUV_FANN_SKIP_NPM != '1'
-      run: npm ci
+      run: npm install --no-audit --no-fund
       
     - name: Fix JavaScript and TypeScript linting issues
       if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable' && env.RUV_FANN_SKIP_NPM != '1'
