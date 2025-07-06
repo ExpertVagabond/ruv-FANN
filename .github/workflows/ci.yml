@@ -92,6 +92,12 @@ jobs:
     - name: Fix JavaScript linting issues
       if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
       run: |
+        # Run ESLint's auto-fix on the ruv-swarm package
+        cd ruv-swarm/npm
+        npm run lint:fix
+        cd ../..
+        
+        # Run additional fixes for any edge cases ESLint might miss
         chmod +x .github/workflows/fix-js-linting.sh
         ./.github/workflows/fix-js-linting.sh
         

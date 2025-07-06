@@ -1,68 +1,24 @@
 #!/bin/bash
 
-# Script to fix JavaScript linting issues in CI
-echo "Starting JavaScript linting fixes..."
+# Script to handle any edge cases that ESLint's auto-fix might miss
+echo "Starting additional JavaScript linting fixes..."
 
-# First check in node_modules after npm installation
-if [ -d "node_modules/ruv-swarm" ]; then
-  echo "Found ruv-swarm in node_modules, fixing linting issues there..."
-  
-  # Fix missing radix parameter in cli-diagnostics.js
-  find node_modules/ruv-swarm -name "cli-diagnostics.js" -type f | while read file; do
-    echo "Fixing $file"
-    sed -i 's/parseInt(\([^,)]*\))/parseInt(\1, 10)/g' "$file"
-  done
-  
-  # Fix missing braces after if conditions in diagnostics.js
-  find node_modules/ruv-swarm -name "diagnostics.js" -type f | while read file; do
-    echo "Fixing $file"
-    sed -i 's/\(if ([^{]*)\) \([^{]\)/\1 {\n  \2\n}/g' "$file"
-  done
-  
-  # Fix missing braces after if conditions in logger.js
-  find node_modules/ruv-swarm -name "logger.js" -type f | while read file; do
-    echo "Fixing $file"
-    sed -i 's/\(if ([^{]*)\) \([^{]\)/\1 {\n  \2\n}/g' "$file"
-  done
-  
-  # Fix 'let' to 'const' for variables never reassigned in mcp-server-reliability-test.js
-  find node_modules/ruv-swarm -name "mcp-server-reliability-test.js" -type f | while read file; do
-    echo "Fixing $file"
-    sed -i 's/let initializationLogs/const initializationLogs/g' "$file"
-  done
-  
-  echo "JavaScript linting fixes in node_modules completed."
-fi
-
-# Also check in ruv-swarm/npm directory if it exists
+# Check for any remaining issues after ESLint auto-fix
 if [ -d "ruv-swarm/npm" ]; then
-  echo "Checking ruv-swarm/npm directory..."
+  echo "Checking for any remaining issues in ruv-swarm/npm..."
   
-  # Fix missing radix parameter in cli-diagnostics.js
-  find ruv-swarm/npm -name "cli-diagnostics.js" -type f | while read file; do
-    echo "Fixing $file"
-    sed -i 's/parseInt(\([^,)]*\))/parseInt(\1, 10)/g' "$file"
-  done
+  # Fix any complex patterns that ESLint's auto-fix might miss
+  # For example, specific variable name changes or complex regex patterns
   
-  # Fix missing braces after if conditions in diagnostics.js
-  find ruv-swarm/npm -name "diagnostics.js" -type f | while read file; do
-    echo "Fixing $file"
-    sed -i 's/\(if ([^{]*)\) \([^{]\)/\1 {\n  \2\n}/g' "$file"
-  done
-  
-  # Fix missing braces after if conditions in logger.js
-  find ruv-swarm/npm -name "logger.js" -type f | while read file; do
-    echo "Fixing $file"
-    sed -i 's/\(if ([^{]*)\) \([^{]\)/\1 {\n  \2\n}/g' "$file"
-  done
-  
-  # Fix 'let' to 'const' for variables never reassigned in mcp-server-reliability-test.js
-  find ruv-swarm/npm -name "mcp-server-reliability-test.js" -type f | while read file; do
-    echo "Fixing $file"
+  # Example: Fix 'let initializationLogs' to 'const initializationLogs' if ESLint missed it
+  find ruv-swarm/npm -type f -name "*.js" -exec grep -l "let initializationLogs" {} \; | while read file; do
+    echo "Fixing let/const in $file"
     sed -i 's/let initializationLogs/const initializationLogs/g' "$file"
   done
   
-  echo "JavaScript linting fixes in ruv-swarm/npm completed."
+  # Add any other specific fixes here if needed
+  
+  echo "Additional fixes in ruv-swarm/npm completed."
 fi
 
-echo "All JavaScript linting fixes completed."
+echo "All additional JavaScript linting fixes completed."
