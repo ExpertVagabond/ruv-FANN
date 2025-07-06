@@ -69,28 +69,33 @@ jobs:
     - name: Build
       run: cargo build --verbose --all-features
     
-    - name: Set up Python for macOS
+    - name: Set up Python 3.11 on macOS
       if: matrix.os == 'macos-latest'
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'  # Use Python 3.11 which includes distutils
+        python-version: '3.11'
         
-    - name: Set up Node.js for macOS
+    - name: Install setuptools on macOS
+      if: matrix.os == 'macos-latest'
+      run: pip install setuptools
+      
+    - name: Set up Node.js 16 on macOS
       if: matrix.os == 'macos-latest'
       uses: actions/setup-node@v3
       with:
         node-version: 16
         
-    - name: Install Python distutils on macOS
+    # Skip npm steps on macOS entirely
+    - name: Set RUV_FANN_SKIP_NPM env var on macOS
       if: matrix.os == 'macos-latest'
-      run: pip install setuptools  # This includes distutils
+      run: echo "RUV_FANN_SKIP_NPM=1" >> $GITHUB_ENV
       
     - name: Install Node.js dependencies
-      if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+      if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable' && env.RUV_FANN_SKIP_NPM != '1'
       run: npm ci
       
     - name: Fix JavaScript and TypeScript linting issues
-      if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+      if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable' && env.RUV_FANN_SKIP_NPM != '1'
       run: |
         # Create a custom ESLint configuration that disables ALL warnings
         cd ruv-swarm/npm
