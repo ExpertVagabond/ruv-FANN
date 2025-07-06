@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        # Specify versions that support dependencies like bumpalo 3.19.0 (requires Rust 1.71.1)
+        # Specify versions that support dependencies like half 2.6.0 (requires Rust 1.81.0)
         rust: [stable, beta, nightly]
         include:
           - os: ubuntu-latest
@@ -408,16 +408,16 @@ jobs:
       run: timeout 60s cargo run --example basic_usage || [ $? -eq 124 ]
 
   msrv:
-    name: MSRV (1.71.1)
+    name: MSRV (1.81.0)
     runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install Rust 1.71.1
+    - name: Install Rust 1.81.0
       uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.71.1  # MSRV updated to support dependencies like bumpalo 3.19.0
+        toolchain: 1.81.0  # MSRV updated to support dependencies like half 2.6.0
     
     - name: Cache dependencies
       uses: actions/cache@v3
