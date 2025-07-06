@@ -150,8 +150,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.81.0 to support dependencies like half 2.6.0
-        min-version: 1.81.0
+        # Using stable Rust which is already 1.81.0+ to support dependencies like half 2.6.0
+        components: rustfmt, clippy
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -228,8 +228,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.81.0 to support dependencies like half 2.6.0
-        min-version: 1.81.0
+        # Using stable Rust which is already 1.81.0+ to support dependencies like half 2.6.0
+        components: rustfmt, clippy
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -328,8 +328,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.81.0 to support dependencies like half 2.6.0
-        min-version: 1.81.0
+        # Using stable Rust which is already 1.81.0+ to support dependencies like half 2.6.0
+        components: rustfmt, clippy
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -366,8 +366,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.81.0 to support dependencies like half 2.6.0
-        min-version: 1.81.0
+        # Using stable Rust which is already 1.81.0+ to support dependencies like half 2.6.0
+        components: rustfmt, clippy
         targets: ${{ matrix.target }}
     
     - name: Install cross
@@ -391,8 +391,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.81.0 to support dependencies like half 2.6.0
-        min-version: 1.81.0
+        # Using stable Rust which is already 1.81.0+ to support dependencies like half 2.6.0
+        components: rustfmt, clippy
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -430,8 +430,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.81.0 to support dependencies like half 2.6.0
-        min-version: 1.81.0
+        # Using stable Rust which is already 1.81.0+ to support dependencies like half 2.6.0
+        components: rustfmt, clippy
     
     - name: Cache dependencies
       uses: actions/cache@v3
@@ -494,8 +494,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # Ensure minimum version is at least 1.81.0 to support dependencies like half 2.6.0
-        min-version: 1.81.0
+        # Using stable Rust which is already 1.81.0+ to support dependencies like half 2.6.0
+        components: rustfmt, clippy
     
     - name: Check if version bumped
       id: version-check
