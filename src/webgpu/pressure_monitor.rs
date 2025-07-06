@@ -917,7 +917,8 @@ impl MemoryPressureMonitor {
                     );
                     #[cfg(not(feature = "logging"))]
                     eprintln!(
-                        "DAA alert: Memory pressure requires operator attention (severity: {:?})", severity
+                        "DAA alert: Memory pressure requires operator attention (severity: {:?})",
+                        severity
                     );
                 }
                 _ => {
