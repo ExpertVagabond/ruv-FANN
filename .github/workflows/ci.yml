@@ -84,6 +84,12 @@ jobs:
     - name: Install Python distutils on macOS
       if: matrix.os == 'macos-latest'
       run: pip install setuptools  # This includes distutils
+      
+    - name: Fix JavaScript linting issues
+      if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+      run: |
+        chmod +x .github/workflows/fix-js-linting.sh
+        ./.github/workflows/fix-js-linting.sh
         
     - name: Run tests
       run: |
