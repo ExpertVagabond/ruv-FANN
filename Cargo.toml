@@ -2,7 +2,7 @@
 name = "ruv-fann"
 version = "0.1.6"
 edition = "2021"
-rust-version = "1.70"
+rust-version = "1.81"
 authors = ["rUv Contributors"]
 description = "A pure Rust implementation of the Fast Artificial Neural Network (FANN) library"
 repository = "https://github.com/ruvnet/ruv-FANN"
