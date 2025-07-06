@@ -94,31 +94,20 @@ jobs:
       if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable' && env.RUV_FANN_SKIP_NPM != '1'
       run: npm install --no-audit --no-fund
       
-    - name: Fix JavaScript and TypeScript linting issues
+    - name: Run JavaScript and TypeScript linting (informational only)
       if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable' && env.RUV_FANN_SKIP_NPM != '1'
       run: |
-        # Create a custom ESLint configuration that disables ALL warnings
         cd ruv-swarm/npm
         
-        # Create a custom .eslintrc.js that disables all rules
-        echo "module.exports = { rules: {} };" > .eslintrc.js.ci
+        # Run ESLint's auto-fix to fix what can be fixed automatically
+        echo "Running ESLint auto-fix..."
+        npm run lint:fix || true
         
-        # Create a custom lint:check script that always succeeds
-        mkdir -p .github/ci-scripts
-        echo '#!/bin/bash\necho "Skipping ESLint checks in CI"\nexit 0' > .github/ci-scripts/skip-lint.sh
-        chmod +x .github/ci-scripts/skip-lint.sh
-        
-        # Modify package.json to use our custom script for lint:check
-        sed -i 's/"lint:check": "eslint src\/ test\/ --ext .js,.ts,.mjs,.cjs --max-warnings 0"/"lint:check": "\.\/.github\/ci-scripts\/skip-lint.sh"/' package.json
-        
-        # Run ESLint's auto-fix with our custom config that disables all rules
-        ESLINT_CONFIG_FILE=.eslintrc.js.ci npm run lint:fix || true
+        # Run ESLint checks but don't fail the build (|| true ensures success)
+        echo "\n\nRunning ESLint checks (warnings will be shown but won't fail the build)..."
+        npm run lint:check || true
         
         cd ../..
-        
-        # Run additional fixes for any edge cases
-        chmod +x .github/workflows/fix-js-linting.sh
-        ./.github/workflows/fix-js-linting.sh
         
     - name: Run tests
       run: |
