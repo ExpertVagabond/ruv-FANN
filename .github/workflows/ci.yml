@@ -69,6 +69,22 @@ jobs:
     - name: Build
       run: cargo build --verbose --all-features
     
+    - name: Set up Python for macOS
+      if: matrix.os == 'macos-latest'
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'  # Use Python 3.11 which includes distutils
+        
+    - name: Set up Node.js for macOS
+      if: matrix.os == 'macos-latest'
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+        
+    - name: Install Python distutils on macOS
+      if: matrix.os == 'macos-latest'
+      run: pip install setuptools  # This includes distutils
+        
     - name: Run tests
       run: |
         # Pin clap to a version compatible with Rust 1.81.0
