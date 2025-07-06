@@ -85,6 +85,10 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: pip install setuptools  # This includes distutils
       
+    - name: Install Node.js dependencies
+      if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+      run: npm ci
+      
     - name: Fix JavaScript linting issues
       if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
       run: |
