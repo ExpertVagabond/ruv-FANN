@@ -14,6 +14,7 @@ class ClaudeIntegrationOrchestrator {
       forceSetup: options.forceSetup || false,
       mergeSetup: options.mergeSetup || false,
       backupSetup: options.backupSetup || false,
+      noBackup: options.noBackup || false,
       interactive: options.interactive !== false, // Default to true
       workingDir: options.workingDir || process.cwd(),
       packageName: options.packageName || 'ruv-swarm',
@@ -51,7 +52,8 @@ class ClaudeIntegrationOrchestrator {
         force: this.options.forceSetup,
         merge: this.options.mergeSetup,
         backup: this.options.backupSetup,
-        interactive: this.options.interactive
+        noBackup: this.options.noBackup,
+        interactive: this.options.interactive,
       });
 
       // Step 2: Setup remote capabilities

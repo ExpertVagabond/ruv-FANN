@@ -17,12 +17,12 @@ class ClaudeDocsGenerator {
      * Generate main claude.md configuration file with protection
      */
   async generateClaudeMd(options = {}) {
-    const { force = false, merge = false, backup = false, interactive = true } = options;
-    
+    const { force = false, merge = false, backup = false, noBackup = false, interactive = true } = options;
+
     // Check if CLAUDE.md already exists
     const filePath = path.join(this.workingDir, 'CLAUDE.md');
     const fileExists = await this.fileExists(filePath);
-    
+
     if (fileExists && !force && !merge && !backup) {
       if (interactive) {
         // Interactive prompt for action
@@ -39,12 +39,12 @@ class ClaudeDocsGenerator {
         throw new Error('CLAUDE.md already exists. Use --force to overwrite, --backup to backup existing, or --merge to combine.');
       }
     } else if (fileExists && force) {
-      // Force flag: overwrite without backup (unless backup flag is also set)
-      if (backup) {
+      // Force flag: overwrite with optional backup creation
+      if (!noBackup) {
         await this.createBackup(filePath);
         console.log('📄 Backing up existing CLAUDE.md before force overwrite');
       } else {
-        console.log('⚠️  Force overwriting existing CLAUDE.md (no backup)');
+        console.log('⚠️  Force overwriting existing CLAUDE.md (no backup - disabled by --no-backup)');
       }
     } else if (fileExists && backup && !force && !merge) {
       // Backup flag: create backup then overwrite
@@ -55,7 +55,7 @@ class ClaudeDocsGenerator {
       if (backup) {
         await this.createBackup(filePath);
       }
-      return await this.mergeClaudeMd(filePath);
+      return await this.mergeClaudeMd(filePath, noBackup);
     }
     const content = `# Claude Code Configuration for ruv-swarm
 
@@ -620,10 +620,10 @@ Remember: **ruv-swarm coordinates, Claude Code creates!** Start with \`mcp__ruv-
 
     // Write the new content
     await fs.writeFile(filePath, content);
-    
+
     // Clean up old backups (keep only last 5)
     await this.cleanupOldBackups(filePath);
-    
+
     return { file: 'CLAUDE.md', success: true, action: 'created' };
   }
 
@@ -1125,7 +1125,7 @@ ${config.details}
   async createBackup(filePath) {
     const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
     const backupPath = `${filePath}.backup.${timestamp}`;
-    
+
     try {
       await fs.copyFile(filePath, backupPath);
       console.log(`📄 Backup created: ${path.basename(backupPath)}`);
@@ -1142,17 +1142,17 @@ ${config.details}
   async cleanupOldBackups(filePath) {
     const dir = path.dirname(filePath);
     const baseName = path.basename(filePath);
-    
+
     try {
       const files = await fs.readdir(dir);
       const backupFiles = files
         .filter(file => file.startsWith(`${baseName}.backup.`))
         .sort()
         .reverse(); // Most recent first
-      
+
       // Keep only the 5 most recent backups
       const filesToDelete = backupFiles.slice(5);
-      
+
       for (const file of filesToDelete) {
         try {
           await fs.unlink(path.join(dir, file));
@@ -1172,35 +1172,35 @@ ${config.details}
     // In a CLI environment, we need to use a different approach
     // For now, we'll use process.stdin/stdout directly
     const readline = await import('readline');
-    
+
     const rl = readline.createInterface({
       input: process.stdin,
-      output: process.stdout
+      output: process.stdout,
     });
-    
+
     return new Promise((resolve) => {
       console.log(`\n📁 CLAUDE.md already exists at: ${filePath}`);
       console.log('Choose an action:');
       console.log('  [o] Overwrite (creates backup)');
       console.log('  [m] Merge with existing content');
       console.log('  [c] Cancel operation');
-      
+
       rl.question('\nYour choice (o/m/c): ', (answer) => {
         rl.close();
-        
+
         switch (answer.toLowerCase()) {
-          case 'o':
-          case 'overwrite':
-            resolve('overwrite');
-            break;
-          case 'm':
-          case 'merge':
-            resolve('merge');
-            break;
-          case 'c':
-          case 'cancel':
-          default:
-            resolve('cancel');
+        case 'o':
+        case 'overwrite':
+          resolve('overwrite');
+          break;
+        case 'm':
+        case 'merge':
+          resolve('merge');
+          break;
+        case 'c':
+        case 'cancel':
+        default:
+          resolve('cancel');
         }
       });
     });
@@ -1209,26 +1209,30 @@ ${config.details}
   /**
      * Merge ruv-swarm content with existing CLAUDE.md
      */
-  async mergeClaudeMd(filePath) {
+  async mergeClaudeMd(filePath, noBackup = false) {
     try {
       const existingContent = await fs.readFile(filePath, 'utf8');
-      
+
       console.log('📝 Merging ruv-swarm configuration with existing CLAUDE.md');
-      
-      // Create backup first
-      await this.createBackup(filePath);
-      
+
+      // Create backup first (unless disabled)
+      if (!noBackup) {
+        await this.createBackup(filePath);
+      } else {
+        console.log('📝 Skipping backup creation (disabled by --no-backup)');
+      }
+
       // Generate new ruv-swarm content
       const ruvSwarmContent = this.getRuvSwarmContent();
-      
+
       // Intelligent merging
       const mergedContent = this.intelligentMerge(existingContent, ruvSwarmContent);
-      
+
       // Write merged content
       await fs.writeFile(filePath, mergedContent);
-      
+
       console.log('✅ Successfully merged ruv-swarm configuration with existing CLAUDE.md');
-      
+
       return { file: 'CLAUDE.md', success: true, action: 'merged' };
     } catch (error) {
       console.error('❌ Failed to merge CLAUDE.md:', error.message);
@@ -1407,7 +1411,7 @@ When using ruv-swarm coordination with Claude Code:
 ---
 
 Remember: **ruv-swarm coordinates, Claude Code creates!** Start with \`mcp__ruv-swarm__swarm_init\` to enhance your development workflow.`;
-    
+
     return content;
   }
 
@@ -1417,27 +1421,27 @@ Remember: **ruv-swarm coordinates, Claude Code creates!** Start with \`mcp__ruv-
   intelligentMerge(existingContent, ruvSwarmContent) {
     const existingLines = existingContent.split('\n');
     const newLines = ruvSwarmContent.split('\n');
-    
+
     // Check if ruv-swarm content already exists
     const ruvSwarmSectionIndex = this.findRuvSwarmSection(existingLines);
-    
+
     if (ruvSwarmSectionIndex !== -1) {
       // Replace existing ruv-swarm section
       console.log('📝 Updating existing ruv-swarm section in CLAUDE.md');
       const sectionEnd = this.findSectionEnd(existingLines, ruvSwarmSectionIndex);
-      
+
       // Replace the section
       const beforeSection = existingLines.slice(0, ruvSwarmSectionIndex);
       const afterSection = existingLines.slice(sectionEnd);
-      
+
       return [...beforeSection, ...newLines, '', ...afterSection].join('\n');
-    } else {
-      // Intelligently insert ruv-swarm content
-      console.log('📝 Integrating ruv-swarm configuration into existing CLAUDE.md');
-      return this.intelligentInsert(existingLines, newLines);
     }
+    // Intelligently insert ruv-swarm content
+    console.log('📝 Integrating ruv-swarm configuration into existing CLAUDE.md');
+    return this.intelligentInsert(existingLines, newLines);
+
   }
-  
+
   /**
      * Find existing ruv-swarm section in content
      */
@@ -1450,14 +1454,14 @@ Remember: **ruv-swarm coordinates, Claude Code creates!** Start with \`mcp__ruv-
     }
     return -1;
   }
-  
+
   /**
      * Intelligently insert new content based on context
      */
   intelligentInsert(existingLines, newLines) {
     // Look for appropriate insertion points
     let insertIndex = -1;
-    
+
     // 1. After main title but before first major section
     for (let i = 0; i < existingLines.length; i++) {
       if (existingLines[i].startsWith('# ') && i > 0) {
@@ -1466,7 +1470,7 @@ Remember: **ruv-swarm coordinates, Claude Code creates!** Start with \`mcp__ruv-
         break;
       }
     }
-    
+
     // 2. If no major headings, look for end of introductory content
     if (insertIndex === -1) {
       for (let i = 0; i < existingLines.length; i++) {
@@ -1476,19 +1480,19 @@ Remember: **ruv-swarm coordinates, Claude Code creates!** Start with \`mcp__ruv-
         }
       }
     }
-    
+
     // 3. Fallback: insert after first 10 lines or middle of file
     if (insertIndex === -1) {
       insertIndex = Math.min(10, Math.floor(existingLines.length / 2));
     }
-    
+
     // Insert the content with proper spacing
     const beforeInsert = existingLines.slice(0, insertIndex);
     const afterInsert = existingLines.slice(insertIndex);
-    
+
     // Add spacing
     const insertContent = ['', '---', '', ...newLines, '', '---', ''];
-    
+
     return [...beforeInsert, ...insertContent, ...afterInsert].join('\n');
   }
 

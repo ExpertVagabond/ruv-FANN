@@ -215,6 +215,7 @@ async function handleInit(args) {
         const forceSetup = args.includes('--force');
         const mergeSetup = args.includes('--merge');
         const noInteractive = args.includes('--no-interactive');
+        const noBackup = args.includes('--no-backup');
         
         // Validate inputs
         const topology = validateTopology(rawTopology);
@@ -246,6 +247,7 @@ async function handleInit(args) {
                     autoSetup: setupClaude,
                     forceSetup: forceSetup,
                     mergeSetup: mergeSetup,
+                    noBackup: noBackup,
                     interactive: !noInteractive,
                     workingDir: process.cwd(),
                     packageName: 'ruv-swarm'
@@ -1704,6 +1706,7 @@ Commands:
     Options for --claude:
       --force                       Overwrite existing CLAUDE.md (creates backup)
       --merge                       Merge with existing CLAUDE.md content
+      --no-backup                   Disable automatic backup creation
       --no-interactive              Skip interactive prompts (fail on conflicts)
   spawn <type> [name]             Spawn an agent (researcher, coder, analyst, etc.)
   orchestrate <task>              Orchestrate a task across agents
@@ -1723,6 +1726,7 @@ Examples:
   ruv-swarm init mesh 5 --claude                    # Create CLAUDE.md (fails if exists)
   ruv-swarm init mesh 5 --claude --force            # Overwrite CLAUDE.md (creates backup)
   ruv-swarm init mesh 5 --claude --merge            # Merge with existing CLAUDE.md
+  ruv-swarm init mesh 5 --claude --force --no-backup # Overwrite CLAUDE.md (no backup)
   ruv-swarm init mesh 5 --claude --no-interactive   # Non-interactive mode
   ruv-swarm spawn researcher "AI Research Specialist"
   ruv-swarm orchestrate "Build a REST API with authentication"
