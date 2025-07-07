@@ -1226,12 +1226,11 @@ ${config.details}
   }
 
   /**
-     * Get the ruv-swarm specific content
+     * Get the ruv-swarm specific content (full content from generateClaudeMd)
      */
   getRuvSwarmContent() {
-    // Extract just the ruv-swarm specific sections from the full content
-    // This would be the content starting from "# Claude Code Configuration for ruv-swarm"
-    return `# Claude Code Configuration for ruv-swarm
+    // Return the complete ruv-swarm configuration content
+    const content = `# Claude Code Configuration for ruv-swarm
 
 ## 🎯 IMPORTANT: Separation of Responsibilities
 
@@ -1268,37 +1267,153 @@ ${config.details}
 If you need to do X operations, they should be in 1 message, not X messages
 \`\`\`
 
-[... rest of ruv-swarm configuration content ...]
+### 📦 BATCH TOOL EXAMPLES
+
+**✅ CORRECT - Everything in ONE Message:**
+\`\`\`javascript
+[Single Message with BatchTool]:
+  mcp__ruv-swarm__swarm_init { topology: "mesh", maxAgents: 6 }
+  mcp__ruv-swarm__agent_spawn { type: "researcher" }
+  mcp__ruv-swarm__agent_spawn { type: "coder" }
+  mcp__ruv-swarm__agent_spawn { type: "analyst" }
+  mcp__ruv-swarm__agent_spawn { type: "tester" }
+  mcp__ruv-swarm__agent_spawn { type: "coordinator" }
+  TodoWrite { todos: [todo1, todo2, todo3, todo4, todo5] }
+  Bash "mkdir -p app/{src,tests,docs}"
+  Write "app/package.json" 
+  Write "app/README.md"
+  Write "app/src/index.js"
+\`\`\`
+
+**❌ WRONG - Multiple Messages (NEVER DO THIS):**
+\`\`\`javascript
+Message 1: mcp__ruv-swarm__swarm_init
+Message 2: mcp__ruv-swarm__agent_spawn 
+Message 3: mcp__ruv-swarm__agent_spawn
+Message 4: TodoWrite (one todo)
+Message 5: Bash "mkdir src"
+Message 6: Write "package.json"
+// This is 6x slower and breaks parallel coordination!
+\`\`\`
+
+### 🎯 BATCH OPERATIONS BY TYPE
+
+**File Operations (Single Message):**
+- Read 10 files? → One message with 10 Read calls
+- Write 5 files? → One message with 5 Write calls
+- Edit 1 file many times? → One MultiEdit call
+
+**Swarm Operations (Single Message):**
+- Need 8 agents? → One message with swarm_init + 8 agent_spawn calls
+- Multiple memories? → One message with all memory_usage calls
+- Task + monitoring? → One message with task_orchestrate + swarm_monitor
+
+**Command Operations (Single Message):**
+- Multiple directories? → One message with all mkdir commands
+- Install + test + lint? → One message with all npm commands
+- Git operations? → One message with all git commands
+
+## 🚀 Quick Setup (Stdio MCP - Recommended)
+
+### 1. Add MCP Server (Stdio - No Port Needed)
+\`\`\`bash
+# Add ruv-swarm MCP server to Claude Code using stdio
+claude mcp add ruv-swarm npx ruv-swarm mcp start
+\`\`\`
+
+### 2. Use MCP Tools for Coordination in Claude Code
+Once configured, ruv-swarm MCP tools enhance Claude Code's coordination:
+
+**Initialize a swarm:**
+- Use the \`mcp__ruv-swarm__swarm_init\` tool to set up coordination topology
+- Choose: mesh, hierarchical, ring, or star
+- This creates a coordination framework for Claude Code's work
+
+**Spawn agents:**
+- Use \`mcp__ruv-swarm__agent_spawn\` tool to create specialized coordinators
+- Agent types represent different thinking patterns, not actual coders
+- They help Claude Code approach problems from different angles
+
+**Orchestrate tasks:**
+- Use \`mcp__ruv-swarm__task_orchestrate\` tool to coordinate complex workflows
+- This breaks down tasks for Claude Code to execute systematically
+- The agents don't write code - they coordinate Claude Code's actions
+
+## Available MCP Tools for Coordination
+
+### Coordination Tools:
+- \`mcp__ruv-swarm__swarm_init\` - Set up coordination topology for Claude Code
+- \`mcp__ruv-swarm__agent_spawn\` - Create cognitive patterns to guide Claude Code
+- \`mcp__ruv-swarm__task_orchestrate\` - Break down and coordinate complex tasks
+
+### Monitoring Tools:
+- \`mcp__ruv-swarm__swarm_status\` - Monitor coordination effectiveness
+- \`mcp__ruv-swarm__agent_list\` - View active cognitive patterns
+- \`mcp__ruv-swarm__agent_metrics\` - Track coordination performance
+- \`mcp__ruv-swarm__task_status\` - Check workflow progress
+- \`mcp__ruv-swarm__task_results\` - Review coordination outcomes
+
+### Memory & Neural Tools:
+- \`mcp__ruv-swarm__memory_usage\` - Persistent memory across sessions
+- \`mcp__ruv-swarm__neural_status\` - Neural pattern effectiveness
+- \`mcp__ruv-swarm__neural_train\` - Improve coordination patterns
+- \`mcp__ruv-swarm__neural_patterns\` - Analyze thinking approaches
+
+### System Tools:
+- \`mcp__ruv-swarm__benchmark_run\` - Measure coordination efficiency
+- \`mcp__ruv-swarm__features_detect\` - Available capabilities
+- \`mcp__ruv-swarm__swarm_monitor\` - Real-time coordination tracking
+
+## Best Practices for Coordination
+
+### ✅ DO:
+- Use MCP tools to coordinate Claude Code's approach to complex tasks
+- Let the swarm break down problems into manageable pieces
+- Use memory tools to maintain context across sessions
+- Monitor coordination effectiveness with status tools
+- Train neural patterns for better coordination over time
+
+### ❌ DON'T:
+- Expect agents to write code (Claude Code does all implementation)
+- Use MCP tools for file operations (use Claude Code's native tools)
+- Try to make agents execute bash commands (Claude Code handles this)
+- Confuse coordination with execution (MCP coordinates, Claude executes)
+
+## Performance Benefits
+
+When using ruv-swarm coordination with Claude Code:
+- **84.8% SWE-Bench solve rate** - Better problem-solving through coordination
+- **32.3% token reduction** - Efficient task breakdown reduces redundancy
+- **2.8-4.4x speed improvement** - Parallel coordination strategies
+- **27+ neural models** - Diverse cognitive approaches
+
+## Support
+
+- Documentation: https://github.com/ruvnet/ruv-FANN/tree/main/ruv-swarm
+- Issues: https://github.com/ruvnet/ruv-FANN/issues
+- Examples: https://github.com/ruvnet/ruv-FANN/tree/main/ruv-swarm/examples
 
 ---
 
 Remember: **ruv-swarm coordinates, Claude Code creates!** Start with \`mcp__ruv-swarm__swarm_init\` to enhance your development workflow.`;
+    
+    return content;
   }
 
   /**
-     * Intelligently merge existing content with ruv-swarm content
+     * Append ruv-swarm content to the bottom of existing content
      */
   intelligentMerge(existingContent, ruvSwarmContent) {
     const lines = existingContent.split('\n');
     
-    // Look for existing ruv-swarm section
-    const ruvSwarmSectionIndex = lines.findIndex(line => 
-      line.includes('ruv-swarm') || 
-      line.includes('Claude Code Configuration for ruv-swarm') ||
-      line.includes('SWARM ORCHESTRATION')
-    );
-    
-    if (ruvSwarmSectionIndex !== -1) {
-      // Replace existing ruv-swarm section
-      const sectionEnd = this.findSectionEnd(lines, ruvSwarmSectionIndex);
-      lines.splice(ruvSwarmSectionIndex, sectionEnd - ruvSwarmSectionIndex, ruvSwarmContent);
-    } else {
-      // Add ruv-swarm section at end
-      if (lines[lines.length - 1].trim() !== '') {
-        lines.push(''); // Add blank line before new section
-      }
-      lines.push('---', '', ruvSwarmContent);
+    // Always append to the bottom - simpler and safer approach
+    // Add separators if the file doesn't end with empty lines
+    if (lines[lines.length - 1].trim() !== '') {
+      lines.push(''); // Add blank line before new section
     }
+    
+    // Add clear separator and ruv-swarm content
+    lines.push('---', '', ruvSwarmContent);
     
     return lines.join('\n');
   }
