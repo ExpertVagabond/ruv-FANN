@@ -17,13 +17,13 @@ class ClaudeDocsGenerator {
      * Generate main claude.md configuration file with protection
      */
   async generateClaudeMd(options = {}) {
-    const { force = false, merge = false, interactive = true } = options;
+    const { force = false, merge = false, backup = false, interactive = true } = options;
     
     // Check if CLAUDE.md already exists
     const filePath = path.join(this.workingDir, 'CLAUDE.md');
     const fileExists = await this.fileExists(filePath);
     
-    if (fileExists && !force && !merge) {
+    if (fileExists && !force && !merge && !backup) {
       if (interactive) {
         // Interactive prompt for action
         const action = await this.promptUserAction(filePath);
@@ -36,14 +36,25 @@ class ClaudeDocsGenerator {
         }
       } else {
         // Non-interactive mode - fail safely
-        throw new Error('CLAUDE.md already exists. Use --force to overwrite or --merge to combine.');
+        throw new Error('CLAUDE.md already exists. Use --force to overwrite, --backup to backup existing, or --merge to combine.');
       }
     } else if (fileExists && force) {
-      // Create backup before overwriting
+      // Force flag: overwrite without backup (unless backup flag is also set)
+      if (backup) {
+        await this.createBackup(filePath);
+        console.log('📄 Backing up existing CLAUDE.md before force overwrite');
+      } else {
+        console.log('⚠️  Force overwriting existing CLAUDE.md (no backup)');
+      }
+    } else if (fileExists && backup && !force && !merge) {
+      // Backup flag: create backup then overwrite
       await this.createBackup(filePath);
-      console.log('⚠️  Backing up existing CLAUDE.md before overwriting');
+      console.log('📄 Backing up existing CLAUDE.md before overwriting');
     } else if (fileExists && merge) {
-      // Merge with existing content
+      // Merge with existing content (backup first if backup flag is set)
+      if (backup) {
+        await this.createBackup(filePath);
+      }
       return await this.mergeClaudeMd(filePath);
     }
     const content = `# Claude Code Configuration for ruv-swarm
@@ -1401,21 +1412,84 @@ Remember: **ruv-swarm coordinates, Claude Code creates!** Start with \`mcp__ruv-
   }
 
   /**
-     * Append ruv-swarm content to the bottom of existing content
+     * Intelligently combine ruv-swarm content with existing content
      */
   intelligentMerge(existingContent, ruvSwarmContent) {
-    const lines = existingContent.split('\n');
+    const existingLines = existingContent.split('\n');
+    const newLines = ruvSwarmContent.split('\n');
     
-    // Always append to the bottom - simpler and safer approach
-    // Add separators if the file doesn't end with empty lines
-    if (lines[lines.length - 1].trim() !== '') {
-      lines.push(''); // Add blank line before new section
+    // Check if ruv-swarm content already exists
+    const ruvSwarmSectionIndex = this.findRuvSwarmSection(existingLines);
+    
+    if (ruvSwarmSectionIndex !== -1) {
+      // Replace existing ruv-swarm section
+      console.log('📝 Updating existing ruv-swarm section in CLAUDE.md');
+      const sectionEnd = this.findSectionEnd(existingLines, ruvSwarmSectionIndex);
+      
+      // Replace the section
+      const beforeSection = existingLines.slice(0, ruvSwarmSectionIndex);
+      const afterSection = existingLines.slice(sectionEnd);
+      
+      return [...beforeSection, ...newLines, '', ...afterSection].join('\n');
+    } else {
+      // Intelligently insert ruv-swarm content
+      console.log('📝 Integrating ruv-swarm configuration into existing CLAUDE.md');
+      return this.intelligentInsert(existingLines, newLines);
+    }
+  }
+  
+  /**
+     * Find existing ruv-swarm section in content
+     */
+  findRuvSwarmSection(lines) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].toLowerCase();
+      if (line.includes('ruv-swarm') && (line.startsWith('#') || line.includes('claude code configuration'))) {
+        return i;
+      }
+    }
+    return -1;
+  }
+  
+  /**
+     * Intelligently insert new content based on context
+     */
+  intelligentInsert(existingLines, newLines) {
+    // Look for appropriate insertion points
+    let insertIndex = -1;
+    
+    // 1. After main title but before first major section
+    for (let i = 0; i < existingLines.length; i++) {
+      if (existingLines[i].startsWith('# ') && i > 0) {
+        // Found first major heading after title
+        insertIndex = i;
+        break;
+      }
     }
     
-    // Add clear separator and ruv-swarm content
-    lines.push('---', '', ruvSwarmContent);
+    // 2. If no major headings, look for end of introductory content
+    if (insertIndex === -1) {
+      for (let i = 0; i < existingLines.length; i++) {
+        if (existingLines[i].startsWith('## ') && i > 5) {
+          insertIndex = i;
+          break;
+        }
+      }
+    }
     
-    return lines.join('\n');
+    // 3. Fallback: insert after first 10 lines or middle of file
+    if (insertIndex === -1) {
+      insertIndex = Math.min(10, Math.floor(existingLines.length / 2));
+    }
+    
+    // Insert the content with proper spacing
+    const beforeInsert = existingLines.slice(0, insertIndex);
+    const afterInsert = existingLines.slice(insertIndex);
+    
+    // Add spacing
+    const insertContent = ['', '---', '', ...newLines, '', '---', ''];
+    
+    return [...beforeInsert, ...insertContent, ...afterInsert].join('\n');
   }
 
   /**

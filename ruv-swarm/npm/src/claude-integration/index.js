@@ -13,6 +13,7 @@ class ClaudeIntegrationOrchestrator {
       autoSetup: options.autoSetup || false,
       forceSetup: options.forceSetup || false,
       mergeSetup: options.mergeSetup || false,
+      backupSetup: options.backupSetup || false,
       interactive: options.interactive !== false, // Default to true
       workingDir: options.workingDir || process.cwd(),
       packageName: options.packageName || 'ruv-swarm',
@@ -32,6 +33,8 @@ class ClaudeIntegrationOrchestrator {
     console.log('🚀 Setting up modular Claude Code integration...');
     console.log('   Working directory:', this.options.workingDir);
     console.log('   Force setup:', this.options.forceSetup);
+    console.log('   Backup setup:', this.options.backupSetup);
+    console.log('   Merge setup:', this.options.mergeSetup);
     console.log('   Auto setup MCP:', this.options.autoSetup);
 
     try {
@@ -47,6 +50,7 @@ class ClaudeIntegrationOrchestrator {
       results.modules.docs = await this.docs.generateAll({
         force: this.options.forceSetup,
         merge: this.options.mergeSetup,
+        backup: this.options.backupSetup,
         interactive: this.options.interactive
       });
 
