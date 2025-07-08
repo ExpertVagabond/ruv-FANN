@@ -260,7 +260,10 @@ fn test_resource_requirements_custom() {
     
     assert_eq!(resources.min_memory_mb, 1024);
     assert_eq!(resources.max_memory_mb, 4096);
-    assert_eq!(resources.cpu_cores, 2.0);
+    #[allow(clippy::float_cmp)]
+    {
+        assert_eq!(resources.cpu_cores, 2.0);
+    }
     assert!(resources.requires_gpu);
     assert_eq!(resources.network_bandwidth_mbps, 100);
 }
@@ -271,7 +274,10 @@ fn test_agent_metrics_default() {
     assert_eq!(metrics.tasks_processed, 0);
     assert_eq!(metrics.tasks_succeeded, 0);
     assert_eq!(metrics.tasks_failed, 0);
-    assert_eq!(metrics.avg_processing_time_ms, 0.0);
+    #[allow(clippy::float_cmp)]
+    {
+        assert_eq!(metrics.avg_processing_time_ms, 0.0);
+    }
     assert_eq!(metrics.queue_size, 0);
     #[cfg(feature = "std")]
     assert_eq!(metrics.uptime_seconds, 0);
@@ -292,10 +298,14 @@ fn test_agent_metrics_tracking() {
     assert_eq!(metrics.tasks_processed, 100);
     assert_eq!(metrics.tasks_succeeded, 95);
     assert_eq!(metrics.tasks_failed, 5);
-    assert_eq!(metrics.avg_processing_time_ms, 25.5);
+    #[allow(clippy::float_cmp)]
+    {
+        assert_eq!(metrics.avg_processing_time_ms, 25.5);
+    }
     assert_eq!(metrics.queue_size, 10);
     
     // Calculate success rate
+    #[allow(clippy::cast_precision_loss)]
     let success_rate = metrics.tasks_succeeded as f64 / metrics.tasks_processed as f64;
     assert!((success_rate - 0.95).abs() < 0.001);
 }
@@ -397,7 +407,10 @@ fn test_agent_config_creation() {
     
     let resources = config.resource_limits.unwrap();
     assert_eq!(resources.min_memory_mb, 256);
-    assert_eq!(resources.cpu_cores, 1.5);
+    #[allow(clippy::float_cmp)]
+    {
+        assert_eq!(resources.cpu_cores, 1.5);
+    }
 }
 
 #[tokio::test]
@@ -456,6 +469,9 @@ fn test_agent_metadata_complete() {
     assert_eq!(metadata.name, "AdvancedAgent");
     assert_eq!(metadata.version, "2.1.0");
     assert_eq!(metadata.cognitive_pattern, CognitivePattern::Systems);
-    assert_eq!(metadata.resources.cpu_cores, 2.0);
+    #[allow(clippy::float_cmp)]
+    {
+        assert_eq!(metadata.resources.cpu_cores, 2.0);
+    }
     assert_eq!(metadata.metrics.tasks_processed, 1000);
 }

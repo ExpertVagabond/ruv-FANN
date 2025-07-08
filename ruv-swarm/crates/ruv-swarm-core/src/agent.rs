@@ -497,6 +497,7 @@ impl MockAgent {
     /// # Errors
     /// 
     /// Currently does not return errors, but may in future implementations.
+    #[allow(clippy::unused_async)]
     pub async fn start(&mut self) -> crate::error::Result<()> {
         self.status = AgentStatus::Running;
         Ok(())
@@ -507,6 +508,7 @@ impl MockAgent {
     /// # Errors
     /// 
     /// Currently does not return errors, but may in future implementations.
+    #[allow(clippy::unused_async)]
     pub async fn shutdown(&mut self) -> crate::error::Result<()> {
         self.status = AgentStatus::Offline;
         Ok(())
@@ -517,6 +519,7 @@ impl MockAgent {
     /// # Errors
     /// 
     /// Returns the configured result if set via `with_process_result`, otherwise returns success.
+    #[allow(clippy::unused_async)]
     pub async fn process(&mut self, _task: crate::task::Task) -> crate::error::Result<crate::task::TaskResult> {
         if let Some(result) = &self.process_result {
             result.clone()
@@ -535,6 +538,7 @@ impl MockAgent {
     /// # Errors
     /// 
     /// Currently does not return errors, but may in future implementations.
+    #[allow(clippy::unused_async)]
     pub async fn health_check(&self) -> crate::error::Result<HealthStatus> {
         Ok(HealthStatus::Healthy)
     }

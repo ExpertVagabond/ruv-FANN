@@ -131,8 +131,10 @@ fn test_error_propagation_in_swarm() {
     use crate::swarm::{Swarm, SwarmConfig};
     use crate::agent::DynamicAgent;
     
-    let mut config = SwarmConfig::default();
-    config.max_agents = 1; // Very low limit
+    let config = SwarmConfig {
+        max_agents: 1, // Very low limit
+        ..Default::default()
+    };
     let mut swarm = Swarm::new(config);
     
     // Register first agent - should succeed
@@ -199,8 +201,10 @@ async fn test_async_swarm_error_handling() {
     use crate::async_swarm::{AsyncSwarm, AsyncSwarmConfig};
     use crate::agent::DynamicAgent;
     
-    let mut config = AsyncSwarmConfig::default();
-    config.max_agents = 2;
+    let config = AsyncSwarmConfig {
+        max_agents: 2,
+        ..Default::default()
+    };
     let swarm = AsyncSwarm::new(config);
     
     // Fill up the swarm
@@ -296,8 +300,10 @@ async fn test_concurrent_error_scenarios() {
     use crate::task::Task;
     use futures::future::join_all;
     
-    let mut config = AsyncSwarmConfig::default();
-    config.max_agents = 5;
+    let config = AsyncSwarmConfig {
+        max_agents: 5,
+        ..Default::default()
+    };
     let swarm = AsyncSwarm::new(config);
     
     // Register agents
@@ -360,8 +366,10 @@ fn test_boundary_conditions() {
     use crate::task::Task;
     
     // Test with zero max agents
-    let mut config = SwarmConfig::default();
-    config.max_agents = 0;
+    let config = SwarmConfig {
+        max_agents: 0,
+        ..Default::default()
+    };
     let mut swarm = Swarm::new(config);
     
     let agent = DynamicAgent::new("agent", vec!["compute".to_string()]);

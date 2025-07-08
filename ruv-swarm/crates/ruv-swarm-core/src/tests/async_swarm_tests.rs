@@ -12,10 +12,12 @@ use crate::topology::*;
 #[cfg(feature = "std")]
 #[tokio::test]
 async fn test_async_swarm_config_creation() {
-    let mut config = AsyncSwarmConfig::default();
-    config.max_agents = 10;
-    config.topology_type = TopologyType::Mesh;
-    config.max_concurrent_tasks_per_agent = 5;
+    let config = AsyncSwarmConfig {
+        max_agents: 10,
+        topology_type: TopologyType::Mesh,
+        max_concurrent_tasks_per_agent: 5,
+        ..Default::default()
+    };
     
     assert_eq!(config.max_agents, 10);
     assert_eq!(config.topology_type, TopologyType::Mesh);
@@ -25,9 +27,11 @@ async fn test_async_swarm_config_creation() {
 #[cfg(feature = "std")]
 #[tokio::test]
 async fn test_async_swarm_creation() {
-    let mut config = AsyncSwarmConfig::default();
-    config.max_agents = 5;
-    config.topology_type = TopologyType::Star;
+    let config = AsyncSwarmConfig {
+        max_agents: 5,
+        topology_type: TopologyType::Star,
+        ..Default::default()
+    };
     
     let swarm = AsyncSwarm::new(config);
     
@@ -48,7 +52,10 @@ async fn test_async_swarm_metrics() {
     assert_eq!(metrics.total_agents, 0);
     assert_eq!(metrics.queued_tasks, 0);
     assert_eq!(metrics.assigned_tasks, 0);
-    assert_eq!(metrics.avg_agent_load, 0.0);
+    #[allow(clippy::float_cmp)]
+    {
+        assert_eq!(metrics.avg_agent_load, 0.0);
+    }
 }
 
 #[cfg(feature = "std")]
@@ -173,8 +180,10 @@ async fn test_async_swarm_agent_status() {
 #[cfg(feature = "std")]
 #[tokio::test]
 async fn test_async_swarm_health_monitoring() {
-    let mut config = AsyncSwarmConfig::default();
-    config.health_check_interval_ms = 50; // Fast interval for testing
+    let config = AsyncSwarmConfig {
+        health_check_interval_ms: 50, // Fast interval for testing
+        ..Default::default()
+    };
     
     let mut swarm = AsyncSwarm::new(config);
     
@@ -200,8 +209,10 @@ async fn test_async_swarm_health_monitoring() {
 #[cfg(feature = "std")]
 #[tokio::test]
 async fn test_async_swarm_concurrent_task_processing() {
-    let mut config = AsyncSwarmConfig::default();
-    config.task_timeout_ms = 100;
+    let config = AsyncSwarmConfig {
+        task_timeout_ms: 100,
+        ..Default::default()
+    };
     
     let swarm = AsyncSwarm::new(config);
     
@@ -231,8 +242,10 @@ async fn test_async_swarm_concurrent_task_processing() {
 #[cfg(feature = "std")]
 #[tokio::test]
 async fn test_async_swarm_error_scenarios() {
-    let mut config = AsyncSwarmConfig::default();
-    config.max_agents = 2;
+    let config = AsyncSwarmConfig {
+        max_agents: 2,
+        ..Default::default()
+    };
     
     let swarm = AsyncSwarm::new(config);
     
@@ -273,8 +286,10 @@ async fn test_async_swarm_distribution_strategies() {
     // Test different distribution strategies
     
     // Test 1: LeastLoaded strategy
-    let mut config = AsyncSwarmConfig::default();
-    config.distribution_strategy = DistributionStrategy::LeastLoaded;
+    let config = AsyncSwarmConfig {
+        distribution_strategy: DistributionStrategy::LeastLoaded,
+        ..Default::default()
+    };
     
     let swarm = AsyncSwarm::new(config);
     
@@ -297,8 +312,10 @@ async fn test_async_swarm_distribution_strategies() {
     assert_eq!(assignments.len(), 4);
     
     // Test 2: Random strategy
-    let mut config = AsyncSwarmConfig::default();
-    config.distribution_strategy = DistributionStrategy::Random;
+    let config = AsyncSwarmConfig {
+        distribution_strategy: DistributionStrategy::Random,
+        ..Default::default()
+    };
     
     let random_swarm = AsyncSwarm::new(config);
     
@@ -323,8 +340,10 @@ async fn test_async_swarm_distribution_strategies() {
 #[tokio::test]
 async fn test_async_swarm_topology_connections() {
     // Test Mesh topology
-    let mut config = AsyncSwarmConfig::default();
-    config.topology_type = TopologyType::Mesh;
+    let config = AsyncSwarmConfig {
+        topology_type: TopologyType::Mesh,
+        ..Default::default()
+    };
     
     let mesh_swarm = AsyncSwarm::new(config);
     
@@ -341,8 +360,10 @@ async fn test_async_swarm_topology_connections() {
     assert!(metrics.total_connections > 0);
     
     // Test Star topology
-    let mut config = AsyncSwarmConfig::default();
-    config.topology_type = TopologyType::Star;
+    let config = AsyncSwarmConfig {
+        topology_type: TopologyType::Star,
+        ..Default::default()
+    };
     
     let star_swarm = AsyncSwarm::new(config);
     
@@ -396,7 +417,10 @@ async fn test_async_swarm_metrics_accuracy() {
     assert_eq!(metrics.active_agents, 0);
     assert_eq!(metrics.queued_tasks, 0);
     assert_eq!(metrics.assigned_tasks, 0);
-    assert_eq!(metrics.avg_agent_load, 0.0);
+    #[allow(clippy::float_cmp)]
+    {
+        assert_eq!(metrics.avg_agent_load, 0.0);
+    }
     
     // Add agents and tasks
     let agent1 = DynamicAgent::new("agent-1".to_string(), vec!["compute".to_string()]);
@@ -434,9 +458,11 @@ async fn test_async_swarm_metrics_accuracy() {
 #[cfg(feature = "std")]
 #[tokio::test]
 async fn test_async_swarm_auto_scaling_config() {
-    let mut config = AsyncSwarmConfig::default();
-    config.enable_auto_scaling = true;
-    config.max_agents = 10;
+    let config = AsyncSwarmConfig {
+        enable_auto_scaling: true,
+        max_agents: 10,
+        ..Default::default()
+    };
     
     let swarm = AsyncSwarm::new(config);
     
@@ -454,8 +480,10 @@ async fn test_async_swarm_auto_scaling_config() {
 #[cfg(feature = "std")]
 #[tokio::test]
 async fn test_async_swarm_task_timeout() {
-    let mut config = AsyncSwarmConfig::default();
-    config.task_timeout_ms = 50; // Very short timeout
+    let config = AsyncSwarmConfig {
+        task_timeout_ms: 50, // Very short timeout
+        ..Default::default()
+    };
     
     let swarm = AsyncSwarm::new(config);
     

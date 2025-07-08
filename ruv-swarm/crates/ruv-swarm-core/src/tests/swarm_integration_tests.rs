@@ -38,9 +38,11 @@ fn test_custom_error() {
 // Integration test: Complete swarm workflow
 #[test]
 fn test_swarm_complete_workflow() {
-    let mut config = SwarmConfig::default();
-    config.topology_type = TopologyType::Mesh;
-    config.distribution_strategy = DistributionStrategy::LeastLoaded;
+    let config = SwarmConfig {
+        topology_type: TopologyType::Mesh,
+        distribution_strategy: DistributionStrategy::LeastLoaded,
+        ..Default::default()
+    };
     let mut swarm = Swarm::new(config);
     
     // Step 1: Register agents with different capabilities
@@ -293,8 +295,10 @@ fn test_swarm_error_recovery() {
 // Test dynamic topology changes
 #[test]
 fn test_dynamic_topology_changes() {
-    let mut config = SwarmConfig::default();
-    config.topology_type = TopologyType::Mesh;
+    let config = SwarmConfig {
+        topology_type: TopologyType::Mesh,
+        ..Default::default()
+    };
     let mut swarm = Swarm::new(config);
     
     // Start with 2 agents
@@ -321,8 +325,10 @@ fn test_dynamic_topology_changes() {
 // Test load balancing fairness
 #[test]
 fn test_load_balancing_fairness() {
-    let mut config = SwarmConfig::default();
-    config.distribution_strategy = DistributionStrategy::LeastLoaded;
+    let config = SwarmConfig {
+        distribution_strategy: DistributionStrategy::LeastLoaded,
+        ..Default::default()
+    };
     let mut swarm = Swarm::new(config);
     
     // Register 3 identical agents
