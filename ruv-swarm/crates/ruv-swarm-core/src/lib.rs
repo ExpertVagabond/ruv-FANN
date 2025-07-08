@@ -59,16 +59,62 @@ pub mod swarm;
 pub mod task;
 pub mod topology;
 
+// Async modules
+#[cfg(feature = "std")]
+pub mod async_swarm;
+pub mod swarm_trait;
+
+#[cfg(test)]
+mod tests {
+    //! Integration tests for the core module
+    use super::*;
+    
+    #[test]
+    fn test_version_info() {
+        assert!(!VERSION.is_empty());
+        assert_eq!(VERSION, env!("CARGO_PKG_VERSION"));
+    }
+    
+    #[test]
+    fn test_metadata() {
+        assert_eq!(Metadata::name(), "ruv-swarm-core");
+        assert_eq!(Metadata::version(), VERSION);
+        assert!(!Metadata::description().is_empty());
+    }
+    
+    // Include meaningful test modules
+    mod agent_tests;
+    mod task_tests;
+    mod topology_tests;
+    mod swarm_tests;
+    mod async_swarm_tests;
+    mod error_handling_tests;
+    mod swarm_integration_tests;
+}
+
 // Re-export commonly used types
 pub use agent::{
     Agent, AgentMessage, AgentMetadata, AgentMetrics, BoxedAgent, CognitivePattern, ErasedAgent,
-    HealthStatus, MessageType, ResourceRequirements,
+    HealthStatus, MessageType, ResourceRequirements, Capability,
 };
+
+#[cfg(test)]
+pub use agent::MockAgent;
 
 pub use error::{Result, SwarmError};
 
 #[cfg(feature = "std")]
 pub use swarm::{Swarm, SwarmConfig, SwarmMetrics};
+
+#[cfg(feature = "std")]
+pub use async_swarm::{AsyncSwarm, AsyncSwarmConfig, AsyncSwarmMetrics, AsyncSwarmTrait};
+
+pub use swarm_trait::{
+    SwarmSync, SwarmAsync, SwarmMixed, SwarmOrchestrator, SwarmFactory, SwarmBuilder,
+    SwarmLifecycle, SwarmLifecycleState, SwarmMonitoring, SwarmHealthStatus,
+    SwarmPerformanceMetrics, SwarmErrorStatistics, ErrorTrend, SwarmConfigSummary,
+    SwarmMetricsCore,
+};
 
 pub use topology::{Topology, TopologyType};
 
@@ -82,6 +128,9 @@ pub mod prelude {
     pub use crate::error::Result;
     #[cfg(feature = "std")]
     pub use crate::swarm::{Swarm, SwarmConfig};
+    #[cfg(feature = "std")]
+    pub use crate::async_swarm::{AsyncSwarm, AsyncSwarmConfig, AsyncSwarmTrait};
+    pub use crate::swarm_trait::{SwarmSync, SwarmAsync, SwarmOrchestrator};
     pub use crate::task::{Task, TaskId, TaskPriority as Priority};
 }
 

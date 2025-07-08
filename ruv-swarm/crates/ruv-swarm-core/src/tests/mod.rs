@@ -1,6 +1,17 @@
 //! Unit tests for swarm core
+//! 
+//! This module contains meaningful tests for the core functionality of the swarm system.
+//! Tests focus on critical paths and core behaviors rather than edge cases.
 
-pub mod agent_tests;
-pub mod swarm_tests;
-pub mod task_tests;
-pub mod topology_tests;
+// Core unit tests for each module
+mod agent_tests;
+mod task_tests;
+mod topology_tests;
+mod error_handling_tests;
+
+// Swarm tests
+mod swarm_tests;
+mod async_swarm_tests;
+
+// Integration tests
+mod swarm_integration_tests;

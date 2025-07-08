@@ -67,6 +67,10 @@ impl Swarm {
     }
 
     /// Register an agent with the swarm
+    /// 
+    /// # Errors
+    /// 
+    /// Returns an error if the maximum number of agents has been reached.
     pub fn register_agent(&mut self, agent: DynamicAgent) -> Result<()> {
         if self.agents.len() >= self.config.max_agents {
             return Err(SwarmError::ResourceExhausted {
@@ -105,6 +109,10 @@ impl Swarm {
     }
 
     /// Remove an agent from the swarm
+    /// 
+    /// # Errors
+    /// 
+    /// Returns an error if the agent is not found in the swarm.
     pub fn unregister_agent(&mut self, agent_id: &AgentId) -> Result<()> {
         self.agents
             .remove(agent_id)
@@ -126,13 +134,21 @@ impl Swarm {
     }
 
     /// Submit a task to the swarm
+    /// 
+    /// # Errors
+    /// 
+    /// Currently does not return errors, but may in future implementations.
     pub fn submit_task(&mut self, task: Task) -> Result<()> {
         self.task_queue.push(task);
         Ok(())
     }
 
     /// Assign tasks to agents based on distribution strategy
-    pub async fn distribute_tasks(&mut self) -> Result<Vec<(TaskId, AgentId)>> {
+    /// 
+    /// # Errors
+    /// 
+    /// Returns an error if task assignment fails.
+    pub fn distribute_tasks(&mut self) -> Result<Vec<(TaskId, AgentId)>> {
         let mut assignments = Vec::new();
         let mut tasks_to_assign = Vec::new();
 
@@ -142,7 +158,7 @@ impl Swarm {
         }
 
         for task in tasks_to_assign {
-            if let Some(agent_id) = self.select_agent_for_task(&task)? {
+            if let Some(agent_id) = self.select_agent_for_task(&task) {
                 let task_id = task.id.clone();
 
                 // Assign task to agent
@@ -167,7 +183,7 @@ impl Swarm {
     }
 
     /// Select an agent for a task based on distribution strategy
-    fn select_agent_for_task(&self, task: &Task) -> Result<Option<AgentId>> {
+    fn select_agent_for_task(&self, task: &Task) -> Option<AgentId> {
         let available_agents: Vec<&AgentId> = self
             .agents
             .iter()
@@ -176,7 +192,7 @@ impl Swarm {
             .collect();
 
         if available_agents.is_empty() {
-            return Ok(None);
+            return None;
         }
 
         let selected = match self.config.distribution_strategy {
@@ -205,7 +221,7 @@ impl Swarm {
             }
         };
 
-        Ok(selected.cloned())
+        selected.cloned()
     }
 
     /// Get the status of all agents
@@ -237,9 +253,13 @@ impl Swarm {
     }
 
     /// Start all agents
-    pub async fn start_all_agents(&mut self) -> Result<()> {
+    /// 
+    /// # Errors
+    /// 
+    /// Returns an error if any agent fails to start.
+    pub fn start_all_agents(&mut self) -> Result<()> {
         for (id, agent) in &mut self.agents {
-            agent.start().await.map_err(|e| {
+            agent.start().map_err(|e| {
                 SwarmError::Custom(format!("Failed to start agent {id}: {e:?}"))
             })?;
         }
@@ -247,9 +267,13 @@ impl Swarm {
     }
 
     /// Shutdown all agents
-    pub async fn shutdown_all_agents(&mut self) -> Result<()> {
+    /// 
+    /// # Errors
+    /// 
+    /// Returns an error if any agent fails to shutdown.
+    pub fn shutdown_all_agents(&mut self) -> Result<()> {
         for (id, agent) in &mut self.agents {
-            agent.shutdown().await.map_err(|e| {
+            agent.shutdown().map_err(|e| {
                 SwarmError::Custom(format!("Failed to shutdown agent {id}: {e:?}"))
             })?;
         }
