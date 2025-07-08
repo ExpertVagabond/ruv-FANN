@@ -126,16 +126,16 @@ impl SwarmAsync for MockSwarmAsync {
             return Ok(assignments);
         }
         
-        let mut agent_idx = 0;
+        let mut next_agent = 0;
         while let Some(task) = tasks.pop() {
             let task_id = task.id.clone();
-            let agent_id = &agent_ids[agent_idx % agent_ids.len()];
+            let agent_id = &agent_ids[next_agent % agent_ids.len()];
             
             // Check if agent can handle task
             if let Some(agent) = agents.get(agent_id) {
                 if agent.can_handle(&task) {
                     assignments.push((task_id, agent_id.clone()));
-                    agent_idx += 1;
+                    next_agent += 1;
                 } else {
                     // Put task back if no agent can handle it
                     tasks.push(task);
@@ -250,6 +250,7 @@ impl SwarmMonitoring for MockSwarmMonitoring {
     fn error_statistics(&self) -> SwarmErrorStatistics {
         SwarmErrorStatistics {
             total_errors: self.error_count,
+            #[allow(clippy::cast_precision_loss)]
             error_rate: self.error_count as f64 / 100.0,
             common_errors: vec![
                 ("Timeout".to_string(), self.error_count / 2),
@@ -296,7 +297,7 @@ fn test_swarm_sync_max_agents() {
     
     // Fill up to max agents (10)
     for i in 0..10 {
-        let agent = DynamicAgent::new(format!("agent-{}", i), vec!["compute".to_string()]);
+        let agent = DynamicAgent::new(format!("agent-{i}"), vec!["compute".to_string()]);
         assert!(swarm.register_agent(agent).is_ok());
     }
     
@@ -355,7 +356,7 @@ async fn test_swarm_async_lifecycle() {
     
     // Register multiple agents
     for i in 0..3 {
-        let agent = DynamicAgent::new(format!("agent-{}", i), vec!["compute".to_string()]);
+        let agent = DynamicAgent::new(format!("agent-{i}"), vec!["compute".to_string()]);
         swarm.register_agent(agent).await.unwrap();
     }
     
@@ -403,8 +404,8 @@ fn test_swarm_orchestrator_trait() {
     
     // Add some agents
     for i in 0..5 {
-        let agent = DynamicAgent::new(format!("agent-{}", i), vec!["compute".to_string()]);
-        orchestrator.agents.insert(format!("agent-{}", i), agent);
+        let agent = DynamicAgent::new(format!("agent-{i}"), vec!["compute".to_string()]);
+        orchestrator.agents.insert(format!("agent-{i}"), agent);
     }
     
     // Test metrics
@@ -423,6 +424,7 @@ fn test_swarm_orchestrator_trait() {
 
 // Tests for SwarmMonitoring trait
 #[test]
+#[allow(clippy::float_cmp)]
 fn test_swarm_monitoring_trait() {
     let monitor = MockSwarmMonitoring {
         error_count: 0,
@@ -446,6 +448,7 @@ fn test_swarm_monitoring_trait() {
 }
 
 #[test]
+#[allow(clippy::float_cmp)]
 fn test_swarm_monitoring_with_errors() {
     let monitor = MockSwarmMonitoring {
         error_count: 20,
@@ -468,7 +471,7 @@ fn test_swarm_monitoring_with_errors() {
 // Tests for SwarmLifecycleState
 #[test]
 fn test_swarm_lifecycle_states() {
-    let states = vec![
+    let states = [
         SwarmLifecycleState::Uninitialized,
         SwarmLifecycleState::Initialized,
         SwarmLifecycleState::Running,
@@ -533,6 +536,7 @@ fn test_swarm_config_summary() {
 
 // Test SwarmHealthStatus
 #[test]
+#[allow(clippy::float_cmp)]
 fn test_swarm_health_status() {
     let health = SwarmHealthStatus {
         health_score: 0.85,
@@ -549,6 +553,7 @@ fn test_swarm_health_status() {
 
 // Test SwarmPerformanceMetrics
 #[test]
+#[allow(clippy::float_cmp)]
 fn test_swarm_performance_metrics() {
     let perf = SwarmPerformanceMetrics {
         avg_task_completion_ms: 150.0,
@@ -565,6 +570,7 @@ fn test_swarm_performance_metrics() {
 
 // Test SwarmErrorStatistics
 #[test]
+#[allow(clippy::float_cmp)]
 fn test_swarm_error_statistics() {
     let errors = SwarmErrorStatistics {
         total_errors: 42,

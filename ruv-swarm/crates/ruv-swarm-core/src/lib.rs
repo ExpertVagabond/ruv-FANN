@@ -65,31 +65,7 @@ pub mod async_swarm;
 pub mod swarm_trait;
 
 #[cfg(test)]
-mod tests {
-    //! Integration tests for the core module
-    use super::*;
-    
-    #[test]
-    fn test_version_info() {
-        assert_eq!(VERSION, env!("CARGO_PKG_VERSION"));
-    }
-    
-    #[test]
-    fn test_metadata() {
-        assert_eq!(Metadata::name(), "ruv-swarm-core");
-        assert_eq!(Metadata::version(), VERSION);
-        assert!(!Metadata::description().is_empty());
-    }
-    
-    // Include meaningful test modules
-    mod agent_tests;
-    mod task_tests;
-    mod topology_tests;
-    mod swarm_tests;
-    mod async_swarm_tests;
-    mod error_handling_tests;
-    mod swarm_integration_tests;
-}
+mod tests;
 
 // Re-export commonly used types
 pub use agent::{
