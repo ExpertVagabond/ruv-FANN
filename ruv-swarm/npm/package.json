@@ -69,6 +69,7 @@
     "examples:swarm": "node examples/mcp-workflows.js swarm",
     "examples:daa": "node ../examples/daa-service-demo.js",
     "test:daa": "node test/daa-service.test.js",
+    "benchmark:wasm": "node test/benchmarks/benchmark-neural-models.js",
     "build": "node scripts/build.js",
     "build:wasm": "cd ../crates/ruv-swarm-wasm && wasm-pack build --target web --out-dir ../../npm/wasm -- --no-default-features",
     "build:wasm-simd": "cd ../crates/ruv-swarm-wasm && RUSTFLAGS=\"-C target-feature=+simd128\" wasm-pack build --target web --out-dir ../../npm/wasm-simd -- --no-default-features",
