@@ -457,12 +457,14 @@ impl MockAgent {
     }
 
     /// Set capabilities for the mock agent
+    #[must_use]
     pub fn with_capabilities(mut self, capabilities: Vec<Capability>) -> Self {
         self.capabilities = capabilities;
         self
     }
 
     /// Set the process result for the mock agent
+    #[must_use]
     pub fn with_process_result(mut self, result: crate::error::Result<crate::task::TaskResult>) -> Self {
         self.process_result = Some(result);
         self
@@ -491,18 +493,30 @@ impl MockAgent {
     }
 
     /// Start the agent
+    /// 
+    /// # Errors
+    /// 
+    /// Currently does not return errors, but may in future implementations.
     pub async fn start(&mut self) -> crate::error::Result<()> {
         self.status = AgentStatus::Running;
         Ok(())
     }
 
     /// Shutdown the agent
+    /// 
+    /// # Errors
+    /// 
+    /// Currently does not return errors, but may in future implementations.
     pub async fn shutdown(&mut self) -> crate::error::Result<()> {
         self.status = AgentStatus::Offline;
         Ok(())
     }
 
     /// Process a task
+    /// 
+    /// # Errors
+    /// 
+    /// Returns the configured result if set via `with_process_result`, otherwise returns success.
     pub async fn process(&mut self, _task: crate::task::Task) -> crate::error::Result<crate::task::TaskResult> {
         if let Some(result) = &self.process_result {
             result.clone()
@@ -514,6 +528,20 @@ impl MockAgent {
     /// Get agent metrics
     pub fn metrics(&self) -> AgentMetrics {
         AgentMetrics::default()
+    }
+    
+    /// Health check for the agent
+    /// 
+    /// # Errors
+    /// 
+    /// Currently does not return errors, but may in future implementations.
+    pub async fn health_check(&self) -> crate::error::Result<HealthStatus> {
+        Ok(HealthStatus::Healthy)
+    }
+    
+    /// Get agent metadata
+    pub fn metadata(&self) -> AgentMetadata {
+        AgentMetadata::default()
     }
 }
 

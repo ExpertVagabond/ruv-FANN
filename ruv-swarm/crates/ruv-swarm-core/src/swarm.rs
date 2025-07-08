@@ -51,6 +51,8 @@ pub struct Swarm {
     task_queue: Vec<Task>,
     task_assignments: HashMap<TaskId, AgentId>,
     agent_loads: HashMap<AgentId, usize>,
+    /// Coordinator agent ID for star topology
+    star_coordinator: Option<AgentId>,
 }
 
 impl Swarm {
@@ -63,6 +65,7 @@ impl Swarm {
             task_queue: Vec::new(),
             task_assignments: HashMap::new(),
             agent_loads: HashMap::new(),
+            star_coordinator: None,
         }
     }
 
@@ -94,9 +97,12 @@ impl Swarm {
                 }
             }
             TopologyType::Star => {
-                // Connect to the first agent (coordinator)
-                if let Some(coordinator) = self.agents.keys().next() {
-                    if coordinator != &agent_id {
+                // First agent becomes the coordinator
+                if self.star_coordinator.is_none() {
+                    self.star_coordinator = Some(agent_id.clone());
+                } else {
+                    // Connect new agent to the coordinator
+                    if let Some(coordinator) = &self.star_coordinator {
                         self.topology
                             .add_connection(agent_id.clone(), coordinator.clone());
                     }
@@ -127,6 +133,25 @@ impl Swarm {
         if let Some(neighbors) = neighbors {
             for neighbor in neighbors {
                 self.topology.remove_connection(agent_id, &neighbor);
+            }
+        }
+
+        // Handle star topology coordinator removal
+        if self.config.topology_type == TopologyType::Star {
+            if let Some(ref coordinator) = self.star_coordinator {
+                if coordinator == agent_id {
+                    // If coordinator is removed, elect a new one and reconnect all agents
+                    self.star_coordinator = self.agents.keys().next().cloned();
+                    
+                    if let Some(new_coordinator) = &self.star_coordinator {
+                        // Reconnect all agents to the new coordinator
+                        for agent in self.agents.keys() {
+                            if agent != new_coordinator {
+                                self.topology.add_connection(agent.clone(), new_coordinator.clone());
+                            }
+                        }
+                    }
+                }
             }
         }
 

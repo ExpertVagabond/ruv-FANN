@@ -297,5 +297,9 @@ pub trait SwarmTesting {
     fn submit_test_task(&mut self, task_id: &str);
     
     /// Verify swarm state for testing
+    /// 
+    /// # Errors
+    /// 
+    /// Returns error if swarm state is invalid or verification fails.
     fn verify_state(&self) -> Result<()>;
 }

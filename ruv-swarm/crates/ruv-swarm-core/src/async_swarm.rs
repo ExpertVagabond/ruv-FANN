@@ -67,6 +67,8 @@ pub struct AsyncSwarm {
     task_assignments: Arc<RwLock<HashMap<TaskId, AgentId>>>,
     agent_loads: Arc<RwLock<HashMap<AgentId, usize>>>,
     health_check_handle: Option<tokio::task::JoinHandle<()>>,
+    /// Coordinator agent ID for star topology
+    star_coordinator: Arc<RwLock<Option<AgentId>>>,
 }
 
 #[cfg(feature = "std")]
@@ -81,6 +83,7 @@ impl AsyncSwarm {
             task_assignments: Arc::new(RwLock::new(HashMap::new())),
             agent_loads: Arc::new(RwLock::new(HashMap::new())),
             health_check_handle: None,
+            star_coordinator: Arc::new(RwLock::new(None)),
         }
     }
 
@@ -118,9 +121,13 @@ impl AsyncSwarm {
                 }
             }
             TopologyType::Star => {
-                // Connect to the first agent (coordinator)
-                if let Some(coordinator) = agents.keys().next() {
-                    if coordinator != &agent_id {
+                // First agent becomes the coordinator
+                let mut star_coordinator = self.star_coordinator.write().await;
+                if star_coordinator.is_none() {
+                    *star_coordinator = Some(agent_id.clone());
+                } else {
+                    // Connect new agent to the coordinator
+                    if let Some(coordinator) = star_coordinator.as_ref() {
                         topology.add_connection(agent_id.clone(), coordinator.clone());
                     }
                 }
@@ -156,6 +163,26 @@ impl AsyncSwarm {
         if let Some(neighbors) = neighbors {
             for neighbor in neighbors {
                 topology.remove_connection(agent_id, &neighbor);
+            }
+        }
+        
+        // Handle star topology coordinator removal
+        if self.config.topology_type == TopologyType::Star {
+            let mut star_coordinator = self.star_coordinator.write().await;
+            if let Some(ref coordinator) = *star_coordinator {
+                if coordinator == agent_id {
+                    // If coordinator is removed, elect a new one and reconnect all agents
+                    *star_coordinator = agents.keys().next().cloned();
+                    
+                    if let Some(new_coordinator) = star_coordinator.as_ref() {
+                        // Reconnect all agents to the new coordinator
+                        for agent in agents.keys() {
+                            if agent != new_coordinator {
+                                topology.add_connection(agent.clone(), new_coordinator.clone());
+                            }
+                        }
+                    }
+                }
             }
         }
 

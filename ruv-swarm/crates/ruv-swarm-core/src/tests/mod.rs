@@ -12,6 +12,7 @@ mod error_handling_tests;
 // Swarm tests
 mod swarm_tests;
 mod async_swarm_tests;
+mod swarm_trait_tests;
 
 // Integration tests
 mod swarm_integration_tests;
