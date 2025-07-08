@@ -173,7 +173,8 @@ impl Swarm {
     /// # Errors
     /// 
     /// Returns an error if task assignment fails.
-    pub fn distribute_tasks(&mut self) -> Result<Vec<(TaskId, AgentId)>> {
+    #[allow(clippy::unused_async)]
+    pub async fn distribute_tasks(&mut self) -> Result<Vec<(TaskId, AgentId)>> {
         let mut assignments = Vec::new();
         let mut tasks_to_assign = Vec::new();
 
@@ -282,9 +283,9 @@ impl Swarm {
     /// # Errors
     /// 
     /// Returns an error if any agent fails to start.
-    pub fn start_all_agents(&mut self) -> Result<()> {
+    pub async fn start_all_agents(&mut self) -> Result<()> {
         for (id, agent) in &mut self.agents {
-            agent.start().map_err(|e| {
+            agent.start().await.map_err(|e| {
                 SwarmError::Custom(format!("Failed to start agent {id}: {e:?}"))
             })?;
         }
@@ -296,9 +297,9 @@ impl Swarm {
     /// # Errors
     /// 
     /// Returns an error if any agent fails to shutdown.
-    pub fn shutdown_all_agents(&mut self) -> Result<()> {
+    pub async fn shutdown_all_agents(&mut self) -> Result<()> {
         for (id, agent) in &mut self.agents {
-            agent.shutdown().map_err(|e| {
+            agent.shutdown().await.map_err(|e| {
                 SwarmError::Custom(format!("Failed to shutdown agent {id}: {e:?}"))
             })?;
         }

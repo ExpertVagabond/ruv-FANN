@@ -132,8 +132,8 @@ fn test_task_submission() {
     assert_eq!(swarm.task_queue_size(), 2);
 }
 
-#[test]
-fn test_task_distribution_no_agents() {
+#[tokio::test]
+async fn test_task_distribution_no_agents() {
     let mut swarm = Swarm::new(SwarmConfig::default());
     
     // Submit task with no agents
@@ -141,15 +141,15 @@ fn test_task_distribution_no_agents() {
     swarm.submit_task(task).unwrap();
     
     // Distribution should return empty
-    let assignments = swarm.distribute_tasks().unwrap();
+    let assignments = swarm.distribute_tasks().await.unwrap();
     assert_eq!(assignments.len(), 0);
     
     // Task should remain in queue
     assert_eq!(swarm.task_queue_size(), 1);
 }
 
-#[test]
-fn test_task_distribution_basic() {
+#[tokio::test]
+async fn test_task_distribution_basic() {
     let mut swarm = Swarm::new(SwarmConfig::default());
     
     // Register agent
@@ -162,7 +162,7 @@ fn test_task_distribution_basic() {
     swarm.submit_task(task).unwrap();
     
     // Distribute tasks
-    let assignments = swarm.distribute_tasks().unwrap();
+    let assignments = swarm.distribute_tasks().await.unwrap();
     assert_eq!(assignments.len(), 1);
     assert_eq!(assignments[0].0.to_string(), "task-1");
     assert_eq!(assignments[0].1, "agent-1");
@@ -172,8 +172,8 @@ fn test_task_distribution_basic() {
     assert_eq!(swarm.assigned_tasks_count(), 1);
 }
 
-#[test]
-fn test_task_distribution_capability_mismatch() {
+#[tokio::test]
+async fn test_task_distribution_capability_mismatch() {
     let mut swarm = Swarm::new(SwarmConfig::default());
     
     // Register agent with different capability
@@ -186,15 +186,15 @@ fn test_task_distribution_capability_mismatch() {
     swarm.submit_task(task).unwrap();
     
     // Distribution should fail to assign
-    let assignments = swarm.distribute_tasks().unwrap();
+    let assignments = swarm.distribute_tasks().await.unwrap();
     assert_eq!(assignments.len(), 0);
     
     // Task should remain in queue
     assert_eq!(swarm.task_queue_size(), 1);
 }
 
-#[test]
-fn test_distribution_strategy_least_loaded() {
+#[tokio::test]
+async fn test_distribution_strategy_least_loaded() {
     let config = SwarmConfig {
         distribution_strategy: DistributionStrategy::LeastLoaded,
         ..Default::default()
@@ -215,7 +215,7 @@ fn test_distribution_strategy_least_loaded() {
     }
     
     // Distribute tasks
-    let assignments = swarm.distribute_tasks().unwrap();
+    let assignments = swarm.distribute_tasks().await.unwrap();
     assert_eq!(assignments.len(), 6);
     
     // Each agent should get 2 tasks (balanced load)
@@ -330,8 +330,8 @@ fn test_agent_status_tracking() {
     assert_eq!(metrics.active_agents, 1);
 }
 
-#[test]
-fn test_agent_lifecycle_management() {
+#[tokio::test]
+async fn test_agent_lifecycle_management() {
     let mut swarm = Swarm::new(SwarmConfig::default());
     
     // Register multiple agents
@@ -341,7 +341,7 @@ fn test_agent_lifecycle_management() {
     }
     
     // Start all agents
-    assert!(swarm.start_all_agents().is_ok());
+    assert!(swarm.start_all_agents().await.is_ok());
     
     // Verify all are running
     let statuses = swarm.agent_statuses();
@@ -350,7 +350,7 @@ fn test_agent_lifecycle_management() {
     }
     
     // Shutdown all agents
-    assert!(swarm.shutdown_all_agents().is_ok());
+    assert!(swarm.shutdown_all_agents().await.is_ok());
     
     // Verify all are offline
     let statuses = swarm.agent_statuses();
@@ -376,8 +376,8 @@ fn test_get_agent_mut() {
     assert_eq!(statuses.get("agent-1"), Some(&AgentStatus::Busy));
 }
 
-#[test]
-fn test_task_distribution_with_busy_agents() {
+#[tokio::test]
+async fn test_task_distribution_with_busy_agents() {
     let mut swarm = Swarm::new(SwarmConfig::default());
     
     // Register agents with different statuses
@@ -395,13 +395,13 @@ fn test_task_distribution_with_busy_agents() {
     swarm.submit_task(task).unwrap();
     
     // Only running agent should get the task
-    let assignments = swarm.distribute_tasks().unwrap();
+    let assignments = swarm.distribute_tasks().await.unwrap();
     assert_eq!(assignments.len(), 1);
     assert_eq!(assignments[0].1, "running-agent");
 }
 
-#[test]
-fn test_agent_load_tracking() {
+#[tokio::test]
+async fn test_agent_load_tracking() {
     let config = SwarmConfig {
         distribution_strategy: DistributionStrategy::LeastLoaded,
         ..Default::default()
@@ -422,7 +422,7 @@ fn test_agent_load_tracking() {
     }
     
     // Distribute tasks - should balance load
-    let assignments = swarm.distribute_tasks().unwrap();
+    let assignments = swarm.distribute_tasks().await.unwrap();
     assert_eq!(assignments.len(), 3);
     
     // Both agents should have tasks

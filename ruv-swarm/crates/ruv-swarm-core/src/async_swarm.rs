@@ -325,7 +325,7 @@ impl AsyncSwarm {
         let mut agents = self.agents.write().await;
         
         for (id, agent) in agents.iter_mut() {
-            agent.start().map_err(|e| {
+            agent.start().await.map_err(|e| {
                 SwarmError::Custom(format!("Failed to start agent {id}: {e:?}"))
             })?;
         }
@@ -342,7 +342,7 @@ impl AsyncSwarm {
         let mut agents = self.agents.write().await;
         
         for (id, agent) in agents.iter_mut() {
-            agent.shutdown().map_err(|e| {
+            agent.shutdown().await.map_err(|e| {
                 SwarmError::Custom(format!("Failed to shutdown agent {id}: {e:?}"))
             })?;
         }

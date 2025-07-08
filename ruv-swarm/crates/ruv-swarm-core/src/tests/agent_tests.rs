@@ -196,22 +196,22 @@ fn test_dynamic_agent_task_handling() {
     assert!(!agent.can_handle(&task4));
 }
 
-#[test]
-fn test_dynamic_agent_lifecycle() {
+#[tokio::test]
+async fn test_dynamic_agent_lifecycle() {
     let mut agent = DynamicAgent::new("dynamic-agent", vec!["compute".to_string()]);
     
     // Start agent
-    let result = agent.start();
+    let result = agent.start().await;
     assert!(result.is_ok());
     assert_eq!(agent.status(), AgentStatus::Running);
     
     // Shutdown agent
-    let result = agent.shutdown();
+    let result = agent.shutdown().await;
     assert!(result.is_ok());
     assert_eq!(agent.status(), AgentStatus::Offline);
     
     // Can restart
-    let result = agent.start();
+    let result = agent.start().await;
     assert!(result.is_ok());
     assert_eq!(agent.status(), AgentStatus::Running);
 }

@@ -36,8 +36,8 @@ fn test_custom_error() {
 }
 
 // Integration test: Complete swarm workflow
-#[test]
-fn test_swarm_complete_workflow() {
+#[tokio::test]
+async fn test_swarm_complete_workflow() {
     let config = SwarmConfig {
         topology_type: TopologyType::Mesh,
         distribution_strategy: DistributionStrategy::LeastLoaded,
@@ -73,10 +73,10 @@ fn test_swarm_complete_workflow() {
     }
     
     // Step 3: Start all agents
-    swarm.start_all_agents().unwrap();
+    swarm.start_all_agents().await.unwrap();
     
     // Step 4: Distribute tasks
-    let assignments = swarm.distribute_tasks().unwrap();
+    let assignments = swarm.distribute_tasks().await.unwrap();
     
     // Verify assignments
     assert_eq!(assignments.len(), 4);
@@ -167,8 +167,8 @@ async fn test_async_swarm_workflow() {
 }
 
 // Test multi-phase workflow
-#[test]
-fn test_multi_phase_swarm_workflow() {
+#[tokio::test]
+async fn test_multi_phase_swarm_workflow() {
     let mut swarm = Swarm::new(SwarmConfig::default());
     
     // Phase 1: Setup agents
@@ -186,7 +186,7 @@ fn test_multi_phase_swarm_workflow() {
         swarm.register_agent(agent).unwrap();
     }
     
-    swarm.start_all_agents().unwrap();
+    swarm.start_all_agents().await.unwrap();
     
     // Phase 2: Preprocessing tasks
     for i in 0..3 {
@@ -195,7 +195,7 @@ fn test_multi_phase_swarm_workflow() {
         swarm.submit_task(task).unwrap();
     }
     
-    let phase1_assignments = swarm.distribute_tasks().unwrap();
+    let phase1_assignments = swarm.distribute_tasks().await.unwrap();
     assert_eq!(phase1_assignments.len(), 3);
     for (_, agent_id) in &phase1_assignments {
         assert_eq!(agent_id, "preprocessor");
@@ -208,7 +208,7 @@ fn test_multi_phase_swarm_workflow() {
         swarm.submit_task(task).unwrap();
     }
     
-    let phase2_assignments = swarm.distribute_tasks().unwrap();
+    let phase2_assignments = swarm.distribute_tasks().await.unwrap();
     assert_eq!(phase2_assignments.len(), 3);
     for (_, agent_id) in &phase2_assignments {
         assert_eq!(agent_id, "processor");
@@ -221,7 +221,7 @@ fn test_multi_phase_swarm_workflow() {
         swarm.submit_task(task).unwrap();
     }
     
-    let phase3_assignments = swarm.distribute_tasks().unwrap();
+    let phase3_assignments = swarm.distribute_tasks().await.unwrap();
     assert_eq!(phase3_assignments.len(), 3);
     for (_, agent_id) in &phase3_assignments {
         assert_eq!(agent_id, "postprocessor");
@@ -234,8 +234,8 @@ fn test_multi_phase_swarm_workflow() {
 }
 
 // Test error recovery workflow
-#[test]
-fn test_swarm_error_recovery() {
+#[tokio::test]
+async fn test_swarm_error_recovery() {
     let mut swarm = Swarm::new(SwarmConfig::default());
     
     // Register agents
@@ -254,7 +254,7 @@ fn test_swarm_error_recovery() {
     }
     
     // Distribute - should only assign to healthy agent
-    let assignments = swarm.distribute_tasks().unwrap();
+    let assignments = swarm.distribute_tasks().await.unwrap();
     assert_eq!(assignments.len(), 3);
     for (_, agent_id) in &assignments {
         assert_eq!(agent_id, "healthy");
@@ -273,7 +273,7 @@ fn test_swarm_error_recovery() {
     }
     
     // Now both agents should get tasks
-    let assignments2 = swarm.distribute_tasks().unwrap();
+    let assignments2 = swarm.distribute_tasks().await.unwrap();
     assert_eq!(assignments2.len(), 3);
     
     let mut healthy_count = 0;
@@ -323,8 +323,8 @@ fn test_dynamic_topology_changes() {
 }
 
 // Test load balancing fairness
-#[test]
-fn test_load_balancing_fairness() {
+#[tokio::test]
+async fn test_load_balancing_fairness() {
     let config = SwarmConfig {
         distribution_strategy: DistributionStrategy::LeastLoaded,
         ..Default::default()
@@ -345,7 +345,7 @@ fn test_load_balancing_fairness() {
     }
     
     // Distribute all tasks
-    let assignments = swarm.distribute_tasks().unwrap();
+    let assignments = swarm.distribute_tasks().await.unwrap();
     assert_eq!(assignments.len(), 30);
     
     // Count tasks per agent

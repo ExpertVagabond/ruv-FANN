@@ -381,7 +381,8 @@ impl DynamicAgent {
     /// # Errors
     /// 
     /// Currently does not return errors, but may in future implementations.
-    pub fn start(&mut self) -> crate::error::Result<()> {
+    #[allow(clippy::unused_async)]
+    pub async fn start(&mut self) -> crate::error::Result<()> {
         self.status = AgentStatus::Running;
         Ok(())
     }
@@ -391,7 +392,8 @@ impl DynamicAgent {
     /// # Errors
     /// 
     /// Currently does not return errors, but may in future implementations.
-    pub fn shutdown(&mut self) -> crate::error::Result<()> {
+    #[allow(clippy::unused_async)]
+    pub async fn shutdown(&mut self) -> crate::error::Result<()> {
         self.status = AgentStatus::Offline;
         Ok(())
     }

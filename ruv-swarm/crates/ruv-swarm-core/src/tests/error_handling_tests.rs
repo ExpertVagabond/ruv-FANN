@@ -340,8 +340,8 @@ async fn test_concurrent_error_scenarios() {
 }
 
 // Test error conditions in agent operations
-#[test]
-fn test_agent_error_conditions() {
+#[tokio::test]
+async fn test_agent_error_conditions() {
     use crate::agent::{DynamicAgent, AgentStatus};
     
     let mut agent = DynamicAgent::new("test-agent", vec!["compute".to_string()]);
@@ -351,16 +351,16 @@ fn test_agent_error_conditions() {
     assert_eq!(agent.status(), AgentStatus::Error);
     
     // Agent in error state should still be able to transition
-    agent.start().unwrap();
+    agent.start().await.unwrap();
     assert_eq!(agent.status(), AgentStatus::Running);
     
-    agent.shutdown().unwrap();
+    agent.shutdown().await.unwrap();
     assert_eq!(agent.status(), AgentStatus::Offline);
 }
 
 // Test boundary conditions
-#[test]
-fn test_boundary_conditions() {
+#[tokio::test]
+async fn test_boundary_conditions() {
     use crate::swarm::{Swarm, SwarmConfig};
     use crate::agent::DynamicAgent;
     use crate::task::Task;
@@ -388,7 +388,7 @@ fn test_boundary_conditions() {
     swarm.submit_task(task).unwrap();
     
     // Should not assign task to agent with no capabilities
-    let assignments = swarm.distribute_tasks().unwrap();
+    let assignments = swarm.distribute_tasks().await.unwrap();
     assert_eq!(assignments.len(), 0);
 }
 

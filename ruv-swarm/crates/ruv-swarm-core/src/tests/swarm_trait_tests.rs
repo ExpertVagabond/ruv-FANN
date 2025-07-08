@@ -172,7 +172,7 @@ impl SwarmAsync for MockSwarmAsync {
     async fn start_all_agents(&self) -> Result<()> {
         let mut agents = self.agents.write().await;
         for agent in agents.values_mut() {
-            agent.start()?;
+            agent.start().await?;
         }
         Ok(())
     }
@@ -180,7 +180,7 @@ impl SwarmAsync for MockSwarmAsync {
     async fn shutdown_all_agents(&self) -> Result<()> {
         let mut agents = self.agents.write().await;
         for agent in agents.values_mut() {
-            agent.shutdown()?;
+            agent.shutdown().await?;
         }
         Ok(())
     }
