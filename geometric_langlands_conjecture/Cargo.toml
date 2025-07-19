@@ -1,6 +1,6 @@
 [package]
 name = "geometric-langlands"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 authors = ["ruv-FANN Contributors <ruv@ruv.net>"]
 description = "A comprehensive computational framework for the Geometric Langlands Conjecture with neural-symbolic integration, CLI tools, WASM deployment, and CUDA acceleration"

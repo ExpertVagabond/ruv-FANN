@@ -101,8 +101,8 @@ cargo install geometric-langlands-cli
 
 # Use the CLI
 langlands --help
-langlands compute correspondence --input "GL(3)" --output results.json
-langlands visual hecke-eigenvalues --output chart.svg
+langlands compute --computation-type correspondence --input "GL(3)" --output results.json
+langlands visual --object-type hecke-eigenvalues --output chart.svg
 ```
 
 ### From Source
@@ -148,11 +148,11 @@ The `geometric-langlands-cli` provides an intuitive interface for mathematical c
 
 ```bash
 # Verify Langlands correspondence for GL(3)
-langlands verify correspondence --group "GL(3)" --verbose
+langlands verify --property correspondence --input "GL(3)" --depth standard
 
 # Compute Hecke eigenvalues and visualize
-langlands compute hecke --level 5 --weight 12 --output eigenvalues.json
-langlands visual hecke-eigenvalues --input eigenvalues.json --output chart.svg
+langlands compute --computation-type hecke --input "level=5,weight=12" --output eigenvalues.json
+langlands visual --object-type hecke-eigenvalues --input eigenvalues.json --output chart.svg
 
 # Interactive REPL for exploration
 langlands repl --auto-save
@@ -161,8 +161,8 @@ langlands repl --auto-save
 langlands train --epochs 100 --batch-size 32 --architecture langlands_v1
 
 # Export results to various formats
-langlands export recent --format latex --metadata --output paper.tex
-langlands export recent --format python --output analysis.py
+langlands export --format latex --metadata --output paper.tex
+langlands export --format python --output analysis.py
 ```
 
 ### Library Usage Examples

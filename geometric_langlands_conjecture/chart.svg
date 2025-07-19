@@ -1,0 +1,1 @@
+# Hecke eigenvalue plot data

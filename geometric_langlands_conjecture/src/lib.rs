@@ -47,11 +47,11 @@
 //! Example CLI usage:
 //! ```bash
 //! # Verify Langlands correspondence
-//! langlands verify correspondence --group "GL(3)" --verbose
+//! langlands verify --property correspondence --input "GL(3)" --depth standard
 //!
 //! # Compute and visualize Hecke eigenvalues
-//! langlands compute hecke --level 5 --weight 12 --output eigenvalues.json
-//! langlands visual hecke-eigenvalues --input eigenvalues.json --output chart.svg
+//! langlands compute --computation-type hecke --input "level=5,weight=12" --output eigenvalues.json
+//! langlands visual --object-type hecke-eigenvalues --input eigenvalues.json --output chart.svg
 //!
 //! # Interactive REPL for exploration
 //! langlands repl --auto-save
