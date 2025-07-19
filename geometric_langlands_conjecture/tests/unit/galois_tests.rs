@@ -4,10 +4,11 @@
 //! and related structures critical to the geometric side of Langlands.
 
 use geometric_langlands::prelude::*;
-use crate::helpers::{Timer, assertions::*};
+use super::super::helpers::{Timer, assertions::*};
 use nalgebra::{DMatrix, DVector};
 use num_complex::Complex64;
 use proptest::prelude::*;
+#[cfg(test)]
 use test_case::test_case;
 
 /// Test Galois representation construction and properties

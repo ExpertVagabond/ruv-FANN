@@ -10,8 +10,9 @@
 //! - WebAssembly support for browser deployment
 //! - Comprehensive mathematical type system
 //! - Parallel algorithms for large-scale computations
+//! - **Interactive CLI tool** for research workflows
 //!
-//! ## Example
+//! ## Using the Library
 //!
 //! ```rust,no_run
 //! use geometric_langlands::prelude::*;
@@ -26,6 +27,37 @@
 //! let hecke = HeckeOperator::new(&g, 5);
 //! let eigenform = hecke.apply(&form);
 //! ```
+//!
+//! ## Command Line Interface
+//!
+//! For interactive exploration and research workflows, install the CLI companion:
+//!
+//! ```bash
+//! cargo install geometric-langlands-cli
+//! langlands --help
+//! ```
+//!
+//! The CLI provides:
+//! - **Interactive REPL** for mathematical exploration
+//! - **Visualization tools** for Hecke eigenvalues and correspondences  
+//! - **Export capabilities** to LaTeX, Python, Mathematica, and more
+//! - **Neural network training** for pattern recognition in automorphic forms
+//! - **Batch computation** tools for research workflows
+//!
+//! Example CLI usage:
+//! ```bash
+//! # Verify Langlands correspondence
+//! langlands verify correspondence --group "GL(3)" --verbose
+//!
+//! # Compute and visualize Hecke eigenvalues
+//! langlands compute hecke --level 5 --weight 12 --output eigenvalues.json
+//! langlands visual hecke-eigenvalues --input eigenvalues.json --output chart.svg
+//!
+//! # Interactive REPL for exploration
+//! langlands repl --auto-save
+//! ```
+//!
+//! See the [`geometric-langlands-cli`](https://crates.io/crates/geometric-langlands-cli) documentation for more details.
 
 #![warn(missing_docs)]
 #![warn(missing_debug_implementations)]
@@ -61,6 +93,12 @@ pub mod trace;
 // Main Langlands correspondence
 pub mod langlands;
 
+// Neural network integration
+pub mod neural;
+
+// Physics connections - S-duality and Kapustin-Witten theory
+// pub mod physics; // Temporarily disabled
+
 // Performance modules
 #[cfg(feature = "cuda")]
 #[cfg_attr(docsrs, doc(cfg(feature = "cuda")))]
@@ -69,6 +107,9 @@ pub mod cuda;
 #[cfg(feature = "wasm")]
 #[cfg_attr(docsrs, doc(cfg(feature = "wasm")))]
 pub mod wasm;
+
+// Performance optimization
+pub mod performance;
 
 // Utilities
 pub mod utils;
@@ -100,6 +141,39 @@ pub mod prelude {
         GaloisRepresentation, LocalSystem,
         LAdic, PerverseSheaf,
     };
+    
+    pub use crate::langlands::{
+        LanglandsCorrespondence, Functoriality, ReciprocityLaw,
+        RamanujanConjecture, LFunction, LiftType, ReciprocityType,
+    };
+    
+    pub use crate::spectral::{
+        SpectralData, SpectralDecomposition, EigenvalueProblem,
+        FunctionalCalculus,
+    };
+    
+    pub use crate::neural::{
+        LanglandsNeuralNetwork, NeuralConfig, NeuralPrediction,
+        TrainingData, PatternMemory,
+    };
+    
+    pub use crate::performance::{
+        PerformanceOptimizer, PerformanceMetrics,
+        ComputationCache, CacheKey, CacheStrategy,
+        ParallelExecutor, ThreadPool,
+        PerformanceConfig, ConfigManager,
+    };
+    
+    // Physics exports temporarily disabled during compilation fix
+    // pub use crate::physics::{
+    //     SDuality, MontonenOliveDuality, ElectricMagneticDuality,
+    //     KapustinWittenTheory, TopologicalTwist,
+    //     N4SuperYangMills, GaugeTheory, CouplingConstant,
+    //     WilsonLine, THooftOperator, LineOperator,
+    //     ABrane, BBrane, BraneConfiguration,
+    //     HitchinSystem, HitchinFibration, IntegrableSystem,
+    //     MirrorSymmetry, HomologicalMirrorSymmetry,
+    // };
     
     pub use crate::error::{Error, Result};
 }

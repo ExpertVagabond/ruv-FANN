@@ -4,10 +4,11 @@
 //! and related structures critical to the Langlands correspondence.
 
 use geometric_langlands::prelude::*;
-use crate::helpers::{Timer, assertions::*};
+use super::super::helpers::{Timer, assertions::*};
 use nalgebra::{DMatrix, DVector};
 use num_complex::Complex64;
 use proptest::prelude::*;
+#[cfg(test)]
 use test_case::test_case;
 
 /// Test automorphic form construction and properties
@@ -17,7 +18,7 @@ mod automorphic_form_tests {
     
     #[test]
     fn test_automorphic_form_creation() {
-        let form = AutomorphicForm;
+        // let form = AutomorphicForm; // This is a struct, not a value
         // TODO: Once AutomorphicForm is implemented, test construction
         assert!(true, "AutomorphicForm placeholder test");
     }
@@ -28,7 +29,7 @@ mod automorphic_form_tests {
         
         // Test Eisenstein series for different weights
         for weight in [2, 4, 6, 8, 10, 12] {
-            let _eisenstein = AutomorphicForm::eisenstein_series(&g, weight);
+            let _eisenstein = AutomorphicForm::eisenstein_series(&g, weight as u32);
             // TODO: Once implemented, verify Eisenstein series properties
             assert!(true, "Eisenstein series weight {} placeholder", weight);
         }

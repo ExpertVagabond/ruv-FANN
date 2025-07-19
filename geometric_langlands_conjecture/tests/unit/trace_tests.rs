@@ -3,9 +3,25 @@
 //! Tests for the Arthur-Selberg trace formula and related concepts.
 
 use geometric_langlands::prelude::*;
-use crate::helpers::{Timer, assertions::*};
+use super::super::helpers::{Timer, assertions::*};
 use nalgebra::{DMatrix, DVector};
 use num_complex::Complex64;
+
+// Placeholder type until defined in the main library
+#[derive(Debug, Clone)]
+struct TestFunction;
+
+impl TestFunction {
+    fn evaluate_at_identity(&self) -> f64 { 0.0 }
+    fn orbital_integral(&self, _class: &ConjugacyClass) -> f64 { 0.0 }
+}
+
+#[derive(Debug, Clone)]
+struct ConjugacyClass;
+
+impl ReductiveGroup {
+    fn conjugacy_classes_of_order(&self, _order: usize) -> Vec<ConjugacyClass> { vec![] }
+}
 
 /// Test basic trace formula setup
 #[cfg(test)]

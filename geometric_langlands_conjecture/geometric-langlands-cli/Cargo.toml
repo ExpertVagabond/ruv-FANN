@@ -1,0 +1,97 @@
+[package]
+name = "geometric-langlands-cli"
+version = "0.2.0"
+edition = "2021"
+authors = ["ruv-FANN Contributors <contact@ruvnet.com>"]
+description = "User-friendly CLI for the Geometric Langlands computational framework"
+license = "MIT"
+repository = "https://github.com/ruvnet/ruv-FANN"
+keywords = ["cli", "mathematics", "langlands", "repl", "visualization"]
+categories = ["command-line-utilities", "mathematics", "science"]
+
+[[bin]]
+name = "langlands"
+path = "src/main.rs"
+
+[dependencies]
+# Core library dependency - temporarily disabled for CLI publishing
+# geometric-langlands = { path = "..", version = "0.2.0", features = ["full"] }
+num-complex = "0.4"
+
+# CLI framework
+clap = { version = "4.5", features = ["derive", "color", "suggestions", "env"] }
+clap_complete = "4.5"
+
+# Interactive REPL
+rustyline = { version = "14.0", features = ["derive"] }
+rustyline-derive = "0.10"
+
+# Terminal UI and visualization
+ratatui = "0.29"
+crossterm = "0.28"
+indicatif = "0.17"
+console = "0.15"
+dialoguer = "0.11"
+colored = "2.1"
+
+# Progress bars and spinners
+indicatif-log-bridge = "0.2"
+
+# Configuration
+config = "0.14"
+directories = "5.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Database persistence
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "sqlite", "migrate", "chrono", "uuid"] }
+uuid = { version = "1.11", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+# Async runtime
+tokio = { version = "1.42", features = ["full"] }
+
+# Logging
+env_logger = "0.11"
+log = "0.4"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
+
+# Error handling
+anyhow = "1.0"
+thiserror = "2.0"
+
+# Plotting and visualization
+plotters = { version = "0.3", default-features = false, features = ["bitmap_backend", "svg_backend", "ttf"] }
+plotters-svg = "0.3"
+imageproc = "0.25"
+image = "0.25"
+
+# Math rendering
+katex = "0.4"
+latex2mathml = "0.2"
+
+# Tables and formatting
+comfy-table = "7.1"
+prettytable-rs = "0.10"
+
+# Additional utilities
+num_cpus = "1.16"
+dirs = "5.0"
+open = "5.3"
+bincode = "1.3"
+
+# Testing
+assert_cmd = "2.0"
+predicates = "3.1"
+tempfile = "3.14"
+
+[dev-dependencies]
+criterion = "0.6"
+proptest = "1.6"
+
+[features]
+default = ["full-ui"]
+full-ui = []
+minimal = []

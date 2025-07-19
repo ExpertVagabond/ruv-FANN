@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometric Langlands WASM - Basic Example</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .warning {
+            background: #fffaeb;
+            border: 1px solid #f6e05e;
+            color: #744210;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .output {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .success {
+            color: #22543d;
+        }
+        .info {
+            color: #2b6cb0;
+        }
+        .warning-text {
+            color: #b91c1c;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+        button:hover {
+            background: #5a67d8;
+        }
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌟 Geometric Langlands WASM - Basic Example</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Alpha Version</strong><br>
+            This demonstrates only the currently implemented features. Many theoretical features are still under development.
+        </div>
+        
+        <button id="runExample" onclick="runExample()">Run Example</button>
+        
+        <div id="output" class="output" style="display: none;">
+            <pre id="outputContent"></pre>
+        </div>
+    </div>
+
+    <script type="module">
+        import init, { 
+            ReductiveGroup, 
+            AutomorphicForm, 
+            GaloisRepresentation,
+            LanglandsCorrespondence,
+            compute_l_function_value
+        } from '../pkg/geometric_langlands_wasm.js';
+
+        let initialized = false;
+
+        // Make runExample available globally
+        window.runExample = async function() {
+            const button = document.getElementById('runExample');
+            const output = document.getElementById('output');
+            const outputContent = document.getElementById('outputContent');
+            
+            button.disabled = true;
+            button.textContent = 'Running...';
+            output.style.display = 'block';
+            outputContent.innerHTML = '';
+            
+            const log = (message, className = '') => {
+                const span = document.createElement('span');
+                span.className = className;
+                span.textContent = message + '\n';
+                outputContent.appendChild(span);
+            };
+            
+            try {
+                // Initialize if needed
+                if (!initialized) {
+                    log('Initializing WASM module...', 'info');
+                    await init();
+                    initialized = true;
+                }
+                
+                log('🌟 Geometric Langlands WASM - Basic Example', 'success');
+                log('⚠️  Alpha version - limited features available\n', 'warning-text');
+                
+                // Create reductive groups
+                log('1. Creating Reductive Groups:', 'info');
+                const gl3 = ReductiveGroup.gl_n(3);
+                log(`   GL(3): rank=${gl3.rank}, dimension=${gl3.dimension}`);
+                
+                const sl2 = ReductiveGroup.sl_n(2);
+                log(`   SL(2): rank=${sl2.rank}, dimension=${sl2.dimension}`);
+                
+                const sp4 = ReductiveGroup.sp_2n(2);
+                log(`   Sp(4): rank=${sp4.rank}, dimension=${sp4.dimension}`);
+                
+                // Create automorphic forms
+                log('\n2. Creating Automorphic Forms:', 'info');
+                const cuspidal = AutomorphicForm.cuspidal_form("example_cusp", 2.5);
+                log(`   Cuspidal form: weight=${cuspidal.weight}, level=${cuspidal.level}`);
+                
+                const eisenstein = AutomorphicForm.eisenstein_series(1.0, 3.0);
+                log(`   Eisenstein series: weight=${eisenstein.weight}`);
+                
+                // Create Galois representations
+                log('\n3. Creating Galois Representations:', 'info');
+                const artin = GaloisRepresentation.artin_representation(2);
+                log(`   Artin representation: dimension=${artin.dimension}`);
+                
+                const weil_deligne = GaloisRepresentation.weil_deligne_representation(3, 1.5);
+                log(`   Weil-Deligne representation: dimension=${weil_deligne.dimension}`);
+                
+                // Compute L-function values
+                log('\n4. Computing L-function values:', 'info');
+                const l_value = compute_l_function_value(2.0);
+                log(`   L(2.0) = ${l_value}`);
+                
+                // Basic Langlands correspondence
+                log('\n5. Langlands Correspondence (simplified):', 'info');
+                const correspondence = new LanglandsCorrespondence();
+                
+                try {
+                    const galois_rep = correspondence.automorphic_to_galois(cuspidal);
+                    log('   Automorphic → Galois: Success!', 'success');
+                    log(`   Resulting dimension: ${galois_rep.dimension}`);
+                } catch (e) {
+                    log('   Note: Full correspondence not yet implemented', 'warning-text');
+                }
+                
+                // Not yet implemented features
+                log('\n⚠️  Features in development:', 'warning-text');
+                log('   - Advanced geometric structures');
+                log('   - Complete spectral decomposition');
+                log('   - Full categorical equivalences');
+                log('   - GPU acceleration');
+                log('   - Complex visualizations');
+                
+                log('\n✅ Demo completed successfully!', 'success');
+                
+            } catch (error) {
+                log(`\n❌ Error: ${error.message}`, 'warning-text');
+                console.error(error);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Run Example';
+            }
+        };
+    </script>
+</body>
+</html>

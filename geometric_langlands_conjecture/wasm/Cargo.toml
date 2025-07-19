@@ -1,11 +1,16 @@
 [package]
 name = "geometric-langlands-wasm"
-version = "0.1.0"
+version = "0.1.0-alpha"
 edition = "2021"
 authors = ["ruv-FANN Contributors"]
-description = "WebAssembly bindings for the Geometric Langlands Conjecture implementation"
+description = "WebAssembly bindings for the Geometric Langlands Conjecture implementation (ALPHA - Work in Progress)"
 license = "MIT"
 repository = "https://github.com/ruvnet/ruv-FANN"
+homepage = "https://github.com/ruvnet/ruv-FANN/tree/main/geometric_langlands_conjecture"
+documentation = "https://docs.rs/geometric-langlands-wasm"
+readme = "README.md"
+keywords = ["mathematics", "langlands", "wasm", "webassembly", "number-theory"]
+categories = ["mathematics", "wasm", "science"]
 
 [lib]
 crate-type = ["cdylib"]

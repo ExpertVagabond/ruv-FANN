@@ -1,0 +1,94 @@
+# Geometric Langlands Performance Configuration
+# This file contains optimized settings for high-performance mathematical computations
+
+[cache]
+# Maximum cache size in MB (1GB default)
+max_size_mb = 1024
+# Cache eviction strategy: "LRU", "LFU", "FIFO", "ARC"
+strategy = "LRU"
+# Time-to-live in seconds (1 hour)
+ttl_seconds = 3600
+# Enable compression for cached data
+compression = false
+# Prefetch depth for predictive caching
+prefetch_depth = 2
+
+[parallel]
+# Number of threads (0 = auto-detect)
+num_threads = 0
+# Execution strategy: "WorkStealing", "Static", "Dynamic", "GPU"
+strategy = "WorkStealing"
+# Minimum chunk size for parallel processing
+min_chunk_size = 1000
+# Enable work stealing between threads
+work_stealing = true
+# Pin threads to CPU cores
+thread_pinning = false
+
+[memory]
+# Memory pool size in MB
+pool_size_mb = 512
+# Enable memory mapping for large allocations
+memory_mapping = true
+# Preallocate buffers to reduce allocation overhead
+preallocate = true
+# Buffer alignment (64 bytes = cache line)
+alignment = 64
+# Enable huge pages for large matrices
+huge_pages = false
+
+[algorithms]
+# Block size for matrix multiplication
+matmul_block_size = 64
+# Threshold for parallel FFT execution
+fft_parallel_threshold = 1024
+# Maximum iterations for eigenvalue computation
+eigenvalue_max_iterations = 1000
+# Convergence tolerance for iterative algorithms
+convergence_tolerance = 1e-10
+# Enable fast approximations for real-time processing
+fast_approximations = false
+
+[gpu]
+# Enable GPU acceleration (requires CUDA feature)
+enabled = false
+# Preferred GPU device ID
+device_id = 0
+# GPU memory limit in MB (0 = no limit)
+memory_limit_mb = 0
+# Enable unified memory between CPU and GPU
+unified_memory = true
+
+[gpu.kernel_config]
+# CUDA kernel block dimensions
+block_size = [256, 1, 1]
+# Grid dimensions (0 = auto-calculate)
+grid_size = [0, 0, 0]
+# Shared memory per block
+shared_memory = 49152
+# Maximum registers per thread
+max_registers = 64
+
+# Workload-specific presets
+[presets.high_performance]
+cache.max_size_mb = 4096
+parallel.work_stealing = true
+memory.huge_pages = true
+gpu.enabled = true
+
+[presets.memory_efficient]
+cache.max_size_mb = 256
+cache.compression = true
+memory.pool_size_mb = 256
+memory.preallocate = false
+
+[presets.real_time]
+cache.ttl_seconds = 60
+algorithms.fast_approximations = true
+parallel.thread_pinning = true
+
+[presets.large_matrix]
+cache.max_size_mb = 2048
+algorithms.matmul_block_size = 128
+parallel.min_chunk_size = 10000
+memory.pool_size_mb = 1024

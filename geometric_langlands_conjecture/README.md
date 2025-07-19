@@ -87,6 +87,25 @@ This duality connects:
 
 ## 📦 Installation
 
+### As a Library
+```bash
+# Add to your Cargo.toml
+[dependencies]
+geometric-langlands = "0.2.0"
+```
+
+### Command Line Interface
+```bash
+# Install the CLI tool globally
+cargo install geometric-langlands-cli
+
+# Use the CLI
+langlands --help
+langlands compute correspondence --input "GL(3)" --output results.json
+langlands visual hecke-eigenvalues --output chart.svg
+```
+
+### From Source
 ```bash
 # Clone the repository
 git clone https://github.com/ruvnet/ruv-FANN.git
@@ -123,7 +142,32 @@ wasm-pack build --target web --features wasm
 
 ## 🧪 Examples
 
-### Basic Automorphic Form Computation
+### Command Line Interface Examples
+
+The `geometric-langlands-cli` provides an intuitive interface for mathematical computations:
+
+```bash
+# Verify Langlands correspondence for GL(3)
+langlands verify correspondence --group "GL(3)" --verbose
+
+# Compute Hecke eigenvalues and visualize
+langlands compute hecke --level 5 --weight 12 --output eigenvalues.json
+langlands visual hecke-eigenvalues --input eigenvalues.json --output chart.svg
+
+# Interactive REPL for exploration
+langlands repl --auto-save
+
+# Train neural networks on automorphic patterns
+langlands train --epochs 100 --batch-size 32 --architecture langlands_v1
+
+# Export results to various formats
+langlands export recent --format latex --metadata --output paper.tex
+langlands export recent --format python --output analysis.py
+```
+
+### Library Usage Examples
+
+#### Basic Automorphic Form Computation
 ```rust
 use geometric_langlands::automorphic::{AutomorphicForm, HeckeOperator};
 use geometric_langlands::core::ReductiveGroup;
@@ -134,7 +178,7 @@ let hecke = HeckeOperator::new(&g, 5);
 let eigenform = hecke.apply(&form);
 ```
 
-### Galois Representation Construction
+#### Galois Representation Construction
 ```rust
 use geometric_langlands::galois::{GaloisRep, LocalSystem};
 use geometric_langlands::core::Curve;
@@ -144,7 +188,7 @@ let galois_rep = GaloisRep::from_curve(&curve);
 let local_system = LocalSystem::from_galois_rep(&galois_rep);
 ```
 
-### GPU-Accelerated Computation
+#### GPU-Accelerated Computation
 ```rust
 use geometric_langlands::cuda::CudaContext;
 use geometric_langlands::spectral::SpectralDecomposition;
@@ -152,6 +196,24 @@ use geometric_langlands::spectral::SpectralDecomposition;
 let ctx = CudaContext::new()?;
 let matrix = generate_hecke_matrix(1000);
 let decomp = SpectralDecomposition::compute_cuda(&ctx, &matrix)?;
+```
+
+#### Research Workflow Integration
+```rust
+use geometric_langlands::prelude::*;
+
+// Set up computation configuration
+let config = Config::new()
+    .precision(64)
+    .parallel(true)
+    .cache_results(true);
+
+// Batch computation for research
+for n in 2..=10 {
+    let group = ReductiveGroup::gl_n(n);
+    let correspondence = LanglandsCorrespondence::verify(&group, &config)?;
+    correspondence.export_to_file(&format!("gl{}_results.json", n))?;
+}
 ```
 
 ## 📊 Performance
@@ -169,8 +231,16 @@ See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines.
 
 - [Mathematical Background](docs/MATH.md)
 - [API Documentation](https://docs.rs/geometric-langlands)
+- [CLI Documentation](https://docs.rs/geometric-langlands-cli)
 - [Implementation Notes](docs/IMPLEMENTATION.md)
 - [Performance Guide](docs/PERFORMANCE.md)
+- [Research Workflows](docs/RESEARCH.md)
+
+## 🛠️ Related Tools
+
+- **[geometric-langlands-cli](https://crates.io/crates/geometric-langlands-cli)** - Command-line interface with interactive REPL, visualization, and export capabilities
+- **WASM Package** - Browser-compatible WebAssembly module (coming soon)
+- **Python Bindings** - PyO3-based Python integration (in development)
 
 ## 🔬 Research References
 

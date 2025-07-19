@@ -1,6 +1,6 @@
 //! Test helper utilities and common functionality
 
-use std::time::Instant;
+use std::time::{Instant, Duration};
 use nalgebra::{DMatrix, DVector};
 use num_complex::Complex64;
 use geometric_langlands::prelude::*;
@@ -115,7 +115,7 @@ impl MemoryTracker {
 /// Test assertion helpers with detailed error messages
 pub mod assertions {
     use super::*;
-    use crate::math_utils::{approx_eq, complex_approx_eq, matrix_approx_eq, vector_approx_eq};
+    use super::super::math_utils::{approx_eq, complex_approx_eq, matrix_approx_eq, vector_approx_eq};
     
     /// Assert two floating point numbers are approximately equal with context
     pub fn assert_approx_eq_with_context(

@@ -4,9 +4,10 @@
 //! properties hold across large spaces of randomly generated inputs.
 
 use proptest::prelude::*;
+use proptest::strategy::ValueTree;
 use geometric_langlands::prelude::*;
-use crate::helpers::{Timer, generators::*, assertions::*};
-use crate::math_utils::properties::*;
+use super::helpers::{Timer, generators::*, assertions::*};
+use super::math_utils::{self, properties::*};
 use nalgebra::{DMatrix, DVector};
 use num_complex::Complex64;
 
@@ -267,9 +268,9 @@ pub mod group_properties {
         #[test]
         fn unitary_group_properties(n in 1..5usize) {
             // Generate random unitary matrices and test group properties
-            let u1 = crate::math_utils::random_unitary_matrix(n);
-            let u2 = crate::math_utils::random_unitary_matrix(n);
-            let u3 = crate::math_utils::random_unitary_matrix(n);
+            let u1 = math_utils::random_unitary_matrix(n);
+            let u2 = math_utils::random_unitary_matrix(n);
+            let u3 = math_utils::random_unitary_matrix(n);
             
             // Test closure: product of unitary matrices is unitary
             let product = &u1 * &u2;
@@ -294,7 +295,7 @@ pub mod group_properties {
         #[test]
         fn group_identity_properties(n in 1..5usize) {
             let identity = DMatrix::<Complex64>::identity(n, n);
-            let u = crate::math_utils::random_unitary_matrix(n);
+            let u = math_utils::random_unitary_matrix(n);
             
             // Test UI = IU = U
             let left_mult = &u * &identity;
@@ -318,7 +319,7 @@ pub mod group_properties {
         
         #[test]
         fn group_inverse_properties(n in 1..5usize) {
-            let u = crate::math_utils::random_unitary_matrix(n);
+            let u = math_utils::random_unitary_matrix(n);
             let u_inv = u.adjoint(); // For unitary matrices, inverse = adjoint
             
             // Test U * U^(-1) = I

@@ -5,7 +5,7 @@
 
 use geometric_langlands::prelude::*;
 
-mod common;
+// mod common; // Removed - defined inline below
 
 #[test]
 #[ignore] // Remove once modules are implemented
@@ -33,9 +33,10 @@ fn test_project_compiles() {
 #[test]
 fn test_basic_mathematical_operations() {
     // Test that basic mathematical structures work
-    let _field = Field;
-    let _group = Group;
-    let _ring = Ring;
+    // Basic structure creation tests - these are abstract types
+    // let _field = Field; // Abstract type
+    // let _group = Group; // Abstract type
+    // let _ring = Ring;   // Abstract type
     
     // Test GL(n) construction
     for n in 1..=5 {
@@ -86,7 +87,7 @@ fn test_parallel_computation() {
     }
     
     // Collect results
-    let results: Vec<usize> = handles.into_iter()
+    let results: Vec<u32> = handles.into_iter()
         .map(|h| h.join().unwrap())
         .collect();
     
@@ -136,7 +137,7 @@ mod common {
         ReductiveGroup::gl_n(n)
     }
     
-    pub fn create_test_form(g: &ReductiveGroup, weight: i32) -> AutomorphicForm {
+    pub fn create_test_form(g: &ReductiveGroup, weight: u32) -> AutomorphicForm {
         AutomorphicForm::eisenstein_series(g, weight)
     }
     

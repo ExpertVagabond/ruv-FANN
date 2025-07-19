@@ -4,7 +4,7 @@
 //! for the geometric Langlands correspondence implementation.
 
 use geometric_langlands::prelude::*;
-use crate::helpers::{Timer, assertions::*};
+use super::super::helpers::{Timer, assertions::*};
 use nalgebra::{DMatrix, DVector};
 use num_complex::Complex64;
 use std::collections::HashMap;

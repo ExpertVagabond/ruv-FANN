@@ -23,7 +23,7 @@ pub mod wasm_tests;
 pub mod utils_tests;
 pub mod error_tests;
 
-use crate::helpers::Timer;
+use super::helpers::Timer;
 
 /// Run all unit tests with timing
 pub fn run_all_unit_tests() {

@@ -33,6 +33,26 @@ pub enum Error {
     #[error("Group structures are incompatible")]
     GroupMismatch,
     
+    /// Invalid rank or dimension
+    #[error("Invalid rank")]
+    InvalidRank,
+    
+    /// Invalid dimension in geometric structure
+    #[error("Invalid dimension")]
+    InvalidDimension,
+    
+    /// Spectral computation error
+    #[error("Spectral computation error: {0}")]
+    SpectralError(String),
+    
+    /// Trace formula computation error
+    #[error("Trace formula error: {0}")]
+    TraceFormulaError(String),
+    
+    /// Eisenstein series computation error
+    #[error("Eisenstein series error: {0}")]
+    EisensteinError(String),
+    
     /// CUDA-related errors
     #[cfg(feature = "cuda")]
     #[error("CUDA error: {0}")]
@@ -50,6 +70,18 @@ pub enum Error {
     /// Serialization errors
     #[error("Serialization error: {0}")]
     SerializationError(#[from] serde_json::Error),
+    
+    /// Dimension-related error
+    #[error("Dimension error: {0}")]
+    Dimension(String),
+    
+    /// Computation error
+    #[error("Computation error: {0}")]
+    Computation(String),
+    
+    /// Not implemented feature
+    #[error("Not implemented: {0}")]
+    NotImplemented(String),
     
     /// Generic errors
     #[error("Error: {0}")]

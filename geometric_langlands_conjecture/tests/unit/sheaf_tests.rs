@@ -1,7 +1,7 @@
 //! Unit tests for sheaf theory implementations
 
 use geometric_langlands::prelude::*;
-use crate::helpers::{Timer, assertions::*};
+use super::super::helpers::{Timer, assertions::*};
 
 #[cfg(test)]
 mod sheaf_tests {

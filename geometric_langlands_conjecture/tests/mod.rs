@@ -120,7 +120,7 @@ pub mod config {
 pub mod math_utils {
     use num_complex::Complex64;
     use nalgebra::{DMatrix, DVector};
-    use crate::config::{EPSILON, LARGE_EPSILON};
+    use super::config::{EPSILON, LARGE_EPSILON};
     
     /// Check if two floating point numbers are approximately equal
     pub fn approx_eq(a: f64, b: f64) -> bool {
@@ -178,7 +178,7 @@ pub mod math_utils {
             
             let conjugate_transpose = m.adjoint();
             let product = m * &conjugate_transpose;
-            let identity = DMatrix::identity(n, n);
+            let identity = DMatrix::<Complex64>::identity(n, n);
             
             // Check if product is approximately identity
             for i in 0..n {

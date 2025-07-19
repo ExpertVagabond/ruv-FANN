@@ -5,7 +5,7 @@
 
 #[cfg(feature = "cuda")]
 use geometric_langlands::cuda::*;
-use crate::helpers::{Timer, assertions::*};
+use super::super::helpers::{Timer, assertions::*};
 use nalgebra::{DMatrix, DVector};
 use num_complex::Complex64;
 use std::time::Duration;

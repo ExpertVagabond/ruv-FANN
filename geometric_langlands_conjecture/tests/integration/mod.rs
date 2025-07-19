@@ -4,16 +4,16 @@
 //! and that the full Langlands correspondence is implemented properly.
 
 use geometric_langlands::prelude::*;
-use crate::helpers::{Timer, assertions::*, fixtures::*};
+use super::helpers::{Timer, assertions::*, fixtures::*};
 use nalgebra::{DMatrix, DVector};
 use num_complex::Complex64;
 use std::collections::HashMap;
 
 pub mod correspondence_tests;
-pub mod workflow_tests;
-pub mod examples_tests;
-pub mod benchmark_tests;
-pub mod regression_tests;
+// pub mod workflow_tests;    // Commented out - defined inline below
+// pub mod examples_tests;    // Not implemented yet
+// pub mod benchmark_tests;   // Not implemented yet
+// pub mod regression_tests;  // Not implemented yet
 
 /// Full integration test suite coordinator
 pub struct IntegrationTestSuite {
@@ -151,7 +151,7 @@ mod full_correspondence_tests {
         let mut eigenvalues = Vec::new();
         
         for &p in &primes {
-            let hecke = HeckeOperator::new(&g, p);
+            let hecke = HeckeOperator::new(&g, p as u32);
             let _eigenform = hecke.apply(&form);
             
             // TODO: Extract eigenvalue and store
@@ -192,9 +192,10 @@ mod consistency_tests {
     #[test]
     fn test_field_group_ring_consistency() {
         // Test that field, group, and ring operations are consistent
-        let field = Field;
-        let group = Group;
-        let ring = Ring;
+        // These are abstract types, not values
+        // let field = Field;
+        // let group = Group;
+        // let ring = Ring;
         
         // TODO: Test interactions between these structures
         assert!(true, "Field-group-ring consistency placeholder");
@@ -254,7 +255,7 @@ mod workflow_tests {
         
         // Step 3: Apply Hecke operators
         for p in [2, 3, 5, 7, 11] {
-            let hecke = HeckeOperator::new(&g, p);
+            let hecke = HeckeOperator::new(&g, p as u32);
             let _result = hecke.apply(&form);
             println!("✓ Applied Hecke operator T_{}", p);
         }
@@ -286,7 +287,7 @@ mod workflow_tests {
             let handle = thread::spawn(move || {
                 let g = ReductiveGroup::gl_n(2);
                 let form = AutomorphicForm::eisenstein_series(&g, 6);
-                let hecke = HeckeOperator::new(&g, p);
+                let hecke = HeckeOperator::new(&g, p as u32);
                 let _result = hecke.apply(&form);
                 
                 // Store result
@@ -402,7 +403,7 @@ mod performance_integration_tests {
         let start = std::time::Instant::now();
         
         for &p in &primes[..10] { // Test first 10 primes
-            let hecke = HeckeOperator::new(&g, p);
+            let hecke = HeckeOperator::new(&g, p as u32);
             let _result = hecke.apply(&form);
         }
         
@@ -423,7 +424,7 @@ mod performance_integration_tests {
             let _form = AutomorphicForm::eisenstein_series(&g, 4);
             
             for p in [2, 3, 5, 7] {
-                let hecke = HeckeOperator::new(&g, p);
+                let hecke = HeckeOperator::new(&g, p as u32);
                 let _result = hecke.apply(&_form);
             }
         }
@@ -494,16 +495,16 @@ pub fn run_all() {
     correspondence_tests::run_all();
     
     println!("  Workflow tests...");
-    workflow_tests::run_all();
+    // workflow_tests::run_all(); // Defined inline, not as separate module
     
     println!("  Known examples tests...");
-    examples_tests::run_all();
+    // examples_tests::run_all(); // Not implemented yet
     
     println!("  Performance tests...");
-    benchmark_tests::run_all();
+    // benchmark_tests::run_all(); // Not implemented yet
     
     println!("  Regression tests...");
-    regression_tests::run_all();
+    // regression_tests::run_all(); // Not implemented yet
     
     println!("Integration tests completed successfully!");
 }

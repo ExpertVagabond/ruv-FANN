@@ -4,7 +4,7 @@
 //! important for the geometric Langlands correspondence.
 
 use geometric_langlands::prelude::*;
-use crate::helpers::{Timer, assertions::*};
+use super::super::helpers::{Timer, assertions::*};
 use nalgebra::{DMatrix, DVector, ComplexField};
 use num_complex::Complex64;
 use proptest::prelude::*;
@@ -300,7 +300,7 @@ mod cohomological_tests {
         
         // Check some known values
         let h0_r0 = e2_page.get_term(0, 0);
-        assert!(h0_r0.is_some(), "E_2^{0,0} should exist");
+        assert!(h0_r0.is_some(), "E_2^{{0,0}} should exist");
         
         // Converges to cohomology of total space
         leray_sequence.compute_limit();

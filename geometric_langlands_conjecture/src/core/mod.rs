@@ -8,6 +8,9 @@ use num_complex::Complex;
 use num_traits::{Zero, One};
 use std::fmt::Debug;
 use serde::{Serialize, Deserialize};
+use crate::Result;
+
+pub mod mock;
 
 // TODO: King Architect - Implement full type system here
 
@@ -40,9 +43,39 @@ impl Field {
     }
 }
 
-/// Abstract group structure
+/// Trait for abstract groups
+pub trait Group: Debug {
+    /// Dimension of the group
+    fn dimension(&self) -> usize;
+    
+    /// Rank of the group
+    fn rank(&self) -> usize;
+    
+    /// Name of the group
+    fn name(&self) -> String;
+    
+    /// Identity element
+    fn identity(&self) -> Vec<f64>;
+    
+    /// Lie algebra
+    fn lie_algebra(&self) -> Result<Box<dyn LieAlgebra>>;
+    
+    /// Langlands dual group
+    fn langlands_dual(&self) -> Result<Box<dyn Group>>;
+    
+    /// Fundamental representation
+    fn fundamental_representation(&self) -> Result<Box<dyn crate::representation::Representation>>;
+    
+    /// Character variety
+    fn character_variety(&self, curve: &dyn AlgebraicVariety) -> Result<Box<dyn AlgebraicVariety>>;
+    
+    /// Representation variety  
+    fn representation_variety(&self, curve: &dyn AlgebraicVariety) -> Result<Box<dyn AlgebraicVariety>>;
+}
+
+/// Concrete group structure
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Group {
+pub struct ConcreteGroup {
     /// Dimension of the group
     pub dimension: usize,
     /// Whether the group is connected
@@ -51,7 +84,7 @@ pub struct Group {
     pub is_reductive: bool,
 }
 
-impl Group {
+impl ConcreteGroup {
     /// Create a new group with specified properties
     pub fn new(dimension: usize, is_connected: bool, is_reductive: bool) -> Self {
         Self { dimension, is_connected, is_reductive }
@@ -81,7 +114,7 @@ impl Ring {
 }
 
 /// Trait for algebraic varieties
-pub trait AlgebraicVariety: Debug + Clone {
+pub trait AlgebraicVariety: Debug {
     /// Dimension of the variety
     fn dimension(&self) -> usize;
     
@@ -90,6 +123,51 @@ pub trait AlgebraicVariety: Debug + Clone {
     
     /// Whether the variety is complete
     fn is_complete(&self) -> bool;
+    
+    /// Genus of the variety (for curves)
+    fn genus(&self) -> crate::Result<i32> {
+        Ok(0)
+    }
+    
+    /// Volume of the variety
+    fn volume(&self) -> crate::Result<f64> {
+        Ok(1.0)
+    }
+    
+    /// Intersection with another variety
+    fn intersection(&self, other: &dyn AlgebraicVariety) -> crate::Result<Vec<Vec<f64>>> {
+        Ok(Vec::new())
+    }
+    
+    /// Mirror variety under mirror symmetry
+    fn mirror_variety(&self) -> crate::Result<Box<dyn AlgebraicVariety>> {
+        Err(crate::Error::NotImplemented("Mirror variety".to_string()))
+    }
+    
+    /// Moduli space
+    fn moduli_space(&self) -> crate::Result<Box<dyn AlgebraicVariety>> {
+        Err(crate::Error::NotImplemented("Moduli space".to_string()))
+    }
+    
+    /// Holomorphic curves in the variety
+    fn holomorphic_curves(&self) -> crate::Result<Vec<mock::HolomorphicCurve>> {
+        Ok(Vec::new())
+    }
+    
+    /// Lagrangian submanifolds
+    fn lagrangian_submanifolds(&self) -> crate::Result<Vec<()>> {
+        Ok(Vec::new())
+    }
+    
+    /// Codimension in ambient space
+    fn codimension(&self) -> crate::Result<usize> {
+        Ok(1)
+    }
+    
+    /// Todd class
+    fn todd_class(&self) -> crate::Result<Vec<f64>> {
+        Ok(vec![1.0])
+    }
 }
 
 /// Trait for schemes in algebraic geometry
@@ -172,8 +250,8 @@ impl ReductiveGroup {
     }
     
     /// Get the Lie algebra of this group
-    pub fn lie_algebra(&self) -> LieAlgebra {
-        LieAlgebra {
+    pub fn lie_algebra(&self) -> ConcreteLieAlgebra {
+        ConcreteLieAlgebra {
             dimension: self.dimension,
             root_system: self.root_system.clone(),
             base_field: self.base_field.clone(),
@@ -181,9 +259,21 @@ impl ReductiveGroup {
     }
 }
 
-/// Lie algebra structure
+/// Trait for Lie algebras
+pub trait LieAlgebra: Debug {
+    /// Dimension of the Lie algebra
+    fn dimension(&self) -> usize;
+    
+    /// Root system
+    fn root_system(&self) -> String;
+    
+    /// Cartan subalgebra
+    fn cartan_subalgebra(&self) -> Result<DMatrix<Complex<f64>>>;
+}
+
+/// Concrete Lie algebra structure
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct LieAlgebra {
+pub struct ConcreteLieAlgebra {
     /// Dimension of the Lie algebra
     pub dimension: usize,
     /// Root system
@@ -204,8 +294,8 @@ impl ReductiveGroup {
     }
     
     /// Convert to abstract Group structure
-    pub fn to_group(&self) -> Group {
-        Group::new(self.dimension, true, true)
+    pub fn to_group(&self) -> ConcreteGroup {
+        ConcreteGroup::new(self.dimension, true, true)
     }
 }
 
@@ -228,7 +318,7 @@ impl MatrixRepresentation {
     }
     
     /// Compose two representations
-    pub fn compose(&self, other: &Self) -> Result<Self, crate::Error> {
+    pub fn compose(&self, other: &Self) -> crate::Result<Self> {
         if self.group != other.group {
             return Err(crate::Error::GroupMismatch);
         }

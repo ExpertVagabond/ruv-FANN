@@ -5,7 +5,7 @@
 //! perverse sheaves, and D-modules.
 
 use geometric_langlands::prelude::*;
-use crate::helpers::{Timer, assertions::*};
+use super::super::helpers::{Timer, assertions::*};
 
 #[cfg(test)]
 mod basic_category_tests {
