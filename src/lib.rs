@@ -50,6 +50,10 @@ pub mod training;
 #[cfg(feature = "io")]
 pub mod io;
 
+// Logging and verification module
+#[cfg(feature = "logging")]
+pub mod logging;
+
 // WebGPU acceleration module
 pub mod webgpu;
 
