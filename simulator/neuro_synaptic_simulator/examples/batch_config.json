@@ -1,0 +1,46 @@
+{
+  "simulations": [
+    {
+      "name": "small_network",
+      "cores": 8,
+      "memory_mb": 2,
+      "wasm_module": "tests/fixtures/wasm_modules/neural_net.wasm",
+      "timesteps": 1000
+    },
+    {
+      "name": "medium_network",
+      "cores": 32,
+      "memory_mb": 8,
+      "wasm_module": "tests/fixtures/wasm_modules/neural_net.wasm",
+      "timesteps": 2000
+    },
+    {
+      "name": "large_network",
+      "cores": 128,
+      "memory_mb": 16,
+      "wasm_module": "tests/fixtures/wasm_modules/neural_net.wasm",
+      "timesteps": 5000
+    },
+    {
+      "name": "max_network",
+      "cores": 256,
+      "memory_mb": 28,
+      "wasm_module": "tests/fixtures/wasm_modules/neural_net.wasm",
+      "timesteps": 10000
+    },
+    {
+      "name": "compute_intensive",
+      "cores": 64,
+      "memory_mb": 4,
+      "wasm_module": "tests/fixtures/wasm_modules/compute.wasm",
+      "timesteps": 1000
+    },
+    {
+      "name": "memory_intensive",
+      "cores": 64,
+      "memory_mb": 16,
+      "wasm_module": "tests/fixtures/wasm_modules/memory_intensive.wasm",
+      "timesteps": 1000
+    }
+  ]
+}

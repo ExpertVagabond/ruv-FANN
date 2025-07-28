@@ -1,0 +1,29 @@
+{
+  "config": {
+    "cores": 64,
+    "memory_mb": 4,
+    "timesteps": 1000,
+    "wasm_found": false,
+    "wasm_module": "tests/fixtures/wasm_modules/compute.wasm"
+  },
+  "hardware": {
+    "cache_hit_cycles": 3,
+    "clock_frequency_mhz": 1000,
+    "inter_core_latency_cycles": 10,
+    "memory_latency_cycles": 100
+  },
+  "performance": {
+    "cache_hit_rate_percent": 79.6875,
+    "effective_frequency_mhz": 35.80425589525465,
+    "execution_time_seconds": 0.001787497,
+    "memory_accesses": 6400,
+    "operations_per_second": 35804255.89525465,
+    "total_cycles": 1000000000.0,
+    "total_operations": 64000
+  },
+  "simulation": {
+    "mode": "minimal_simulation",
+    "status": "completed",
+    "version": "0.1.0"
+  }
+}

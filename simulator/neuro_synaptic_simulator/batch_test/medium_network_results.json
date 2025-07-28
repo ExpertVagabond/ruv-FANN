@@ -1,0 +1,29 @@
+{
+  "config": {
+    "cores": 32,
+    "memory_mb": 8,
+    "timesteps": 2000,
+    "wasm_found": false,
+    "wasm_module": "tests/fixtures/wasm_modules/neural_net.wasm"
+  },
+  "hardware": {
+    "cache_hit_cycles": 3,
+    "clock_frequency_mhz": 1000,
+    "inter_core_latency_cycles": 10,
+    "memory_latency_cycles": 100
+  },
+  "performance": {
+    "cache_hit_rate_percent": 78.125,
+    "effective_frequency_mhz": 26.962694584290016,
+    "execution_time_seconds": 0.00237365,
+    "memory_accesses": 6400,
+    "operations_per_second": 26962694.584290016,
+    "total_cycles": 2000000000.0,
+    "total_operations": 64000
+  },
+  "simulation": {
+    "mode": "minimal_simulation",
+    "status": "completed",
+    "version": "0.1.0"
+  }
+}
