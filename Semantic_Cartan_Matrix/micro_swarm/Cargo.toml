@@ -1,0 +1,38 @@
+[package]
+name = "micro_swarm"
+version = "0.1.0"
+edition = "2021"  
+authors = ["Neuro-Synaptic Simulator Team"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ruvnet/ruv-FANN"
+keywords = ["neural-networks", "swarm", "orchestration", "agents"]
+categories = ["science", "concurrency"]
+description = "Swarm orchestration and coordination for micro-neural networks"
+
+[dependencies]
+# Now using published versions
+micro_core = { version = "0.1.0" }
+micro_routing = { version = "0.1.0" }
+micro_metrics = { version = "0.1.0" }
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
+tokio = { version = "1.0", features = ["full"], optional = true }
+axum = { version = "0.7", optional = true }
+rayon = { version = "1.10", optional = true }
+crossbeam = { version = "0.8", optional = true }
+
+[features]
+default = ["std", "dashboard"]
+std = ["tokio", "serde/std", "serde_json/std"]
+dashboard = ["axum", "tokio"]
+parallel = ["rayon", "crossbeam"]
+metrics = []
+plugins = []
+quantum = []
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+tokio-test = "0.4"
+
+[workspace]
+# Empty workspace to prevent inheritance from parent

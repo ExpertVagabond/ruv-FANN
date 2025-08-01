@@ -1,0 +1,71 @@
+[package]
+name = "micro_swarm"
+version = "0.1.0"
+edition = "2021"
+authors = ["rUv Semantic Cartan Matrix Team"]
+description = "Micro-swarm orchestration for neuro-synaptic chip simulation"
+license = "MIT"
+
+[dependencies]
+# Core async runtime
+tokio = { version = "1.35", features = ["full"] }
+async-trait = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Logging and tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Concurrency utilities
+crossbeam = "0.8"
+parking_lot = "0.12"
+dashmap = "5.5"
+
+# Memory management
+bytes = "1.5"
+memmap2 = "0.9"
+
+# Metrics and monitoring
+prometheus = "0.13"
+metrics = "0.21"
+metrics-exporter-prometheus = "0.12"
+
+# Plugin system
+libloading = "0.8"
+once_cell = "1.19"
+
+# Dashboard support
+axum = { version = "0.7", features = ["ws"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+
+# Time utilities
+chrono = { version = "0.4", features = ["serde"] }
+
+# UUID generation
+uuid = { version = "1.6", features = ["v4", "serde"] }
+
+[dev-dependencies]
+criterion = "0.5"
+proptest = "1.4"
+tempfile = "3.8"
+
+[features]
+default = ["dashboard", "metrics", "plugins"]
+dashboard = []
+metrics = []
+plugins = []
+debug-trace = []
+
+# [[bench]]
+# name = "orchestration"
+# harness = false
+
+# Profiles are handled at workspace root

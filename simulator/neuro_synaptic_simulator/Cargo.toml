@@ -6,6 +6,9 @@ authors = ["Neuro-Synaptic Simulator Team"]
 description = "A high-performance neuro-synaptic chip simulator with 256 cores and WASM support"
 license = "MIT"
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [[bin]]
 name = "ruv-fann-simulator"
 path = "src/minimal_main.rs"
@@ -30,6 +33,29 @@ parking_lot = "0.12"
 once_cell = "1.19"
 bytemuck = { version = "1.14", features = ["derive"] }
 bincode = "1.3"
+
+# WASM-specific dependencies
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = [
+    "console",
+    "Performance",
+    "Window",
+    "Document",
+    "Element",
+    "HtmlElement",
+    "HtmlCanvasElement",
+    "WebGlRenderingContext",
+    "WebGl2RenderingContext",
+    "WebGlProgram",
+    "WebGlShader",
+    "WebGlBuffer",
+    "WebGlTexture",
+    "WebGlUniformLocation"
+]}
+js-sys = "0.3"
+getrandom = { version = "0.2", features = ["js"] }
 
 [[example]]
 name = "timing_demo"
@@ -58,3 +84,21 @@ path = "tests/benchmarks/performance_bench.rs"
 [[test]]
 name = "integration"
 path = "tests/integration/mod.rs"
+
+[features]
+default = []
+simd = []
+wasm-simd = ["simd"]
+
+# WASM optimization settings
+[profile.wasm]
+inherits = "release"
+opt-level = "z"     # Optimize for size
+lto = true
+codegen-units = 1
+strip = "symbols"
+panic = "abort"
+
+# Build configuration for wasm-pack
+[package.metadata.wasm-pack]
+"wasm-bindgen" = { version = "0.2", features = ["serde-serialize"] }

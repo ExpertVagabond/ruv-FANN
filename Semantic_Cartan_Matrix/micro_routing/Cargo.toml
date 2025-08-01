@@ -1,0 +1,31 @@
+[package]
+name = "micro_routing"
+version = "0.1.0"
+edition = "2021"
+authors = ["Neuro-Synaptic Simulator Team"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ruvnet/ruv-FANN"
+keywords = ["neural-networks", "routing", "agents", "context"]
+categories = ["science", "algorithms"]
+description = "Dynamic routing and context management for micro-neural networks"
+
+[dependencies]
+# Standalone version - no micro_core dependency
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
+rand = { version = "0.8", default-features = false, features = ["alloc"] }
+
+[features]
+default = ["std"]
+std = ["serde/std", "serde_json/std", "rand/std"]
+rule-based = []
+neural-gating = []
+context-compression = []
+metrics = []
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+proptest = "1.5"
+
+[workspace]
+# Empty workspace to prevent inheritance from parent

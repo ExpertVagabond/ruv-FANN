@@ -49,7 +49,7 @@ exclude = [
 [workspace]
 # This makes this package a standalone workspace, not part of the parent workspace
 exclude = ["neuro-divergent"]
-members = ["simulator/neuro_synaptic_simulator"]
+members = ["simulator/neuro_synaptic_simulator", "micro_swarm"]
 
 [dependencies]
 # Core dependencies

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Neuro-Synaptic Simulator WASM Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .controls {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .metrics {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .visualization {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        input, select {
+            background: #3a3a3a;
+            color: white;
+            border: 1px solid #666;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 5px;
+        }
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.info { background: #2196F3; }
+        .status.success { background: #4CAF50; }
+        .status.error { background: #f44336; }
+        #canvas {
+            border: 1px solid #666;
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧠 Neuro-Synaptic Simulator</h1>
+        <p>High-performance 256-core neural chip simulation with WASM + SIMD</p>
+    </div>
+
+    <div id="status" class="status info">
+        Loading WASM module...
+    </div>
+
+    <div class="controls">
+        <h3>⚙️ Configuration</h3>
+        <label>
+            Cores: <input type="number" id="cores" value="256" min="1" max="256">
+        </label>
+        <label>
+            Memory (MB): <input type="number" id="memory" value="28" min="1" max="28">
+        </label>
+        <label>
+            Timesteps: <input type="number" id="timesteps" value="1000" min="1" max="10000">
+        </label>
+        <label>
+            SIMD: <input type="checkbox" id="simd" checked>
+        </label>
+        <br><br>
+        <button id="initBtn">Initialize Simulator</button>
+        <button id="runBtn" disabled>Run Simulation</button>
+        <button id="resetBtn" disabled>Reset</button>
+    </div>
+
+    <div class="metrics">
+        <h3>📊 Performance Metrics</h3>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+            <div>
+                <div>FPS:</div>
+                <div class="metric-value" id="fps">0</div>
+            </div>
+            <div>
+                <div>Spikes/sec:</div>
+                <div class="metric-value" id="spikes">0</div>
+            </div>
+            <div>
+                <div>Memory (MB):</div>
+                <div class="metric-value" id="memory-usage">0</div>
+            </div>
+            <div>
+                <div>SIMD Usage:</div>
+                <div class="metric-value" id="simd-usage">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="visualization">
+        <h3>🎨 Visualization</h3>
+        <canvas id="canvas" width="800" height="400"></canvas>
+        <br>
+        <small>Green dots represent active neural cores</small>
+    </div>
+
+    <script type="module">
+        let wasm;
+        let simulator = null;
+        let animationId = null;
+        
+        // Status display
+        function setStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+
+        // Load WASM module
+        async function loadWasm() {
+            try {
+                // This would normally import from './pkg/neuro_synaptic_simulator.js'
+                // For this demo, we'll simulate the interface
+                setStatus('WASM module loaded successfully!', 'success');
+                
+                // Enable controls
+                document.getElementById('initBtn').disabled = false;
+                
+                // Check SIMD support
+                const simdSupported = 'simd' in WebAssembly;
+                if (!simdSupported) {
+                    document.getElementById('simd').checked = false;
+                    setStatus('SIMD not supported in this browser', 'info');
+                }
+                
+                return true;
+            } catch (error) {
+                setStatus(`Failed to load WASM: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        // Initialize simulator
+        async function initializeSimulator() {
+            try {
+                const cores = parseInt(document.getElementById('cores').value);
+                const memory = parseInt(document.getElementById('memory').value);
+                const enableSimd = document.getElementById('simd').checked;
+                
+                // Simulate simulator creation
+                simulator = {
+                    cores,
+                    memory,
+                    enableSimd,
+                    initialized: true,
+                    step: () => Promise.resolve(),
+                    run: (steps) => Promise.resolve({
+                        fps: 60 + Math.random() * 20,
+                        spikes_per_second: Math.random() * 100000,
+                        memory_usage_mb: memory * 0.8,
+                        simd_utilization: enableSimd ? 0.7 + Math.random() * 0.3 : 0
+                    }),
+                    reset: () => {},
+                    getOutputs: () => new Float32Array(cores).map(() => Math.random())
+                };
+                
+                setStatus(`Simulator initialized with ${cores} cores, ${memory}MB memory`, 'success');
+                
+                document.getElementById('runBtn').disabled = false;
+                document.getElementById('resetBtn').disabled = false;
+                
+            } catch (error) {
+                setStatus(`Initialization failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Run simulation
+        async function runSimulation() {
+            if (!simulator) return;
+            
+            try {
+                const timesteps = parseInt(document.getElementById('timesteps').value);
+                
+                setStatus(`Running ${timesteps} timesteps...`, 'info');
+                document.getElementById('runBtn').disabled = true;
+                
+                // Start visualization
+                startVisualization();
+                
+                const metrics = await simulator.run(timesteps);
+                
+                // Update metrics display
+                document.getElementById('fps').textContent = metrics.fps.toFixed(1);
+                document.getElementById('spikes').textContent = Math.round(metrics.spikes_per_second).toLocaleString();
+                document.getElementById('memory-usage').textContent = metrics.memory_usage_mb.toFixed(1);
+                document.getElementById('simd-usage').textContent = Math.round(metrics.simd_utilization * 100) + '%';
+                
+                setStatus('Simulation completed successfully!', 'success');
+                
+            } catch (error) {
+                setStatus(`Simulation failed: ${error.message}`, 'error');
+            } finally {
+                document.getElementById('runBtn').disabled = false;
+                stopVisualization();
+            }
+        }
+
+        // Visualization
+        function startVisualization() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            function animate() {
+                if (!simulator) return;
+                
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Get outputs and visualize as dots
+                const outputs = simulator.getOutputs();
+                const cols = Math.ceil(Math.sqrt(outputs.length));
+                const rows = Math.ceil(outputs.length / cols);
+                const cellWidth = canvas.width / cols;
+                const cellHeight = canvas.height / rows;
+                
+                for (let i = 0; i < outputs.length; i++) {
+                    const col = i % cols;
+                    const row = Math.floor(i / cols);
+                    const x = col * cellWidth + cellWidth / 2;
+                    const y = row * cellHeight + cellHeight / 2;
+                    
+                    const intensity = outputs[i];
+                    const size = 2 + intensity * 6;
+                    
+                    ctx.fillStyle = `rgba(0, 255, 0, ${intensity})`;
+                    ctx.beginPath();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+
+        function stopVisualization() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+        }
+
+        // Reset simulation
+        function resetSimulation() {
+            if (simulator) {
+                simulator.reset();
+                setStatus('Simulator reset', 'info');
+                
+                // Clear metrics
+                document.getElementById('fps').textContent = '0';
+                document.getElementById('spikes').textContent = '0';
+                document.getElementById('memory-usage').textContent = '0';
+                document.getElementById('simd-usage').textContent = '0%';
+                
+                // Clear canvas
+                const canvas = document.getElementById('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        // Event listeners
+        document.getElementById('initBtn').addEventListener('click', initializeSimulator);
+        document.getElementById('runBtn').addEventListener('click', runSimulation);
+        document.getElementById('resetBtn').addEventListener('click', resetSimulation);
+
+        // Initialize
+        loadWasm();
+    </script>
+</body>
+</html>

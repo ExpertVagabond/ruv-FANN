@@ -11,6 +11,10 @@ pub mod logging;
 // pub mod performance;
 // pub mod visualization;
 
+// WASM bindings for browser/Node.js integration
+#[cfg(target_arch = "wasm32")]
+pub mod wasm_bindings;
+
 // Re-export commonly used types
 // pub use crate::core::{
 //     CoreScheduler,

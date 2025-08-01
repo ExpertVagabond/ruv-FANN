@@ -1,0 +1,1 @@
+//\! Context management stub\nuse crate::RootVector;\nuse alloc::string::String;\n\npub struct ContextVector;\npub struct ContextManager;\n\nimpl Default for ContextVector { fn default() -> Self { Self } }\nimpl Default for ContextManager { fn default() -> Self { Self } }

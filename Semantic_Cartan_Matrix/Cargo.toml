@@ -1,0 +1,85 @@
+[package]
+name = "semantic-cartan-matrix"
+version = "0.1.0"
+edition = "2021"
+authors = ["Neuro-Synaptic Simulator Team"]
+description = "High-performance Semantic Cartan Matrix implementation for rUv-FANN"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ruvnet/ruv-FANN"
+keywords = ["neural-networks", "cartan-matrix", "wasm", "simd", "performance"]
+categories = ["science", "mathematics", "wasm", "embedded"]
+
+[dependencies]
+# Core dependencies
+ruv-fann = { path = "..", default-features = false, features = ["no_std"] }
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
+
+# Math and linear algebra
+nalgebra = { version = "0.33", default-features = false, features = ["alloc"] }
+num-traits = { version = "0.2", default-features = false }
+
+# Parallel execution (optional)
+rayon = { version = "1.10", optional = true }
+
+# WASM support
+wasm-bindgen = { version = "0.2", optional = true }
+js-sys = { version = "0.3", optional = true }
+web-sys = { version = "0.3", optional = true }
+
+# Logging and metrics
+log = { version = "0.4", default-features = false }
+tracing = { version = "0.1", default-features = false }
+
+# Benchmarking (optional)
+criterion = { version = "0.5", features = ["html_reports"], optional = true }
+
+[dev-dependencies]
+rand = "0.8"
+proptest = "1.5"
+approx = "0.5"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wee_alloc = { version = "0.4", optional = true }
+console_error_panic_hook = { version = "0.1", optional = true }
+
+[features]
+default = ["std", "parallel"]
+std = ["ruv-fann/std", "serde/std", "serde_json/std", "nalgebra/std", "num-traits/std"]
+no_std = ["ruv-fann/no_std"]
+parallel = ["rayon", "std"]
+wasm = ["wasm-bindgen", "js-sys", "web-sys", "wee_alloc", "console_error_panic_hook"]
+simd = ["ruv-fann/simd"]
+bench = ["criterion"]
+
+# Optimization features
+fast-math = []
+sparse = []
+quantized = []
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.release.package."*"]
+opt-level = 3
+
+[profile.bench]
+opt-level = 3
+lto = true
+codegen-units = 1
+
+[[bench]]
+name = "cartan_performance"
+harness = false
+required-features = ["bench"]
+
+[package.metadata.wasm-pack]
+"wasm-opt" = ["-O3", "--enable-simd"]
+
+[package.metadata.docs.rs]
+features = ["std", "parallel", "wasm"]
+rustdoc-args = ["--cfg", "docsrs"]

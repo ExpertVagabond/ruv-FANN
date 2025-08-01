@@ -1,0 +1,35 @@
+[package]
+name = "micro_metrics"
+version = "0.1.0"
+edition = "2021"
+authors = ["Neuro-Synaptic Simulator Team"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ruvnet/ruv-FANN"
+keywords = ["neural-networks", "metrics", "performance", "monitoring"]
+categories = ["science", "development-tools"]
+description = "Performance monitoring and metrics collection for micro-neural networks"
+
+[dependencies]
+micro_core = { version = "0.1.0" }
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
+
+# Time measurement
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+# Native timing
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+# WASM timing via JS
+js-sys = { version = "0.3", optional = true }
+web-sys = { version = "0.3", optional = true }
+
+[features]
+default = ["std"]
+std = ["serde/std", "serde_json/std"]
+wasm = ["js-sys", "web-sys"]
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[workspace]
+# Empty workspace to prevent inheritance from parent

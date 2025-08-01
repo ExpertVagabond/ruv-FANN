@@ -1,0 +1,1 @@
+//\! Simple router stub\nuse crate::{RootVector, Result};\nuse alloc::string::String;\n\npub struct DynamicRouter;\npub struct RouterConfig;\npub struct RoutingDecision;\n\nimpl Default for DynamicRouter { fn default() -> Self { Self } }\nimpl Default for RouterConfig { fn default() -> Self { Self } }

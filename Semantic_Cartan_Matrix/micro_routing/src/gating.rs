@@ -1,0 +1,1 @@
+//\! Neural gating stub\nuse crate::{RootVector, Result};\nuse alloc::vec::Vec;\n\npub struct NeuralGate;\npub struct GatingFunction;\n\nimpl Default for NeuralGate { fn default() -> Self { Self } }\nimpl Default for GatingFunction { fn default() -> Self { Self } }
