@@ -64,7 +64,10 @@ mod binary_tests {
         let data: Vec<f32> = vec![1.0, 2.0, 3.0];
         let mut buf = Vec::new();
         write_binary(&data, &mut buf).expect("write_binary failed");
-        assert!(!buf.is_empty(), "write_binary should produce non-empty output");
+        assert!(
+            !buf.is_empty(),
+            "write_binary should produce non-empty output"
+        );
     }
 
     #[test]
@@ -86,7 +89,9 @@ mod binary_tests {
     fn binary_serialized_size() {
         let data: Vec<f32> = vec![1.0, 2.0, 3.0];
         let writer = BinaryWriter::new();
-        let size = writer.serialized_size(&data).expect("serialized_size failed");
+        let size = writer
+            .serialized_size(&data)
+            .expect("serialized_size failed");
         assert!(size > 0);
 
         // Also check via the inspect module
@@ -190,8 +195,7 @@ mod json_tests {
         // Both should deserialize to the same value
         let r1: MockNetwork =
             read_json_with_options(&mut Cursor::new(&buf_compact), false).unwrap();
-        let r2: MockNetwork =
-            read_json_with_options(&mut Cursor::new(&buf_pretty), true).unwrap();
+        let r2: MockNetwork = read_json_with_options(&mut Cursor::new(&buf_pretty), true).unwrap();
         assert_eq!(r1, r2);
         assert_eq!(original, r1);
     }
@@ -281,8 +285,7 @@ mod compression_tests {
             .collect();
 
         let mut compressed = Vec::new();
-        compress_data(&mut Cursor::new(&repeated), &mut compressed)
-            .expect("compress_data failed");
+        compress_data(&mut Cursor::new(&repeated), &mut compressed).expect("compress_data failed");
 
         let mut decompressed = Vec::new();
         decompress_data(&mut Cursor::new(&compressed), &mut decompressed)
@@ -732,8 +735,7 @@ mod streaming_tests {
 
     #[test]
     fn stream_read_with_custom_buffer_size() {
-        let stream_reader =
-            crate::io::streaming::TrainingDataStreamReader::with_buffer_size(1024);
+        let stream_reader = crate::io::streaming::TrainingDataStreamReader::with_buffer_size(1024);
         let data = b"1 1 1\n0.5\n0.5\n";
         let mut buf_reader = BufReader::new(Cursor::new(data));
         let stats = stream_reader
@@ -843,10 +845,7 @@ mod dot_export_tests {
             "Missing digraph declaration"
         );
         assert!(dot.contains("rankdir=LR"), "Missing LR rankdir");
-        assert!(
-            dot.contains("node [shape=circle]"),
-            "Missing node shape"
-        );
+        assert!(dot.contains("node [shape=circle]"), "Missing node shape");
         assert!(dot.contains("->"), "Missing edges");
         assert!(dot.ends_with("}\n"), "Should end with closing brace");
     }
@@ -883,10 +882,7 @@ mod dot_export_tests {
             dot.contains("blue") || dot.contains("red"),
             "Should have colored edges"
         );
-        assert!(
-            dot.contains("penwidth="),
-            "Should have pen width for edges"
-        );
+        assert!(dot.contains("penwidth="), "Should have pen width for edges");
     }
 
     #[test]
@@ -947,10 +943,7 @@ mod dot_export_tests {
             "Missing info comment"
         );
         assert!(dot.contains("// Layers: 3"), "Missing layer count");
-        assert!(
-            dot.contains("// Learning Rate:"),
-            "Missing learning rate"
-        );
+        assert!(dot.contains("// Learning Rate:"), "Missing learning rate");
         assert!(
             dot.contains("// Connection Rate:"),
             "Missing connection rate"
@@ -1131,7 +1124,10 @@ mod network_binary_tests {
         network.randomize_weights(-1.0, 1.0);
 
         let bytes = network.to_bytes().expect("to_bytes failed");
-        assert!(!bytes.is_empty(), "to_bytes should produce non-empty output");
+        assert!(
+            !bytes.is_empty(),
+            "to_bytes should produce non-empty output"
+        );
     }
 
     #[test]

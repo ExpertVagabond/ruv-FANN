@@ -200,17 +200,26 @@ impl CpuSimdOps {
         debug_assert!(
             a.len() >= m * k,
             "matmul_scalar: a.len() ({}) < m*k ({}*{}={})",
-            a.len(), m, k, m * k
+            a.len(),
+            m,
+            k,
+            m * k
         );
         debug_assert!(
             b.len() >= k * n,
             "matmul_scalar: b.len() ({}) < k*n ({}*{}={})",
-            b.len(), k, n, k * n
+            b.len(),
+            k,
+            n,
+            k * n
         );
         debug_assert!(
             c.len() >= m * n,
             "matmul_scalar: c.len() ({}) < m*n ({}*{}={})",
-            c.len(), m, n, m * n
+            c.len(),
+            m,
+            n,
+            m * n
         );
         // Initialize output to zero
         c.fill(0.0);
@@ -356,7 +365,10 @@ impl CpuSimdOps {
 
     /// Scalar bias addition
     fn add_bias_scalar(&self, matrix: &mut [f32], bias: &[f32], rows: usize, cols: usize) {
-        debug_assert!(matrix.len() >= rows * cols, "add_bias_scalar: matrix.len() < rows*cols");
+        debug_assert!(
+            matrix.len() >= rows * cols,
+            "add_bias_scalar: matrix.len() < rows*cols"
+        );
         debug_assert!(bias.len() >= cols, "add_bias_scalar: bias.len() < cols");
         for i in 0..rows {
             for j in 0..cols {
@@ -368,7 +380,10 @@ impl CpuSimdOps {
     /// AVX2 optimized bias addition
     #[cfg(target_arch = "x86_64")]
     unsafe fn add_bias_avx2(&self, matrix: &mut [f32], bias: &[f32], rows: usize, cols: usize) {
-        debug_assert!(matrix.len() >= rows * cols, "add_bias_avx2: matrix.len() < rows*cols");
+        debug_assert!(
+            matrix.len() >= rows * cols,
+            "add_bias_avx2: matrix.len() < rows*cols"
+        );
         debug_assert!(bias.len() >= cols, "add_bias_avx2: bias.len() < cols");
         const SIMD_WIDTH: usize = 8;
 
@@ -486,7 +501,8 @@ impl CpuSimdOps {
         debug_assert!(
             derivatives.len() >= data.len(),
             "activation_derivatives_scalar: derivatives.len() ({}) < data.len() ({})",
-            derivatives.len(), data.len()
+            derivatives.len(),
+            data.len()
         );
         match activation {
             ActivationFunction::Sigmoid | ActivationFunction::SigmoidSymmetric => {

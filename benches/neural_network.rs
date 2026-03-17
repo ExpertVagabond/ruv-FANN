@@ -117,12 +117,30 @@ fn bench_training_algorithms(c: &mut Criterion) {
 
     // Use the trait-based training algorithms for benchmarking
     let algorithm_factories: Vec<(&str, Box<dyn Fn() -> Box<dyn TrainingAlgorithmTrait<f32>>>)> = vec![
-        ("Adam", Box::new(|| Box::new(ruv_fann::training::Adam::new(0.01)))),
-        ("AdamW", Box::new(|| Box::new(ruv_fann::training::AdamW::new(0.01)))),
-        ("IncrementalBackprop", Box::new(|| Box::new(ruv_fann::training::IncrementalBackprop::new(0.1)))),
-        ("BatchBackprop", Box::new(|| Box::new(ruv_fann::training::BatchBackprop::new(0.1)))),
-        ("Rprop", Box::new(|| Box::new(ruv_fann::training::Rprop::new()))),
-        ("Quickprop", Box::new(|| Box::new(ruv_fann::training::Quickprop::new()))),
+        (
+            "Adam",
+            Box::new(|| Box::new(ruv_fann::training::Adam::new(0.01))),
+        ),
+        (
+            "AdamW",
+            Box::new(|| Box::new(ruv_fann::training::AdamW::new(0.01))),
+        ),
+        (
+            "IncrementalBackprop",
+            Box::new(|| Box::new(ruv_fann::training::IncrementalBackprop::new(0.1))),
+        ),
+        (
+            "BatchBackprop",
+            Box::new(|| Box::new(ruv_fann::training::BatchBackprop::new(0.1))),
+        ),
+        (
+            "Rprop",
+            Box::new(|| Box::new(ruv_fann::training::Rprop::new())),
+        ),
+        (
+            "Quickprop",
+            Box::new(|| Box::new(ruv_fann::training::Quickprop::new())),
+        ),
     ];
 
     for (name, factory) in &algorithm_factories {

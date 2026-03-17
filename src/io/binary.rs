@@ -47,9 +47,9 @@ where
         .with_little_endian()
         .allow_trailing_bytes()
         .with_limit(max_bytes);
-    let value = options.deserialize(&buffer).map_err(|e| {
-        IoError::SerializationError(format!("Bincode deserialization error: {e}"))
-    })?;
+    let value = options
+        .deserialize(&buffer)
+        .map_err(|e| IoError::SerializationError(format!("Bincode deserialization error: {e}")))?;
     Ok(value)
 }
 

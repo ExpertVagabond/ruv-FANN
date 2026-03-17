@@ -24,7 +24,9 @@ pub enum NetworkError {
     #[error("Not implemented: {0}")]
     NotImplemented(String),
 
-    #[error("Data size mismatch: expected {expected} samples for inputs and outputs, got {actual}")]
+    #[error(
+        "Data size mismatch: expected {expected} samples for inputs and outputs, got {actual}"
+    )]
     DataSizeMismatch { expected: usize, actual: usize },
 }
 
@@ -440,9 +442,7 @@ impl<T: Float> Network<T> {
         T: serde::Serialize,
         Network<T>: serde::Serialize,
     {
-        bincode::serialize(self).map_err(|e| {
-            NetworkError::InvalidLayerConfiguration
-        })
+        bincode::serialize(self).map_err(|e| NetworkError::InvalidLayerConfiguration)
     }
 
     #[cfg(feature = "binary")]
